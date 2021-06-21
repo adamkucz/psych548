@@ -41,6 +41,16 @@ a {
     text-decoration: none;
 }
 
+a:hover {
+    text-decoration: underline;
+}
+
+.inactive {
+    text-decoration: none !important;
+    color: #000000;
+    cursor: text;
+}
+
 ul {
     list-style-type: disc;
 }
