@@ -27,6 +27,11 @@ body {
     width: 500px;
 }
 
+#info {
+    margin-top: 30px;
+    text-align: left;
+}
+
 h1,
 h2,
 h3,
