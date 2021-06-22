@@ -19,15 +19,12 @@ body {
     width: 200px;
     float: left;
     position: fixed;
+    text-align: center;
 }
 
 .rhs {
     float: right;
     width: 500px;
-}
-
-#logo{
-    text-align: center;
 }
 
 h1,
