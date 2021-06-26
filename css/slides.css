@@ -20,6 +20,14 @@
 @import url(https://fonts.googleapis.com/css?family=Quattrocento);
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono);
 
+@font-face {
+  font-family: 'uni_sansregular';
+  src: url(../fonts/fontfabric_-_unisansregular-webfont.woff2) format('woff2'),
+       url(../fonts/fontfabric_-_unisansregular-webfont.woff) format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Variables */
 :root {
   --font-uw-purple: #342c5c;
@@ -318,4 +326,8 @@ kbd {
  pre {
   max-width: 100%;
   overflow-x: auto;
+}
+
+.unisans {
+  font-family: uni_sansregular;
 }
