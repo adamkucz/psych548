@@ -1,0 +1,2865 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Fundamentals of R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Adam Kuczynski" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="../../css/slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, top, title-slide
+
+# Fundamentals of R
+### Adam Kuczynski
+
+---
+
+
+
+
+# Objects
+
+To create an object, you can use:
+--
+
+- `&lt;-` `&lt;&lt;-` assignment (right to left)
+--
+
+- `-&gt;` `-&gt;&gt;` rightwards assignment
+--
+
+- `=` assignment (right to left)
+--
+
+
+99.9% of the time you will use `&lt;-`:
+
+```r
+object &lt;- value
+```
+--
+
+You should *never* use `=` for object assignment. The reason is that `=` calls two different functions depending on the context:
+
+.pull-left[
+
+```r
+mean(x = c(1, 2, 3, 4, 5))
+```
+
+```
+## [1] 3
+```
+]
+
+.pull-right[
+
+```r
+print(x)
+```
+
+```
+## Error in print(x): object 'x' not found
+```
+]
+---
+.pull-left[
+
+```r
+mean(y &lt;- c(1, 2, 3, 4, 5))
+```
+
+```
+## [1] 3
+```
+]
+
+.pull-right[
+
+```r
+print(y)
+```
+
+```
+## [1] 1 2 3 4 5
+```
+]
+--
+
+
+You can fix this by telling R that your `=` is meant to be an assignment operator, not argument assignment:
+&lt;div&gt;
+.pull-left[
+
+```r
+mean((z = c(1, 2, 3, 4, 5)))
+```
+
+```
+## [1] 3
+```
+]
+
+.pull-right[
+
+```r
+print(z)
+```
+
+```
+## [1] 1 2 3 4 5
+```
+]
+&lt;/div&gt;
+
+******
+--
+
+You can also assign object left-to-right using `-&gt;`, but &lt;u&gt;this is very unusual&lt;/u&gt; and only done in unique circumstances where doing so improves readability of our code:
+
+```r
+value -&gt; object
+```
+--
+
+
+We'll get back to `&lt;&lt;-` and `-&gt;&gt;` later in the course when we learn how to create our own functions. For now you can forget about them!
+---
+# Comments
+ 
+Comments are a very important part of writing R code! When R sees a comment, it will skip over trying to interpret (i.e., run) that code.
+
+Use the `#` to write a comment in your R script:
+
+```r
+# This code is a comment, so R doesn't run it as code
+```
+
+
+```r
+This code is not a comment, so R tries to run it as code
+```
+
+```
+## Error: &lt;text&gt;:1:6: unexpected symbol
+## 1: This code
+##          ^
+```
+
+Commenting your code helps you:
+- Remember what a chunk of code does when you return to the code
+- Communicate with collaborators
+- Keep your code organized
+---
+# Atomic Types
+
+R, like other programming languages, keeps track of the type of object you are working with. It does this much in the same way that we do in our own lives. For example, we know that our age is a number and our name is a bunch of characters squished together.
+--
+
+
+There are *four* main atomic types in R (there are more, but you most likely won't use them)
+--
+
+
+To check the type of a value in R, you can use the `typeof()` function. For example:
+
+```r
+typeof("Psych548")
+```
+
+```
+## [1] "character"
+```
+
+```r
+typeof(TRUE)
+```
+
+```
+## [1] "logical"
+```
+---
+# 1. Numeric
+
+Numeric vectors (more on these later) are numbers, either *integers* or *doubles* (i.e., floating point numbers, decimals)
+- Integers: 1, 2, 3, 4, etc.
+- Doubles: 1.0, 2.43, 3.92, 4.0934853409
+--
+
+
+To check directly if something is numeric, an integer, or a double:
+- `is.numeric(x)`
+- `is.integer(x)`
+- `is.double(x)`
+--
+
+
+You can also coerce (i.e., tell R) that you want to store a value as a numeric object:
+- `as.numeric(x)`
+- `as.integer(x)`
+- `as.double(x)`
+
+---
+
+**Note**: Unless you say otherwise, R will store all numeric values as doubles:
+
+
+```r
+typeof(10)
+```
+
+```
+## [1] "double"
+```
+
+You can specify a single integer using a whole number following by `L`:
+
+.pull-left[
+
+```r
+is.integer(10)
+```
+
+```
+## [1] FALSE
+```
+]
+
+.pull-right[
+
+```r
+is.integer(10L)
+```
+
+```
+## [1] TRUE
+```
+]
+--
+
+
+All integers and doubles are numeric:
+
+```r
+is.numeric(30)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+is.numeric(30L)
+```
+
+```
+## [1] TRUE
+```
+
+---
+# 2. Character
+
+Character vectors contain **strings** of characters squished together using quotations. For example:
+
+
+```r
+"This is a string"
+```
+
+```
+## [1] "This is a string"
+```
+
+```r
+"هذه سلسلة "
+```
+
+```
+## [1] "هذه سلسلة "
+```
+
+```r
+"นี่คือสตริง"
+```
+
+```
+## [1] "นี่คือสตริง"
+```
+--
+
+
+This is also, technically, a string (character type):
+
+```r
+""
+```
+---
+To check directly if something is of type character:
+- `is.character(x)`
+
+You can also coerce values into characters using:
+- `as.character(x)`
+
+For example:
+
+```r
+as.character(1234)
+```
+
+```
+## [1] "1234"
+```
+
+******
+--
+
+
+To check how many characters are in a string, you can use the `nchar()` function:
+
+```r
+nchar("Psych548")
+```
+
+```
+## [1] 8
+```
+---
+To squish two strings together, use the `paste()` function:
+
+```r
+paste("Adam", "Kuczynski")
+```
+
+```
+## [1] "Adam Kuczynski"
+```
+--
+
+To insert formatted values into strings, use `sprintf()`&lt;sup&gt;1&lt;/sup&gt;:
+
+```r
+weeknum &lt;- 2
+weekchar &lt;- "two"
+sprintf("This is Week %d (%s) of the quarter.", weeknum, weekchar)
+```
+
+```
+## [1] "This is Week 2 (two) of the quarter."
+```
+.footnote[[1] see `?sprintf` for more information. This is a really powerful function that lets you do things like format values dynamically.]
+--
+
+
+`glue()` will make your life a lot easier!
+
+```r
+library(glue)
+glue("This is Week {weeknum} ({weekchar}) of the quarter.")
+```
+
+```
+## This is Week 2 (two) of the quarter.
+```
+
+
+---
+# 3. Logical
+
+Logical values are `TRUE`, `FALSE`, and `NA` (more on this later).
+--
+
+
+Logical types *must* be capitalized. `True` is not the same as `TRUE`.
+--
+
+
+Logical types are also commonly represented as one uppercase letter:
+- `TRUE`, `T`
+- `FALSE`, `F`
+--
+
+
+To check directly if something is logical type:
+- `is.logical(x)`
+
+You can also coerce values into logical types:
+- `as.logical(x)`
+
+
+```r
+is.logical(TRUE)
+```
+
+```
+## [1] TRUE
+```
+---
+Underneath the hood, R stores logical values as 0s (`FALSE`) and 1s (`TRUE`). This means
+you can do math with logical values!
+
+```r
+as.numeric(c(TRUE, FALSE))
+```
+
+```
+## [1] 1 0
+```
+--
+
+
+```r
+TRUE + TRUE
+```
+
+```
+## [1] 2
+```
+--
+
+
+```r
+FALSE + FALSE + TRUE
+```
+
+```
+## [1] 1
+```
+--
+
+
+```r
+50 / TRUE
+```
+
+```
+## [1] 50
+```
+--
+
+
+```r
+TRUE*3 / 2 + 50^F
+```
+
+```
+## [1] 2.5
+```
+---
+# 4. Factor
+
+Factors are a special type of variable that is used to denote categorical values. These are *extremely* useful when analyzing categorical data, because R will do all the dummy coding for you.
+--
+
+
+Underneath the hood, factors are stored as numeric values with a table of corresponding levels. This means that factors take up less memory than characters, and comparing factors will be faster than comparing strings (because R only needs to compare numbers).&lt;sup&gt;1&lt;/sup&gt;
+
+.footnote[[1] This likely will not make a difference for you though! The most important consideration in determining whether or not an object should be a factor is whether it is categorical.]
+--
+
+
+To check directly if something is a factor:
+- `is.logical(x)`
+
+To coerce something into a factor:
+- `as.factor(x)`
+
+
+---
+.smallish[
+Coercing a character vector into a factor is easy because R already knows the labels for each level:
+
+```r
+areas &lt;- c("Clinical", "Social", "Cog/Per", "Developmental", "BNS", "Animal Behavior")
+areas &lt;- as.factor(areas)
+print(areas)
+```
+
+```
+## [1] Clinical        Social          Cog/Per         Developmental  
+## [5] BNS             Animal Behavior
+## Levels: Animal Behavior BNS Clinical Cog/Per Developmental Social
+```
+--
+
+However, often you will have a numeric vector that represents categorical data. To change numeric vectors into factors:
+
+```r
+agegroup &lt;- c(0, 1, 0, 2, 1, 0)
+agegroup &lt;- factor(x = agegroup,
+                   levels = c(0, 1, 2),
+                   labels = c("Child", "Adolescent", "Adult"))
+print(agegroup)
+```
+
+```
+## [1] Child      Adolescent Child      Adult      Adolescent Child     
+## Levels: Child Adolescent Adult
+```
+]
+---
+class: inverse
+# Logical and Relational Operators
+---
+# What are operators?
+
+Logical operators are foundational to programming in R and allow you to compare two values together to control your programming logic.
+--
+
+
+Logical operators *always* return a logical value (`TRUE`, `FALSE`, or `NA`), and are most commonly
+used to subset data (more on this later) and control the flow if your code `if`/`else` statements
+(more on this later as well!)
+--
+
+
+.pull-left[
+Relational Operators:
+- `&lt;`, `&gt;`,
+- `&gt;=`, `&lt;=`,
+- `==`, `!=`
+]
+--
+
+
+.pull-right[
+Logical operators:
+- `&amp;`, `&amp;&amp;`
+- `|`, `||`
+- `!`
+]
+---
+# Relational Operators
+`&gt;` and `&lt;` return `TRUE` if the left side is greater than (`&gt;`) or less than (`&lt;`) the right side, otherwise they return `FALSE`
+
+
+```r
+200 &gt; 300
+```
+
+```
+## [1] FALSE
+```
+
+```r
+300 &gt; 200
+```
+
+```
+## [1] TRUE
+```
+
+```r
+200 &lt; 300
+```
+
+```
+## [1] TRUE
+```
+
+```r
+300 &lt; 200
+```
+
+```
+## [1] FALSE
+```
+---
+`&gt;=` and `&lt;=` return `TRUE` if the left side is greater than or equal to (`&gt;=`) or less than or equal to (`&lt;=`) the right side, otherwise they return `FALSE`
+
+```r
+300 &gt; 200
+```
+
+```
+## [1] TRUE
+```
+
+```r
+300 &gt;= 300
+```
+
+```
+## [1] TRUE
+```
+
+```r
+300 &lt;= 200 
+```
+
+```
+## [1] FALSE
+```
+
+```r
+200 &lt;= 300
+```
+
+```
+## [1] TRUE
+```
+---
+`==` and `!=` return `TRUE` if the left side is equal to (`==`) or not equal to (`!=`) the right side, otherwise they return `FALSE`
+
+```r
+200 == 200
+```
+
+```
+## [1] TRUE
+```
+
+```r
+200 == 300
+```
+
+```
+## [1] FALSE
+```
+
+```r
+200 != 200
+```
+
+```
+## [1] FALSE
+```
+
+```r
+200 != 300
+```
+
+```
+## [1] TRUE
+```
+---
+# Comparing strings
+
+You can also use relational operators to compare strings:
+
+```r
+"This" == "This"
+```
+
+```
+## [1] TRUE
+```
+--
+
+
+```r
+"This" == "That"
+```
+
+```
+## [1] FALSE
+```
+--
+
+
+```r
+"This" != "That"
+```
+
+```
+## [1] TRUE
+```
+--
+
+
+Be careful though! These comparisons are case sensitive:
+
+```r
+"this" == "THIS"
+```
+
+```
+## [1] FALSE
+```
+---
+Things get weird though when you use other relational operators with strings
+
+.pull-left[
+Shouldn't this throw an error?
+
+```r
+"UW" &gt; "WSU" 
+```
+
+```
+## [1] FALSE
+```
+
+R *can* compare strings in this way, but this doesn't mean you should!
+]
+
+.pull-right[
+![Neil deGrasse Tyson throwing his hands up in the air](images/ndt.gif)
+]
+
+What does this even mean?!
+
+```r
+"A" &gt; 10
+```
+
+```
+## [1] TRUE
+```
+
+```r
+11 &gt; "10"
+```
+
+```
+## [1] TRUE
+```
+---
+# and, and and
+
+.pull-left[
+The `&amp;` and `&amp;&amp;` ('and', 'and and') operators are used to compare whether two (or more) conditions are `TRUE`
+
+If both conditions are `TRUE`, `TRUE` is returned, otherwise `FALSE` (or `NA`&lt;sup&gt;1&lt;/sup&gt;) is returned
+
+.footnote[[1] Caution: If one of the terms is `NA`, `&amp;&amp;` will return `NA`.]
+]
+
+&lt;div class="pull-right" style="text-align:center;"&gt;
+  &lt;img src="images/alexisrose.gif" alt="Alexis Rose saying 'and'" style="height: 55%; width: 55%;"&gt;
+&lt;/div&gt;
+--
+
+
+
+```r
+TRUE &amp;&amp; TRUE
+```
+
+```
+## [1] TRUE
+```
+
+```r
+TRUE &amp;&amp; FALSE
+```
+
+```
+## [1] FALSE
+```
+
+
+---
+You can combine multiple `&amp;&amp;` to check that *all* conditions evaluate to `TRUE`
+
+```r
+TRUE &amp;&amp; TRUE &amp;&amp; T &amp;&amp; TRUE
+```
+
+```
+## [1] TRUE
+```
+
+```r
+TRUE &amp;&amp; FALSE &amp;&amp; TRUE &amp;&amp; FALSE
+```
+
+```
+## [1] FALSE
+```
+--
+
+
+`&amp;&amp;` is more helpful when we can actually evaluate certain conditions
+
+```r
+1 == 2 &amp;&amp; 100 == as.numeric("100")
+```
+
+```
+## [1] FALSE
+```
+
+```r
+50 &lt; 51 &amp;&amp; as.logical(1) &amp; is.data.frame(mtcars)
+```
+
+```
+## [1] TRUE
+```
+---
+## Single `&amp;` versus double `&amp;&amp;`
+--
+
+
+The single `&amp;` performs comparisons on *all* values.
+--
+
+
+The double `&amp;&amp;` performs comparisons only until it knows what the outcome will be.
+--
+
+
+For example, even though the operation below *has* to return `FALSE` (since the first half is `FALSE`), it
+evaluates the second half anyways (which throws an error)
+
+```r
+exists("nonexistent_object") &amp; nonexistent_object == 1
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'nonexistent_object' not found
+```
+--
+
+
+Using `&amp;&amp;` will properly return FALSE (because it doesn't evaluate the second half).
+
+```r
+exists("nonexistent_object") &amp;&amp; nonexistent_object == 1
+```
+
+```
+## [1] FALSE
+```
+---
+When given a vector, `&amp;` performs comparisons on all elements:
+
+```r
+c(TRUE, FALSE, TRUE) &amp; c(TRUE, TRUE, TRUE)
+```
+
+```
+## [1]  TRUE FALSE  TRUE
+```
+--
+
+`&amp;&amp;` performs comparisons *only* on the first element:
+
+```r
+c(TRUE, FALSE, TRUE) &amp;&amp; c(TRUE, TRUE, TRUE)
+```
+
+```
+## [1] TRUE
+```
+
+```r
+c(FALSE, FALSE, TRUE) &amp;&amp; c(TRUE, TRUE, TRUE)
+```
+
+```
+## [1] FALSE
+```
+--
+
+
+&lt;u&gt;Bottom line:&lt;/u&gt; When using operators to produce one `TRUE`/`FALSE` value, you most likely want to use `&amp;&amp;`
+---
+# or, or or
+
+The `|` and `||` ('or', 'or or') operators are used to compare whether one of two (or more) conditions are `TRUE`
+--
+
+
+If one or more conditions  `TRUE`, `TRUE` is returned, otherwise `FALSE` (or `NA`) is returned.
+--
+
+
+
+```r
+TRUE || FALSE
+```
+
+```
+## [1] TRUE
+```
+--
+
+
+```r
+FALSE || TRUE
+```
+
+```
+## [1] TRUE
+```
+--
+
+
+```r
+FALSE || FALSE
+```
+
+```
+## [1] FALSE
+```
+---
+Similar to the single `&amp;` and double `&amp;&amp;`, `|` evaluates all conditions while `||` stops when the first `TRUE` is reached
+--
+
+
+So this throws an error:
+
+```r
+TRUE | nonexistent_object == 1
+```
+
+```
+## Error in eval(expr, envir, enclos): object 'nonexistent_object' not found
+```
+--
+
+
+But this does not:
+
+```r
+TRUE || nonexistent_object == 1
+```
+
+```
+## [1] TRUE
+```
+--
+
+
+You can combine multiple `||` or evaluate several conditions. For example:
+
+```r
+FALSE || 1 == 2 || "This" == "That" || TRUE
+```
+
+```
+## [1] TRUE
+```
+---
+When given a vector, `|` performs comparisons on all elements:
+
+```r
+c(TRUE, FALSE, TRUE) | c(TRUE, TRUE, TRUE)
+```
+
+```
+## [1] TRUE TRUE TRUE
+```
+--
+
+
+`||` performs comparisons *only* on the first element:
+
+```r
+c(FALSE, FALSE, TRUE) || c(FALSE, TRUE, TRUE)
+```
+
+```
+## [1] FALSE
+```
+---
+# not!
+
+.smallish[
+.pull-left[
+Also known as the "bang" operator
+
+Converts `TRUE` into `FALSE` and `FALSE` into `TRUE`
+]
+
+.pull-right[
+![Cat shaking head no](./images/catno.gif)
+]
+--
+
+
+```r
+!TRUE
+```
+
+```
+## [1] FALSE
+```
+
+```r
+!FALSE
+```
+
+```
+## [1] TRUE
+```
+
+```r
+# Don't actually do this!
+!!!!!!!!!FALSE
+```
+
+```
+## [1] TRUE
+```
+
+]
+
+---
+
+The `!` operator is used when you want to check if a condition does *not* evaluate to `TRUE`. For example to make sure something is not numeric:
+
+```r
+!is.numeric("ABCD")
+```
+
+```
+## [1] TRUE
+```
+--
+
+
+You can negate anything that returns a logical value
+
+
+```r
+!(1 == 1 &amp;&amp; 2 == 2)
+```
+
+```
+## [1] FALSE
+```
+--
+
+
+```r
+# Function that just returns TRUE when it is called
+returnTRUE &lt;- function() return(TRUE)
+returnTRUE()
+```
+
+```
+## [1] TRUE
+```
+--
+
+
+```r
+!returnTRUE()
+```
+
+```
+## [1] FALSE
+```
+---
+# Type coercion
+
+If a relational or logical operator is passed (i.e., used with) two different atomic vectors as arguments, R will automatically coerce (i.e., change) one type to the other.
+--
+
+
+Coercion occurs in the following (decreasing) order of precedence:
+1. Character
+2. Complex
+3. Numeric
+4. Integer
+5. Logical
+6. Raw
+
+For example, R will coerce this entire vector (which can only be one atomic type) to character because there is a character inside:
+
+```r
+c("Psych548", 548.00, 548, TRUE)
+```
+
+```
+## [1] "Psych548" "548"      "548"      "TRUE"
+```
+---
+But if we remove the character, it coerces it to numeric:
+
+```r
+c(548.00, 548, TRUE)
+```
+
+```
+## [1] 548 548   1
+```
+--
+
+
+This is why operations we looked at previously technically work:
+
+```r
+"A" &gt; 10
+```
+
+```
+## [1] TRUE
+```
+
+`10` is coerced to `"10"` and then `"A"` is compared to it. Letters come before numbers in R's character comparison.
+
+
+```r
+11 &gt; "10"
+```
+
+```
+## [1] TRUE
+```
+`11` is coerced to `"11"` and the string `"11"` is larger than the string `"10"`
+---
+# Missing Values
+
+Missing values in R are represented as `NA` (without quotes)
+
+--
+
+
+Even one `NA` "poisons the well. Your calculations will return `NA` unless you handle missing values properly:
+
+```r
+mean(vector_with_NAs)
+```
+
+```
+## [1] NA
+```
+--
+
+
+```r
+mean(vector_with_NAs,
+*    na.rm = TRUE)
+```
+
+```
+## [1] 3.8
+```
+
+The `na.rm` argument in `mean()` removes missing values prior to calculating the mean.
+
+---
+`NA` is technically a logical variable...
+
+```r
+typeof(NA)
+```
+
+```
+## [1] "logical"
+```
+--
+
+
+But it *can* be other types as well (we have missing data for characters and numeric variables too!):
+
+```r
+as.numeric(NA)
+```
+
+```
+## [1] NA
+```
+--
+
+
+You can directly tell R which type of `NA` you want to use:
+- `NA_real_` (double)
+- `NA_integer_` (integer)
+- `NA_character_` (character)
+
+
+```r
+c(NA_character_, 100)
+```
+
+```
+## [1] NA    "100"
+```
+---
+# Detecting Missing Values
+
+**WARNING:** You can't test for missing values by seeing if they are equal to NA (`==NA`):
+
+```r
+vector_with_NAs == NA
+```
+
+```
+## [1] NA NA NA NA NA NA NA
+```
+--
+
+
+Instead, you need to use the `is.na()` function:
+
+```r
+is.na(vector_with_NAs)
+```
+
+```
+## [1] FALSE FALSE  TRUE FALSE FALSE  TRUE FALSE
+```
+--
+
+
+And to check that a value is *not* `NA`:
+
+```r
+!is.na("This is not NA")
+```
+
+```
+## [1] TRUE
+```
+---
+# `Inf` and `NaN`
+R also has representations for positive and negative infinity (`Inf`, `-Inf`) and undefined values (`NaN`; **N**ot **a** **N**umber):
+
+```r
+c(-1, 0, 1) / 0
+```
+
+```
+## [1] -Inf  NaN  Inf
+```
+--
+
+
+.pull-left[
+To check if something is finite or not, use `is.finite()`:
+
+```r
+is.finite(c(-1, 0, 1) / 0)
+```
+
+```
+## [1] FALSE FALSE FALSE
+```
+]
+--
+
+
+.pull-right[
+To check if something is not defined, use `is.nan()`:
+
+```r
+is.nan(c(-1, 0, 1) / 0)
+```
+
+```
+## [1] FALSE  TRUE FALSE
+```
+]
+---
+class: inverse
+# Vectors
+
+---
+# Making Vectors
+
+In R, a **vector** is a set of values that are the &lt;u&gt;same atomic type&lt;/u&gt;
+--
+
+
+We create vectors using the `c()` function (for '**c**ombine' or '**c**oncatenate'):
+
+```r
+c(3, 500, -Inf, -1.23, 24/2*10)
+```
+
+```
+## [1]   3.00 500.00   -Inf  -1.23 120.00
+```
+--
+
+
+You can also use `:` as shorthand to create vectors of series of numbers (incremented by one):
+
+```r
+1:10
+```
+
+```
+##  [1]  1  2  3  4  5  6  7  8  9 10
+```
+
+```r
+-5:5
+```
+
+```
+##  [1] -5 -4 -3 -2 -1  0  1  2  3  4  5
+```
+---
+The following also works but is more unusual to see:
+
+```r
+1.5:10.5
+```
+
+```
+##  [1]  1.5  2.5  3.5  4.5  5.5  6.5  7.5  8.5  9.5 10.5
+```
+
+******
+--
+
+
+You can also create numeric vectors using the `seq()` (for **seq**uence) function:
+
+```r
+seq(from = 1, to = 11, by = 2)
+```
+
+```
+## [1]  1  3  5  7  9 11
+```
+--
+
+
+```r
+seq(from = 1, to = 10, length.out = 5)
+```
+
+```
+## [1]  1.00  3.25  5.50  7.75 10.00
+```
+---
+.pull-left[
+`seq_len` will return the same result as `1:length`:
+
+```r
+seq_len(4)
+```
+
+```
+## [1] 1 2 3 4
+```
+]
+--
+
+
+.pull-right[
+`seq_along` will return a vector of 1:N elements of another vector:
+
+```r
+seq_along(5:10)
+```
+
+```
+## [1] 1 2 3 4 5 6
+```
+]
+
+******
+--
+
+
+You can create vectors of repeated values with `rep()`:
+
+```r
+rep(10, times = 5) # Repeat 10 five times
+```
+
+```
+## [1] 10 10 10 10 10
+```
+--
+
+
+```r
+rep(c(TRUE, FALSE), times = 3) # Repeat c(TRUE, FALSE) 3 times
+```
+
+```
+## [1]  TRUE FALSE  TRUE FALSE  TRUE FALSE
+```
+--
+
+
+```r
+rep(c("One", "Two"), each = 3) # Repeat each element 3 times
+```
+
+```
+## [1] "One" "One" "One" "Two" "Two" "Two"
+```
+
+---
+Vectors are one-dimensional (**length**) by definition:
+
+```r
+length(c(90, -0.5, 2, Inf))
+```
+
+```
+## [1] 4
+```
+--
+
+
+Nested calls to `c()` are flattened:
+
+```r
+length(c(1, c(2, 3, 4, c(5, 6, 7, 8))))
+```
+
+```
+## [1] 8
+```
+
+******
+--
+
+
+If all elements of a vector are not the same type, R will coerce the vector into one type&lt;sup&gt;1&lt;/sup&gt;:
+
+```r
+c("One", 1, TRUE)
+```
+
+```
+## [1] "One"  "1"    "TRUE"
+```
+.footnote[[1] This is the source of many bugs, so be careful with this!]
+---
+# Vector Math
+
+When doing arithmetic operations with vectors, R handles these *elementwise*:
+
+```r
+*# 1*4, 2*5, 3*6
+c(1, 2, 3) * c(4, 5, 6)
+```
+
+```
+## [1]  4 10 18
+```
+
+```r
+*# 1^4, 2^4, 3^4, 4^4
+c(1, 2, 3, 4)^4
+```
+
+```
+## [1]   1  16  81 256
+```
+
+Other common operations on numeric vectors:
+
+`+`, `-`, `/`, `exp()`= `\(e^x\)`, `log()` = `\(\log_e(x)\)`
+
+---
+# Vector Recyling
+
+If you do math of vectors with different lengths, R will **recycle** the shorter one by repeating it until it matches the length of the longer one. For example:
+
+```r
+*# 1*1, 2*2, 1*3, 2*4
+c(1, 2) * c(1, 2, 3, 4)
+```
+
+```
+## [1] 1 4 3 8
+```
+
+```r
+# Same exact operation as above
+c(1, 2, 1, 2) * c(1, 2, 3, 4)
+```
+
+```
+## [1] 1 4 3 8
+```
+--
+
+
+You can recycle with a **scalar** (a single number) as well:
+
+```r
+# 1+1, 1+2, 1+3
+1 + c(1, 2, 3)
+```
+
+```
+## [1] 2 3 4
+```
+---
+# Warning on Recycling
+
+R will warn you if you do math with vectors of incommensurate lengths (but it will not throw an error!):
+
+```r
+# 1+1, 2+2, 3+3, 1+4
+c(1, 2, 3) + c(1, 2, 3, 4)
+```
+
+```
+## Warning in c(1, 2, 3) + c(1, 2, 3, 4): longer object length is not a multiple of
+## shorter object length
+```
+
+```
+## [1] 2 4 6 5
+```
+---
+# Vectorwise Math
+Some functions operate on the entire vector and return one number (rather than operating elementwise):
+
+```r
+sum(1:5)
+```
+
+```
+## [1] 15
+```
+
+```r
+max(c(1, 4, 10:999))
+```
+
+```
+## [1] 999
+```
+
+Other vectorwise summary functions include:
+
+`min()`, `mean()`, `median()`, `sd()`, `var()`
+---
+# Example: Standardizing Data
+
+You can combine elementwise and vectorwise math to perform your calculations. For example, if you want to standardize a vector of values (e.g., scores on a beahvioral tasks):
+
+`$$z_i = \frac{x_i - \text{mean}(x)}{\text{SD}(x)}$$`
+
+```r
+scores &lt;- c(30, 28, 47, 27, 97, 49, 84, 78, 33, 48)
+z &lt;- (scores - mean(scores)) / sd(scores)
+round(z, 2)
+```
+
+```
+##  [1] -0.87 -0.95 -0.20 -0.99  1.77 -0.12  1.25  1.02 -0.75 -0.16
+```
+--
+
+
+You can also use the built-in `scale()` function to do this for you:
+
+```r
+identical(z, as.vector(scale(scores)))
+```
+
+```
+## [1] TRUE
+```
+---
+# Logical Vectors are Special!
+
+A logical vector is a vector filled with `TRUE` and `FALSE` values
+--
+
+
+Typically logical vectors are created programmatically as a result of logical tests (e.g., `course == "Psych548"`). For example, if you want to check whether a group of people are old enough to purchase alcohol:
+
+```r
+ages &lt;- c(13, 43, 72, 24, 21, 20, 40, 15, 29)
+ages &gt;= 21
+```
+
+```
+## [1] FALSE  TRUE  TRUE  TRUE  TRUE FALSE  TRUE FALSE  TRUE
+```
+--
+
+
+Logical vectors are most useful when you want to take a subset of a vector (or other data type). Only ages 21+ are selected:
+
+```r
+ages[ages &gt;= 21]
+```
+
+```
+## [1] 43 72 24 21 40 29
+```
+---
+# Subsetting Vectors
+
+There are many ways to **subset** a vector. You will primarily use `[` and `]` to specify a subset of a vector, however you can also use the `subset()` function.
+
+
+```r
+# Adult clinical core faculty
+faculty &lt;- c("Corey", "Angela", "Bill", "Mary", "Jane", "Lori")
+```
+--
+
+
+.pull-left[
+You can pass a single index (scalar) or vector of values to **keep**:
+
+```r
+faculty[c(4, 5)]
+```
+
+```
+## [1] "Mary" "Jane"
+```
+]
+--
+
+
+.pull-right[
+You can pass a single index or vector or values to **drop**:
+
+```r
+faculty[-c(1, 3:5)]
+```
+
+```
+## [1] "Angela" "Lori"
+```
+]
+--
+
+
+You can also pass a logical vector(`TRUE` to keep, `FALSE` to drop):
+
+```r
+faculty[c(T, F, T, F, F, T)]
+```
+
+```
+## [1] "Corey" "Bill"  "Lori"
+```
+---
+Using logical vectors to subset other vectors is incredibly useful
+
+For example, what if the order of the names changed, but you wanted to keep Mary and Jane?
+
+```r
+faculty == "Mary" | faculty == "Jane"
+```
+
+```
+## [1] FALSE FALSE FALSE  TRUE  TRUE FALSE
+```
+--
+
+
+
+```r
+faculty[faculty == "Mary" | faculty == "Jane"]
+```
+
+```
+## [1] "Mary" "Jane"
+```
+--
+
+
+Or maybe you want to know which faculty have at least 1 grad student&lt;sup&gt;1&lt;/sup&gt;:
+
+```r
+# How many grad students does each faculty have?
+gradstudents &lt;- c(1, 0, 4, 3, 2, 3)
+faculty[gradstudents &gt; 1]
+```
+
+```
+## [1] "Bill" "Mary" "Jane" "Lori"
+```
+---
+The `subset()` function can also be used to subset vectors:
+
+```r
+subset(faculty, gradstudents &gt; 1)
+```
+
+```
+## [1] "Bill" "Mary" "Jane" "Lori"
+```
+--
+
+
+When subsetting vectors, the only difference between `[]` and `subset()` is that `subset()` removes `NA`s
+
+
+```r
+myvector &lt;- 1:5
+myvector[c(T, T, F, NA, T)]
+```
+
+```
+## [1]  1  2 NA  5
+```
+--
+
+
+```r
+subset(myvector, c(T, T, F, NA, T))
+```
+
+```
+## [1] 1 2 5
+```
+--
+
+
+```r
+myvector[c(T, T, F, NA, T) &amp; !is.na(c(T, T, F, NA, T))]
+```
+
+```
+## [1] 1 2 5
+```
+---
+# Named vectors
+
+You can assign **names** to the elements of a vector using the `names()` function:
+
+```r
+names(gradstudents) &lt;- faculty
+print(gradstudents)
+```
+
+```
+##  Corey Angela   Bill   Mary   Jane   Lori 
+##      1      0      4      3      2      3
+```
+
+☝️ The elements of this vector are still numeric!
+--
+
+
+Names are a useful way of subsetting your data and do not depend on the order of the vector:
+
+```r
+gradstudents[c("Mary", "Jane")]
+```
+
+```
+## Mary Jane 
+##    3    2
+```
+---
+### Helpful Logical/Subsetting Functions
+
+`%in%` allows you to avoid typing a lot of OR (`|`) statements out:
+
+```r
+# Same as: faculty == "Mary" | faculty == "Jane"
+faculty %in% c("Mary", "Jane")
+```
+
+```
+## [1] FALSE FALSE FALSE  TRUE  TRUE FALSE
+```
+
+```r
+!faculty %in% c("Mary", "Jane") # Faculty not Mary and Jane
+```
+
+```
+## [1]  TRUE  TRUE  TRUE FALSE FALSE  TRUE
+```
+--
+
+
+`which()` gives you the indices (locations) of `TRUE` values in a logical vector:
+
+```r
+which(faculty %in% c("Mary", "Jane"))
+```
+
+```
+## [1] 4 5
+```
+---
+class: inverse
+# Matrices
+---
+# Making Matrices
+
+**Matrices** are basically two dimensional vectors with **rows** and **columns** and are made with the `matrix()` function
+
+
+```r
+# LETTERS is a built-in vector in R w/ elements A-Z
+matrix(LETTERS[1:6], nrow = 2, ncol = 3)
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,] "A"  "C"  "E" 
+## [2,] "B"  "D"  "F"
+```
+--
+
+
+The `byrow` argument (defaults to `FALSE`) determines whether the data fills the matrix by row (`TRUE`) or by column (`FALSE`):
+
+```r
+matrix(LETTERS[1:6], nrow = 2, ncol = 3, byrow = T)
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,] "A"  "B"  "C" 
+## [2,] "D"  "E"  "F"
+```
+---
+You can also make matrices by binding vectors together with `rbind()` (**r**ow **bind**) and `cbind()` (**c**olumn ** bind**):
+--
+
+
+.pull-left[
+
+```r
+rbind(1:3, 4:6, 7:9)
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    1    2    3
+## [2,]    4    5    6
+## [3,]    7    8    9
+```
+]
+--
+
+
+.pull-right[
+
+```r
+cbind(1:3, 4:6, 7:9)
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    1    4    7
+## [2,]    2    5    8
+## [3,]    3    6    9
+```
+]
+
+******
+--
+
+
+Let's make a matrix to practice subsetting on the next slide!
+
+
+```r
+letters_matrix &lt;- matrix(letters[1:6], nrow = 2,
+                         ncol = 3, byrow = T)
+print(letters_matrix)
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,] "a"  "b"  "c" 
+## [2,] "d"  "e"  "f"
+```
+
+---
+# Subsetting Matrices
+
+Matrices are subset wtih `[rows, colums]`
+--
+
+
+.pull-left[
+
+```r
+# Row 2, Column 3
+letters_matrix[2, 3]
+```
+
+```
+## [1] "f"
+```
+]
+--
+
+
+.pull-right[
+
+```r
+# Row 1, Columns 2 and 3
+letters_matrix[1, c(2, 3)]
+```
+
+```
+## [1] "b" "c"
+```
+]
+--
+
+
+If you want to keep the entire row or column, keep the space inside the square braces (`[]`) blank:
+--
+
+
+&lt;!-- div needed for proper alignment within --&gt;
+&lt;div&gt;
+.pull-left[
+
+```r
+# All rows, column 1
+letters_matrix[, 1]
+```
+
+```
+## [1] "a" "d"
+```
+]
+--
+
+
+.pull-right[
+
+```r
+# Row 2, all columns
+letters_matrix[2, ]
+```
+
+```
+## [1] "d" "e" "f"
+```
+]
+&lt;/div&gt;
+---
+# Matrices -&gt; Vectors
+
+When a matrix is subsetted to just 1 row/column of data (like we saw in the previous slide), R will automatically convert it to a vector. You tell R *not* to do this by using `drop = FALSE`:
+
+.pull-left[
+
+```r
+# All rows, column 1
+letters_matrix[2, ]
+```
+
+```
+## [1] "d" "e" "f"
+```
+]
+
+.pull-right[
+
+```r
+# Row 2, all columns
+letters_matrix[2, , drop = F]
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,] "d"  "e"  "f"
+```
+]
+
+******
+--
+
+
+To get the dimensions of a matrix, use `dim()`
+
+
+```r
+*# Returns vector of length 2: c(rows, columns)
+dim(letters_matrix)
+```
+
+```
+## [1] 2 3
+```
+---
+# Matrix Atomic Type Warning
+
+Like vectors, &lt;u&gt;all elements of a matrix must be the same atomic type&lt;/u&gt;. If they are not, R will automatically coerce the matrix according to the rules discussed earlier (character &gt; complex &gt; numeric &gt; integer &gt; logical &gt; raw)
+
+```r
+cbind(1:2, c("UW", "WSU"))
+```
+
+```
+##      [,1] [,2] 
+## [1,] "1"  "UW" 
+## [2,] "2"  "WSU"
+```
+---
+# Named Matrices
+
+You can assign **names** to rows (`rownames()`) and columns (`colnames()`) of a matrix:
+
+```r
+mymatrix &lt;- matrix(1:6, nrow = 2)
+rownames(mymatrix) &lt;- c("Odds", "Evens")
+colnames(mymatrix) &lt;- c("First", "Second", "Third")
+print(mymatrix)
+```
+
+```
+##       First Second Third
+## Odds      1      3     5
+## Evens     2      4     6
+```
+--
+
+
+You can then subset the matrix by the dimension names:
+
+```r
+mymatrix["Evens", c("First", "Third"), drop = F]
+```
+
+```
+##       First Third
+## Evens     2     6
+```
+---
+# Matrix Math
+
+If two matrices have the same dimensions, math can be formed elementwise. For example:
+
+.pull-left[
+
+```r
+mat1 &lt;- matrix(1:6, ncol = 3)
+print(mat1)
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    1    3    5
+## [2,]    2    4    6
+```
+]
+
+.pull-right[
+
+```r
+mat2 &lt;- matrix(1:6, ncol = 3, byrow = TRUE)
+print(mat2)
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    1    2    3
+## [2,]    4    5    6
+```
+]
+--
+
+
+&lt;div&gt;
+.pull-left[
+
+```r
+mat1 / mat2
+```
+
+```
+##      [,1] [,2]     [,3]
+## [1,]  1.0  1.5 1.666667
+## [2,]  0.5  0.8 1.000000
+```
+]
+--
+
+
+.pull-right[
+
+```r
+mat1 * mat2
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    1    6   15
+## [2,]    8   20   36
+```
+]
+&lt;/div&gt;
+---
+## Matrix Transposition and Multiplication
+
+To transpose a matrix, use `t()`:
+
+
+
+```r
+mat1t &lt;- t(mat1)
+print(mat1t)
+```
+
+```
+##      [,1] [,2]
+## [1,]    1    2
+## [2,]    3    4
+## [3,]    5    6
+```
+--
+
+
+To do actual matrix multiplication (not elementwise), use `%*%`:
+
+```r
+mat1 %*% mat1t
+```
+
+```
+##      [,1] [,2]
+## [1,]   35   44
+## [2,]   44   56
+```
+---
+# Matrix Inversion
+
+To invert an invertible square matrix, use `solve()`:
+
+```r
+mat4 &lt;- mat1 %*% mat1t
+mat4i &lt;- solve(mat4)
+print(mat4i)
+```
+
+```
+##           [,1]      [,2]
+## [1,]  2.333333 -1.833333
+## [2,] -1.833333  1.458333
+```
+
+```r
+mat4 %*% mat4i
+```
+
+```
+##              [,1]          [,2]
+## [1,] 1.000000e+00 -2.664535e-15
+## [2,] 1.776357e-14  1.000000e+00
+```
+
+Note the [floating point imprecision](https://floating-point-gui.de/basic/): The off-diagonals are *very close to zero* rather than actually zero!
+
+---
+# Diagonal Matrices
+
+To extract the diagonal of a matrix or make a diagonal matrix (usually the identity matrix), use `diag()`:
+
+
+```r
+varcov_mtcars &lt;- cov(mtcars[, 1:3])
+print(varcov_mtcars)
+```
+
+```
+##              mpg        cyl       disp
+## mpg    36.324103  -9.172379  -633.0972
+## cyl    -9.172379   3.189516   199.6603
+## disp -633.097208 199.660282 15360.7998
+```
+--
+
+
+Get the variances of the first 3 variables in `mtcars`:
+
+```r
+diag(varcov_mtcars)
+```
+
+```
+##          mpg          cyl         disp 
+##    36.324103     3.189516 15360.799829
+```
+---
+You can also use `diag()` to make an identity matrix of size *n*:
+
+```r
+diag(2)
+```
+
+```
+##      [,1] [,2]
+## [1,]    1    0
+## [2,]    0    1
+```
+
+```r
+diag(3)
+```
+
+```
+##      [,1] [,2] [,3]
+## [1,]    1    0    0
+## [2,]    0    1    0
+## [3,]    0    0    1
+```
+
+```r
+diag(4)
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]    1    0    0    0
+## [2,]    0    1    0    0
+## [3,]    0    0    1    0
+## [4,]    0    0    0    1
+```
+---
+class: inverse
+# Lists
+
+---
+**Lists** are objects that can store multiple types of data and are created with `list()`
+
+.small[
+
+```r
+mylist &lt;- list("groceries" = c("Soy Sauce", "Rice", "Tofu"),
+               "numbers" = 1:7,
+               "mydata" = matrix(8:11, nrow = 2),
+               "linearmod" = lm(mpg ~ disp, data = mtcars))
+print(mylist)
+```
+
+```
+## $groceries
+## [1] "Soy Sauce" "Rice"      "Tofu"     
+## 
+## $numbers
+## [1] 1 2 3 4 5 6 7
+## 
+## $mydata
+##      [,1] [,2]
+## [1,]    8   10
+## [2,]    9   11
+## 
+## $linearmod
+## 
+## Call:
+## lm(formula = mpg ~ disp, data = mtcars)
+## 
+## Coefficients:
+## (Intercept)         disp  
+##    29.59985     -0.04122
+```
+]
+
+---
+# Accessing List Elements
+
+You can access a list element by its name or number in `[[` `]]` (note the double square brackets) or `$` followed by its name:
+
+```r
+mylist[[1]]
+```
+
+```
+## [1] "Soy Sauce" "Rice"      "Tofu"
+```
+--
+
+
+```r
+mylist[["groceries"]]
+```
+
+```
+## [1] "Soy Sauce" "Rice"      "Tofu"
+```
+--
+
+
+```r
+mylist$groceries
+```
+
+```
+## [1] "Soy Sauce" "Rice"      "Tofu"
+```
+---
+# Why two brackets `[[` `]]`?
+
+Single brackets return a **list**
+
+Double brackets return the actual list element as whatever data type it is stored as:
+
+
+```r
+typeof(mylist[1])
+```
+
+```
+## [1] "list"
+```
+
+```r
+typeof(mylist[[1]])
+```
+
+```
+## [1] "character"
+```
+
+---
+# `[]` versus `[[]]`
+
+![Pepper packets inside shaker metaphor for list indexing in R](images/pepperlist.png)
+
+`[x]` chooses elements but keeps the list while `[[x]]` extracts the element from the list
+
+.footnote[Source: [Hadley Wickham](https://twitter.com/hadleywickham/status/643381054758363136?lang=en)]
+---
+# Regression Output is a List!
+.small[
+
+```r
+# Display only the first 7 elements
+str(mylist$linearmod, list.len = 7)
+```
+
+```
+## List of 12
+##  $ coefficients : Named num [1:2] 29.5999 -0.0412
+##   ..- attr(*, "names")= chr [1:2] "(Intercept)" "disp"
+##  $ residuals    : Named num [1:32] -2.01 -2.01 -2.35 2.43 3.94 ...
+##   ..- attr(*, "names")= chr [1:32] "Mazda RX4" "Mazda RX4 Wag" "Datsun 710" "Hornet 4 Drive" ...
+##  $ effects      : Named num [1:32] -113.65 -28.44 -1.79 2.65 3.92 ...
+##   ..- attr(*, "names")= chr [1:32] "(Intercept)" "disp" "" "" ...
+##  $ rank         : int 2
+##  $ fitted.values: Named num [1:32] 23 23 25.1 19 14.8 ...
+##   ..- attr(*, "names")= chr [1:32] "Mazda RX4" "Mazda RX4 Wag" "Datsun 710" "Hornet 4 Drive" ...
+##  $ assign       : int [1:2] 0 1
+##  $ qr           :List of 5
+##   ..$ qr   : num [1:32, 1:2] -5.657 0.177 0.177 0.177 0.177 ...
+##   .. ..- attr(*, "dimnames")=List of 2
+##   .. .. ..$ : chr [1:32] "Mazda RX4" "Mazda RX4 Wag" "Datsun 710" "Hornet 4 Drive" ...
+##   .. .. ..$ : chr [1:2] "(Intercept)" "disp"
+##   .. ..- attr(*, "assign")= int [1:2] 0 1
+##   ..$ qraux: num [1:2] 1.18 1.09
+##   ..$ pivot: int [1:2] 1 2
+##   ..$ tol  : num 1e-07
+##   ..$ rank : int 2
+##   ..- attr(*, "class")= chr "qr"
+##   [list output truncated]
+##  - attr(*, "class")= chr "lm"
+```
+]
+---
+# Named Lists
+
+Lists can be unnamed:
+
+```r
+unnamed_list &lt;- list(c("Apples", "Bananas", "Oranges"),
+                     1:10,
+                     diag(3))
+print(unnamed_list)
+```
+
+```
+## [[1]]
+## [1] "Apples"  "Bananas" "Oranges"
+## 
+## [[2]]
+##  [1]  1  2  3  4  5  6  7  8  9 10
+## 
+## [[3]]
+##      [,1] [,2] [,3]
+## [1,]    1    0    0
+## [2,]    0    1    0
+## [3,]    0    0    1
+```
+---
+You can use `names()` to access the names of a named list and to assign names to an unnamed list:
+
+```r
+names(mylist)
+```
+
+```
+## [1] "groceries" "numbers"   "mydata"    "linearmod"
+```
+
+```r
+names(unnamed_list) &lt;- c("Fruit", "Numbers", "Identity Matrix")
+print(unnamed_list)
+```
+
+```
+## $Fruit
+## [1] "Apples"  "Bananas" "Oranges"
+## 
+## $Numbers
+##  [1]  1  2  3  4  5  6  7  8  9 10
+## 
+## $`Identity Matrix`
+##      [,1] [,2] [,3]
+## [1,]    1    0    0
+## [2,]    0    1    0
+## [3,]    0    0    1
+```
+---
+class: inverse
+# Dataframes
+---
+**Dataframes** are a special type of list where all elements of the list are the same length and are bound together
+--
+
+
+Unlike matrices, dataframes can hold data of different atomic types (but each column needs to be the same type)
+
+******
+--
+
+
+To construct a dataframe from scratch, use the `data.frame()` function:
+
+```r
+uwclinpsych &lt;- data.frame("name" = c("Corey", "Angela", "Bill", "Mary", "Jane", "Lori"),
+                          "grads" = c(1, 0, 4, 3, 2, 3),
+                          "fullprof" = c(F, F, T, T, T, T))
+print(uwclinpsych)
+```
+
+```
+##     name grads fullprof
+## 1  Corey     1    FALSE
+## 2 Angela     0    FALSE
+## 3   Bill     4     TRUE
+## 4   Mary     3     TRUE
+## 5   Jane     2     TRUE
+## 6   Lori     3     TRUE
+```
+---
+You can also create dataframes using `rbind()` and `cbind()`, but unless you are binding two dataframes together, it will return a matrix:
+--
+
+
+.smallish[
+
+```r
+cbind("name" = c("Corey", "Angela", "Bill", "Mary", "Jane", "Lori"),
+      "grads" = c(1, 0, 4, 3, 2, 3),
+      "fullprof" = c(F, F, T, T, T, T))
+```
+
+```
+##      name     grads fullprof
+## [1,] "Corey"  "1"   "FALSE" 
+## [2,] "Angela" "0"   "FALSE" 
+## [3,] "Bill"   "4"   "TRUE"  
+## [4,] "Mary"   "3"   "TRUE"  
+## [5,] "Jane"   "2"   "TRUE"  
+## [6,] "Lori"   "3"   "TRUE"
+```
+--
+
+
+```r
+rbind(uwclinpsych[4:6, ], uwclinpsych[1:3, ])
+```
+
+```
+##     name grads fullprof
+## 4   Mary     3     TRUE
+## 5   Jane     2     TRUE
+## 6   Lori     3     TRUE
+## 1  Corey     1    FALSE
+## 2 Angela     0    FALSE
+## 3   Bill     4     TRUE
+```
+]
+---
+# Subsetting Dataframes
+
+Dataframes are subset in the same way as matrices(`[rows, columns]`)
+
+```r
+uwclinpsych[, 1]
+```
+
+```
+## [1] "Corey"  "Angela" "Bill"   "Mary"   "Jane"   "Lori"
+```
+--
+
+
+```r
+uwclinpsych[, "name"]
+```
+
+```
+## [1] "Corey"  "Angela" "Bill"   "Mary"   "Jane"   "Lori"
+```
+--
+
+
+```r
+uwclinpsych[c(1, 3, 5), ]
+```
+
+```
+##    name grads fullprof
+## 1 Corey     1    FALSE
+## 3  Bill     4     TRUE
+## 5  Jane     2     TRUE
+```
+---
+You can also use the `$` operator to target a single column
+
+```r
+uwclinpsych$name
+```
+
+```
+## [1] "Corey"  "Angela" "Bill"   "Mary"   "Jane"   "Lori"
+```
+
+******
+--
+
+
+When you have data that are related to each other and it is possible to store them as a dataframe, you should! This allows you to confidently make subsets for your analyses:
+
+```r
+uwclinpsych[uwclinpsych$grads &gt; 2, "name"]
+```
+
+```
+## [1] "Bill" "Mary" "Lori"
+```
+--
+
+
+👇 same return value
+
+```r
+uwclinpsych$name[uwclinpsych$grads &gt; 2]
+```
+
+```
+## [1] "Bill" "Mary" "Lori"
+```
+---
+
+```r
+uwclinpsych$name[uwclinpsych$grads &gt; 2 &amp;
+                   uwclinpsych$fullprof]
+```
+
+☝️ What is this code doing?
+--
+
+
+```
+## [1] "Bill" "Mary" "Lori"
+```
+
+
+******
+--
+
+If you want to subset one column of a dataframe while keeping it as a dataframe object, use `drop=FALSE`:
+
+.smallish[
+
+```r
+uwclinpsych[, 1]
+```
+
+```
+## [1] "Corey"  "Angela" "Bill"   "Mary"   "Jane"   "Lori"
+```
+
+```r
+uwclinpsych[, 1, drop = FALSE]
+```
+
+```
+##     name
+## 1  Corey
+## 2 Angela
+## 3   Bill
+## 4   Mary
+## 5   Jane
+## 6   Lori
+```
+]
+---
+# Viewing Dataframes
+
+You can view an entire dataframe by `print()`ing it out in the console.&lt;sup&gt;1&lt;/sup&gt; However, it often just spams your console and is too large to meaningfully read.
+
+.footnote[[1] You can also type the name of the dataframe without `print()` and R will print it!]
+--
+
+
+.pull-left[
+To view the &lt;u&gt;first&lt;/u&gt; *n* rows of a dataframe use `head()` (defaults to 5 rows):
+
+```r
+head(uwclinpsych, 3)
+```
+
+```
+##     name grads fullprof
+## 1  Corey     1    FALSE
+## 2 Angela     0    FALSE
+## 3   Bill     4     TRUE
+```
+]
+--
+
+
+.pull-right[
+To view the &lt;u&gt;last&lt;/u&gt; *n* rows of a dataframe use `tail()` (defaults to 5 rows):
+
+```r
+tail(uwclinpsych, 4)
+```
+
+```
+##   name grads fullprof
+## 3 Bill     4     TRUE
+## 4 Mary     3     TRUE
+## 5 Jane     2     TRUE
+## 6 Lori     3     TRUE
+```
+]
+
+
+---
+You can also `View()` a more friendly pop-up of your data and, in RStudio, filter and sort as you view
+
+
+```r
+View(swiss)
+```
+
+&lt;div style="text-align:center;"&gt;
+  &lt;img src="images/RStudioView.png" alt="RStudio View Data Screen"&gt;
+&lt;/div&gt;
+---
+# Attributes
+
+Objects in R can have **attributes**, which are basically metadata that describe an object. To get an object's attributes, use the `attributes()` function.
+--
+
+
+This can help give you an overview of an object's properties. For example:
+
+```r
+# Linear regression w/ one predictor
+linearmod &lt;- lm(mpg ~ disp, data = mtcars)
+attributes(linearmod)
+```
+
+```
+## $names
+##  [1] "coefficients"  "residuals"     "effects"       "rank"         
+##  [5] "fitted.values" "assign"        "qr"            "df.residual"  
+##  [9] "xlevels"       "call"          "terms"         "model"        
+## 
+## $class
+## [1] "lm"
+```
+---
+Attributes also offer a nice way to document a dataframe
+
+Consider the following data:
+
+
+.pull-left[
+
+```r
+print(dat)
+```
+
+```
+##    pid txm phq pcl
+## 1 1001   1  10   3
+## 2 1002   2  17  28
+## 3 1003   3   3  43
+## 4 1004   1  25  17
+```
+]
+
+.pull-right[
+&lt;div style="min-height:45px;"&gt; &lt;/div&gt;
+🤔 what is `pid`?
+
+🤔 what is `txm`?
+
+🤔 what is `phq`?
+
+🤔 what is `pcl`?
+]
+--
+
+
+We can assign attributes to each column to document what each is:
+
+```r
+attr(dat$pid, "Label") &lt;- "Participant ID"
+attr(dat$txm, "Label") &lt;- "Treatment Modality"
+attr(dat$phq, "Label") &lt;- "Depression (measured by PHQ-9)"
+attr(dat$pcl, "Label") &lt;- "PTSD Sx (measured by PCL-5)"
+
+# Columns can have as many attributes as you would like!
+attr(dat$txm, "Values") &lt;- c("1" = "CPT", "2" = "PE", "3" = "TAU")
+```
+---
+
+You and your collaborators can then reference these attributes
+
+```r
+attributes(dat)
+```
+
+```
+## $names
+## [1] "pid" "txm" "phq" "pcl"
+## 
+## $row.names
+## [1] 1 2 3 4
+## 
+## $class
+## [1] "data.frame"
+```
+
+```r
+attributes(dat$txm)
+```
+
+```
+## $Label
+## [1] "Treatment Modality"
+## 
+## $Values
+##     1     2     3 
+## "CPT"  "PE" "TAU"
+```
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "tomorrow-night-bright",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
