@@ -15,7 +15,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
-   sodipodi:docname="Background_UW_lightsvg.svg">
+   sodipodi:docname="Background_UW_light.svg">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="305.37851"
-     inkscape:cy="-5.704185"
+     inkscape:zoom="0.70000001"
+     inkscape:cx="172.94273"
+     inkscape:cy="120.41426"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -44,7 +44,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -87,8 +87,8 @@
            id="tspan24"
            x="29.920713"
            y="296.08069"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.8722229px;font-family:'Uni Sans';-inkscape-font-specification:'Uni Sans';fill:#ffffff;fill-opacity:1;stroke-width:0.07000434">UNIVERISTY <tspan
-   style="font-size:14.11111111px;fill:#ffffff;fill-opacity:1"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.8722229px;font-family:'Uni Sans';-inkscape-font-specification:'Uni Sans';fill:#ffffff;fill-opacity:1;stroke-width:0.07000434">UNIVERSITY <tspan
+   style="font-size:14.11111069px;fill:#ffffff;fill-opacity:1"
    id="tspan4536">OF</tspan> WASHINGTON</tspan></text>
     </g>
   </g>
