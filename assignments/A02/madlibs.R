@@ -1,0 +1,12 @@
+exclamation <- function() return("ahhh!!")
+plural_noun <- function() return("cats")
+verb <- function() return("interpret")
+adverb <- function() return("voluntarily")
+singular_noun <- function() return("friend")
+verb_ing <- function() return("babysitting")
+adjective <- function() return("jealous")
+food_item <- function() return("tacos")
+verbing_in_place <- function() return("running at the pool")
+integer <- function() return(33)
+double <- function() return(2.843217)
+
