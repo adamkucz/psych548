@@ -31,8 +31,8 @@
 /* Variables */
 :root {
   --font-uw-purple: #342c5c;
-  --image_background_light: url(../images/Background_UW_light.svg);
-  --image_background_dark: url(../images/Background_UW_dark.svg);
+  --image_background_light: url(../images/Background_UW_light.png);
+  --image_background_dark: url(../images/Background_UW_dark.png);
   --image_title_slide: url(../images/guaruja.webp);
 }
 
