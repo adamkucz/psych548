@@ -21,7 +21,7 @@
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono);
 
 @font-face {
-  font-family: 'uni_sansregular';
+  font-family: 'unisans_regular';
   src: url(../fonts/unisans_regular.woff2) format('woff2'),
        url(../fonts/unisans_regular.woff) format('woff');
   font-weight: normal;
@@ -329,5 +329,5 @@ kbd {
 }
 
 .unisans {
-  font-family: uni_sansregular;
+  font-family: unisans_regular;
 }
