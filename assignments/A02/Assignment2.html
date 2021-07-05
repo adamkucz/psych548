@@ -369,9 +369,9 @@ The <code>sleep</code> dataset in R (see <code>help(sleep)</code>) are data from
 ##  [9,] &quot;13.3333333333333&quot; &quot;15&quot; &quot;i&quot;  &quot;I&quot; 
 ## [10,] &quot;15&quot;               &quot;16&quot; &quot;j&quot;  &quot;J&quot;</code></pre>
 <ol start="5" style="list-style-type: decimal">
-<li>Select fourth row from <code>my_matrix</code> and assign it to the object <code>row_4</code> as a vector.</li>
+<li>Select the fourth row from <code>my_matrix</code> and assign it to the object <code>row_4</code> as a vector.</li>
 </ol>
-<pre><code>##  [1] &quot;A&quot; &quot;B&quot; &quot;C&quot; &quot;D&quot; &quot;E&quot; &quot;F&quot; &quot;G&quot; &quot;H&quot; &quot;I&quot; &quot;J&quot;</code></pre>
+<pre><code>## [1] &quot;5&quot;  &quot;10&quot; &quot;d&quot;  &quot;D&quot;</code></pre>
 <ol start="6" style="list-style-type: decimal">
 <li>Assign the element in the 6th row and 2nd column of <code>my_matrix</code> to <code>val_6_2</code> as a numeric value.</li>
 </ol>
@@ -423,18 +423,18 @@ The <code>sleep</code> dataset in R (see <code>help(sleep)</code>) are data from
 <div id="coding-with-lists" class="section level2">
 <h2>Coding with Lists</h2>
 <ol style="list-style-type: decimal">
-<li>Use <code>list()</code> to create a list that contains <code>vec_num</code> and <code>row4</code>, and assign the names <code>vec_num</code> and <code>row4</code> to these two elements of <code>list_1</code>.</li>
+<li>Use <code>list()</code> to create a list that contains <code>vec_num</code> and <code>row_4</code>, and assign the names <code>vec_num</code> and <code>row_4</code> to these two elements of <code>list_1</code>.</li>
 </ol>
 <pre><code>## $vec_num
 ##  [1]  0.000000  1.666667  3.333333  5.000000  6.666667  8.333333 10.000000
 ##  [8] 11.666667 13.333333 15.000000
 ## 
-## $row4
-##  [1] &quot;A&quot; &quot;B&quot; &quot;C&quot; &quot;D&quot; &quot;E&quot; &quot;F&quot; &quot;G&quot; &quot;H&quot; &quot;I&quot; &quot;J&quot;</code></pre>
+## $row_4
+## [1] &quot;5&quot;  &quot;10&quot; &quot;d&quot;  &quot;D&quot;</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Using <code>$</code>, extract <code>row4</code> from <code>list_1</code> and assign it to the object <code>row_4_2</code>.</li>
 </ol>
-<pre><code>## NULL</code></pre>
+<pre><code>## [1] &quot;5&quot;  &quot;10&quot; &quot;d&quot;  &quot;D&quot;</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Create another list that contains <code>val_6_2</code> and <code>big_matrix</code> called <code>list_2</code>.</li>
 </ol>
@@ -464,8 +464,8 @@ The <code>sleep</code> dataset in R (see <code>help(sleep)</code>) are data from
 ##  [1]  0.000000  1.666667  3.333333  5.000000  6.666667  8.333333 10.000000
 ##  [8] 11.666667 13.333333 15.000000
 ## 
-## $row4
-##  [1] &quot;A&quot; &quot;B&quot; &quot;C&quot; &quot;D&quot; &quot;E&quot; &quot;F&quot; &quot;G&quot; &quot;H&quot; &quot;I&quot; &quot;J&quot;
+## $row_4
+## [1] &quot;5&quot;  &quot;10&quot; &quot;d&quot;  &quot;D&quot; 
 ## 
 ## [[3]]
 ## [1] 12
@@ -493,42 +493,38 @@ The <code>sleep</code> dataset in R (see <code>help(sleep)</code>) are data from
 ##                &quot;0&quot; &quot;1.66666666666667&quot; &quot;3.33333333333333&quot;                &quot;5&quot; 
 ##           vec_num5           vec_num6           vec_num7           vec_num8 
 ## &quot;6.66666666666667&quot; &quot;8.33333333333333&quot;               &quot;10&quot; &quot;11.6666666666667&quot; 
-##           vec_num9          vec_num10              row41              row42 
-## &quot;13.3333333333333&quot;               &quot;15&quot;                &quot;A&quot;                &quot;B&quot; 
-##              row43              row44              row45              row46 
-##                &quot;C&quot;                &quot;D&quot;                &quot;E&quot;                &quot;F&quot; 
-##              row47              row48              row49             row410 
-##                &quot;G&quot;                &quot;H&quot;                &quot;I&quot;                &quot;J&quot; 
+##           vec_num9          vec_num10             row_41             row_42 
+## &quot;13.3333333333333&quot;               &quot;15&quot;                &quot;5&quot;               &quot;10&quot; 
+##             row_43             row_44                                       
+##                &quot;d&quot;                &quot;D&quot;               &quot;12&quot;                &quot;0&quot; 
 ##                                                                             
-##               &quot;12&quot;                &quot;0&quot;                &quot;7&quot;                &quot;a&quot; 
+##                &quot;7&quot;                &quot;a&quot;                &quot;A&quot;                &quot;0&quot; 
 ##                                                                             
-##                &quot;A&quot;                &quot;0&quot; &quot;1.66666666666667&quot; &quot;3.33333333333333&quot; 
+## &quot;1.66666666666667&quot; &quot;3.33333333333333&quot;                &quot;5&quot; &quot;6.66666666666667&quot; 
 ##                                                                             
-##                &quot;5&quot; &quot;6.66666666666667&quot; &quot;8.33333333333333&quot;               &quot;10&quot; 
+## &quot;8.33333333333333&quot;               &quot;10&quot; &quot;11.6666666666667&quot; &quot;13.3333333333333&quot; 
 ##                                                                             
-## &quot;11.6666666666667&quot; &quot;13.3333333333333&quot;               &quot;15&quot; &quot;1.66666666666667&quot; 
+##               &quot;15&quot; &quot;1.66666666666667&quot;                &quot;8&quot;                &quot;b&quot; 
 ##                                                                             
-##                &quot;8&quot;                &quot;b&quot;                &quot;B&quot;                &quot;7&quot; 
+##                &quot;B&quot;                &quot;7&quot;                &quot;8&quot;                &quot;9&quot; 
 ##                                                                             
-##                &quot;8&quot;                &quot;9&quot;               &quot;10&quot;               &quot;11&quot; 
+##               &quot;10&quot;               &quot;11&quot;               &quot;12&quot;               &quot;13&quot; 
 ##                                                                             
-##               &quot;12&quot;               &quot;13&quot;               &quot;14&quot;               &quot;15&quot; 
+##               &quot;14&quot;               &quot;15&quot;               &quot;16&quot; &quot;3.33333333333333&quot; 
 ##                                                                             
-##               &quot;16&quot; &quot;3.33333333333333&quot;                &quot;9&quot;                &quot;c&quot; 
+##                &quot;9&quot;                &quot;c&quot;                &quot;C&quot;                &quot;a&quot; 
 ##                                                                             
-##                &quot;C&quot;                &quot;a&quot;                &quot;b&quot;                &quot;c&quot; 
+##                &quot;b&quot;                &quot;c&quot;                &quot;d&quot;                &quot;e&quot; 
 ##                                                                             
-##                &quot;d&quot;                &quot;e&quot;                &quot;f&quot;                &quot;g&quot; 
+##                &quot;f&quot;                &quot;g&quot;                &quot;h&quot;                &quot;i&quot; 
 ##                                                                             
-##                &quot;h&quot;                &quot;i&quot;                &quot;j&quot;                &quot;5&quot; 
+##                &quot;j&quot;                &quot;5&quot;               &quot;10&quot;                &quot;d&quot; 
 ##                                                                             
-##               &quot;10&quot;                &quot;d&quot;                &quot;D&quot;                &quot;A&quot; 
+##                &quot;D&quot;                &quot;A&quot;                &quot;B&quot;                &quot;C&quot; 
 ##                                                                             
-##                &quot;B&quot;                &quot;C&quot;                &quot;D&quot;                &quot;E&quot; 
-##                                                                             
-##                &quot;F&quot;                &quot;G&quot;                &quot;H&quot;                &quot;I&quot; 
-##                    
-##                &quot;J&quot;</code></pre>
+##                &quot;D&quot;                &quot;E&quot;                &quot;F&quot;                &quot;G&quot; 
+##                                                          
+##                &quot;H&quot;                &quot;I&quot;                &quot;J&quot;</code></pre>
 <ol start="6" style="list-style-type: decimal">
 <li>Use <code>as.list()</code> to convert <code>vector_3</code> into a list and assign it to <code>list_big</code>.</li>
 </ol>
@@ -562,205 +558,187 @@ The <code>sleep</code> dataset in R (see <code>help(sleep)</code>) are data from
 ## $vec_num10
 ## [1] &quot;15&quot;
 ## 
-## $row41
-## [1] &quot;A&quot;
+## $row_41
+## [1] &quot;5&quot;
 ## 
-## $row42
-## [1] &quot;B&quot;
+## $row_42
+## [1] &quot;10&quot;
 ## 
-## $row43
-## [1] &quot;C&quot;
+## $row_43
+## [1] &quot;d&quot;
 ## 
-## $row44
+## $row_44
 ## [1] &quot;D&quot;
 ## 
-## $row45
-## [1] &quot;E&quot;
+## [[15]]
+## [1] &quot;12&quot;
 ## 
-## $row46
-## [1] &quot;F&quot;
+## [[16]]
+## [1] &quot;0&quot;
 ## 
-## $row47
-## [1] &quot;G&quot;
+## [[17]]
+## [1] &quot;7&quot;
 ## 
-## $row48
-## [1] &quot;H&quot;
+## [[18]]
+## [1] &quot;a&quot;
 ## 
-## $row49
-## [1] &quot;I&quot;
+## [[19]]
+## [1] &quot;A&quot;
 ## 
-## $row410
-## [1] &quot;J&quot;
+## [[20]]
+## [1] &quot;0&quot;
 ## 
 ## [[21]]
-## [1] &quot;12&quot;
+## [1] &quot;1.66666666666667&quot;
 ## 
 ## [[22]]
-## [1] &quot;0&quot;
+## [1] &quot;3.33333333333333&quot;
 ## 
 ## [[23]]
-## [1] &quot;7&quot;
+## [1] &quot;5&quot;
 ## 
 ## [[24]]
-## [1] &quot;a&quot;
-## 
-## [[25]]
-## [1] &quot;A&quot;
-## 
-## [[26]]
-## [1] &quot;0&quot;
-## 
-## [[27]]
-## [1] &quot;1.66666666666667&quot;
-## 
-## [[28]]
-## [1] &quot;3.33333333333333&quot;
-## 
-## [[29]]
-## [1] &quot;5&quot;
-## 
-## [[30]]
 ## [1] &quot;6.66666666666667&quot;
 ## 
-## [[31]]
+## [[25]]
 ## [1] &quot;8.33333333333333&quot;
 ## 
-## [[32]]
+## [[26]]
 ## [1] &quot;10&quot;
 ## 
-## [[33]]
+## [[27]]
 ## [1] &quot;11.6666666666667&quot;
 ## 
-## [[34]]
+## [[28]]
 ## [1] &quot;13.3333333333333&quot;
 ## 
-## [[35]]
+## [[29]]
 ## [1] &quot;15&quot;
 ## 
-## [[36]]
+## [[30]]
 ## [1] &quot;1.66666666666667&quot;
 ## 
-## [[37]]
+## [[31]]
 ## [1] &quot;8&quot;
 ## 
-## [[38]]
+## [[32]]
 ## [1] &quot;b&quot;
 ## 
-## [[39]]
+## [[33]]
 ## [1] &quot;B&quot;
 ## 
-## [[40]]
+## [[34]]
 ## [1] &quot;7&quot;
 ## 
-## [[41]]
+## [[35]]
 ## [1] &quot;8&quot;
 ## 
-## [[42]]
+## [[36]]
 ## [1] &quot;9&quot;
 ## 
-## [[43]]
+## [[37]]
 ## [1] &quot;10&quot;
 ## 
-## [[44]]
+## [[38]]
 ## [1] &quot;11&quot;
 ## 
-## [[45]]
+## [[39]]
 ## [1] &quot;12&quot;
 ## 
-## [[46]]
+## [[40]]
 ## [1] &quot;13&quot;
 ## 
-## [[47]]
+## [[41]]
 ## [1] &quot;14&quot;
 ## 
-## [[48]]
+## [[42]]
 ## [1] &quot;15&quot;
 ## 
-## [[49]]
+## [[43]]
 ## [1] &quot;16&quot;
 ## 
-## [[50]]
+## [[44]]
 ## [1] &quot;3.33333333333333&quot;
 ## 
-## [[51]]
+## [[45]]
 ## [1] &quot;9&quot;
 ## 
-## [[52]]
+## [[46]]
 ## [1] &quot;c&quot;
 ## 
-## [[53]]
+## [[47]]
 ## [1] &quot;C&quot;
 ## 
-## [[54]]
+## [[48]]
 ## [1] &quot;a&quot;
 ## 
-## [[55]]
+## [[49]]
 ## [1] &quot;b&quot;
 ## 
-## [[56]]
+## [[50]]
 ## [1] &quot;c&quot;
 ## 
-## [[57]]
+## [[51]]
 ## [1] &quot;d&quot;
 ## 
-## [[58]]
+## [[52]]
 ## [1] &quot;e&quot;
 ## 
-## [[59]]
+## [[53]]
 ## [1] &quot;f&quot;
 ## 
-## [[60]]
+## [[54]]
 ## [1] &quot;g&quot;
 ## 
-## [[61]]
+## [[55]]
 ## [1] &quot;h&quot;
 ## 
-## [[62]]
+## [[56]]
 ## [1] &quot;i&quot;
 ## 
-## [[63]]
+## [[57]]
 ## [1] &quot;j&quot;
 ## 
-## [[64]]
+## [[58]]
 ## [1] &quot;5&quot;
 ## 
-## [[65]]
+## [[59]]
 ## [1] &quot;10&quot;
 ## 
-## [[66]]
+## [[60]]
 ## [1] &quot;d&quot;
 ## 
-## [[67]]
+## [[61]]
 ## [1] &quot;D&quot;
 ## 
-## [[68]]
+## [[62]]
 ## [1] &quot;A&quot;
 ## 
-## [[69]]
+## [[63]]
 ## [1] &quot;B&quot;
 ## 
-## [[70]]
+## [[64]]
 ## [1] &quot;C&quot;
 ## 
-## [[71]]
+## [[65]]
 ## [1] &quot;D&quot;
 ## 
-## [[72]]
+## [[66]]
 ## [1] &quot;E&quot;
 ## 
-## [[73]]
+## [[67]]
 ## [1] &quot;F&quot;
 ## 
-## [[74]]
+## [[68]]
 ## [1] &quot;G&quot;
 ## 
-## [[75]]
+## [[69]]
 ## [1] &quot;H&quot;
 ## 
-## [[76]]
+## [[70]]
 ## [1] &quot;I&quot;
 ## 
-## [[77]]
+## [[71]]
 ## [1] &quot;J&quot;</code></pre>
 <ol start="7" style="list-style-type: decimal">
 <li>Now copy <code>list_3</code> as <code>list_4</code> and use <code>[[</code> <code>]]</code> to assign <code>list_3</code> as the last (fifth) element of <code>list_4</code>. This is, you should end up with a list with five elements named <code>list_4</code> that contains the same four elements as <code>list_3</code> plus a fifth element that is itself a list, as one object.</li>
@@ -769,8 +747,8 @@ The <code>sleep</code> dataset in R (see <code>help(sleep)</code>) are data from
 ##  [1]  0.000000  1.666667  3.333333  5.000000  6.666667  8.333333 10.000000
 ##  [8] 11.666667 13.333333 15.000000
 ## 
-## $row4
-##  [1] &quot;A&quot; &quot;B&quot; &quot;C&quot; &quot;D&quot; &quot;E&quot; &quot;F&quot; &quot;G&quot; &quot;H&quot; &quot;I&quot; &quot;J&quot;
+## $row_4
+## [1] &quot;5&quot;  &quot;10&quot; &quot;d&quot;  &quot;D&quot; 
 ## 
 ## [[3]]
 ## [1] 12
@@ -797,8 +775,8 @@ The <code>sleep</code> dataset in R (see <code>help(sleep)</code>) are data from
 ##  [1]  0.000000  1.666667  3.333333  5.000000  6.666667  8.333333 10.000000
 ##  [8] 11.666667 13.333333 15.000000
 ## 
-## [[5]]$row4
-##  [1] &quot;A&quot; &quot;B&quot; &quot;C&quot; &quot;D&quot; &quot;E&quot; &quot;F&quot; &quot;G&quot; &quot;H&quot; &quot;I&quot; &quot;J&quot;
+## [[5]]$row_4
+## [1] &quot;5&quot;  &quot;10&quot; &quot;d&quot;  &quot;D&quot; 
 ## 
 ## [[5]][[3]]
 ## [1] 12
