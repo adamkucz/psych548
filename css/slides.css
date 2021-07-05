@@ -22,8 +22,8 @@
 
 @font-face {
   font-family: 'uni_sansregular';
-  src: url(../fonts/fontfabric_-_unisansregular-webfont.woff2) format('woff2'),
-       url(../fonts/fontfabric_-_unisansregular-webfont.woff) format('woff');
+  src: url(../fonts/unisans_regular.woff2) format('woff2'),
+       url(../fonts/unisans_regular.woff) format('woff');
   font-weight: normal;
   font-style: normal;
 }
