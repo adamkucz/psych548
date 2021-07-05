@@ -1,0 +1,117 @@
+---
+title: "Assignment 1"
+subtitle: "Working With Markdown"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,
+                      eval = F)
+```
+
+Please submit the **.Rmd** file and all output files (**.html**, **.pdf**, etc.)
+
+## Some quick problems
+
+1. Create an object called `myObject` and assign it a value between 1 and 100
+
+```{r}
+myObject <- 59
+```
+
+2. Add 13 to `myObject`, making sure the object itself stores the updated value
+
+```{r}
+myObject <- myObject + 13
+```
+
+3. Is `myObject` divisible by 2? by 3? by 13? by 21? Use R code to get the answer.
+
+```{r}
+myObject %% 2 == 0
+myObject %% 3 == 0
+myObject %% 13 == 0
+myObject %% 21 == 0
+```
+
+4. How many times can 5 fit in `myObject`?
+
+```{r}
+myObject %/% 5
+```
+
+5. Add `myObject` to every element of a vector with values 1, 2, 3, 4, and 5
+
+```{r}
+myObject + c(1, 2, 3, 4, 5)
+```
+
+6. Fix this code (without changing any numbers) to get it to return `r 5 + 3^(3%/%2)`
+```{r, echo=TRUE}
+5+3^3%/%2
+```
+
+```{r, eval=FALSE, echo=FALSE}
+5 + 3^(3 %/% 2)
+```
+
+## R Markdown Practice
+
+Create an R markdown document with the following components:
+
+
+- A custom title (i.e., not "Untitled") and your name
+- Change the theme from the default theme
+- Headers 1 through 4
+- An in-line R calculation
+- Write the equation for the probability density function the normal distribution (R Markdown renders LaTeX style math, so Google will be your friend here!)
+$$\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}$$
+- A block of R code (whatever you want) that is displayed, run, but does not show output in the rendered document
+```{r, results='hide'}
+2 + 2
+```
+- A block of R code that is displayed, but is *not* run and thus does not show output in the rendered document
+```{r, eval=FALSE}
+2 + 2
+```
+- A block of R code that is not shown, but produces output in the rendered document
+```{r, echo=FALSE}
+2 + 2
+```
+- An ordered list
+
+1. This
+2. Is
+  1. an ordered
+  2. list!
+
+- An unordered list
+
+- this is an
+  - unordered list!
+
+- A link to an external website like [UW's website](https://www.washington.edu/)
+
+
+
+- A plot, 5in $\times$ 7in that is right-aligned in the rendered document (hint: if you need help generating a random plot, copy example code at the bottom of `?plot`)
+```{r, fig.height=5, fig.width=7}
+Speed <- cars$speed
+Distance <- cars$dist
+plot(Speed, Distance, panel.first = grid(8, 8),
+     pch = 0, cex = 1.2, col = "blue")
+```
+
+- A picture
+
+![UW Logo](http://depts.washington.edu/uwcreate/img/UW_W-Logo_smallRGB.gif)
+
+- **Bold text**
+- *Italicized text*
+- Look online for an R package that might be useful for you in the future! This can be a package for conducting a specific type of analysis, creating certain figures, or anything else! Load the package in your markdown script and give me a two-sentence overview of the package.
+- **Bonus**:
+  - <u>Underlined text</u>
+  - <span style="color:red;">Red text</span>
+  - <span style="color:white; background-color:red;">White text with a red background</span>
+  - Render a MS Word document
+  - Render a PDF document
