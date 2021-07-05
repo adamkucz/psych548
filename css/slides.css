@@ -328,6 +328,6 @@ kbd {
   overflow-x: auto;
 }
 
-.unisans {
-  font-family: unisans_regular;
+.unisans_regular {
+  font-family: unisans_regular !important;
 }
