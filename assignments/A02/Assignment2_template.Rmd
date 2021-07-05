@@ -236,7 +236,7 @@ tempsC <- c(29, 35, 38, 41, 31, 28, 29, 29)
 
 ```
 
-5. Select fourth row from `my_matrix` and assign it to the object `row_4` as a vector.
+5. Select the fourth row from `my_matrix` and assign it to the object `row_4` as a vector.
 ```{r}
 
 ```
@@ -270,7 +270,7 @@ tempsC <- c(29, 35, 38, 41, 31, 28, 29, 29)
 
 ## Coding with Lists
 
-1. Use `list()` to create a list that contains `vec_num` and `row4`, and assign the names `vec_num` and `row4` to these two elements of `list_1`.
+1. Use `list()` to create a list that contains `vec_num` and `row_4`, and assign the names `vec_num` and `row4` to these two elements of `list_1`.
 ```{r}
 
 ```
