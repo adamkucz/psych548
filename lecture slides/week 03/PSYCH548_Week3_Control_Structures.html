@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Control Structures</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Adam Kuczynski" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <script src="libs/htmlwidgets/htmlwidgets.js"></script>
+    <script src="libs/plotly-binding/plotly.js"></script>
+    <script src="libs/typedarray/typedarray.min.js"></script>
+    <script src="libs/jquery/jquery.min.js"></script>
+    <link href="libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+    <script src="libs/crosstalk/js/crosstalk.min.js"></script>
+    <link href="libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+    <script src="libs/plotly-main/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="../../css/slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, top, title-slide
+
+# Control Structures
+### Adam Kuczynski
+
+---
+
+
+
+
+**Control structures** allow you to control the flow of your R program (script) and are critical to programming in R
+--
+
+
+There are three components of a program's flow: 
+--
+
+
+1. **Sequential**: the order in which the R code is executed
+&gt; "do *this* first, then *that*"
+--
+
+
+2. **Selection**: which path of an algorithm R will execute based on certain criteria
+&gt; "do *that*, but only if *this* is `TRUE`
+
+  - `if`/`else`
+  - `switch`
+--
+
+
+3. **Iteration**: how many types should a certain algorithm be repeated?
+&gt; "do *this* 100 times, then move on to *that*"
+
+  - `for`, `while`, `repeat`
+  - `break`, `next`
+  
+---
+# `if()` otherwise `else`
+
+`if()` and `else` statements allow you to conditionally execute code
+--
+
+
+For example, write a program that tells a cashier whether or not they should sell alcohol to a customer. The cashier enters the customer's birthday into their POS, which needs to display the appropriate message:
+
+```r
+# Calculate age
+age &lt;- as.numeric(difftime(Sys.time(), as.Date(birthday))) / 365
+
+if(age &gt;= 21){
+  print(paste("Age:", floor(age), "(Sell)"))
+} else {
+  print(paste("Age:", floor(age), "(Do not sell)"))
+}
+```
+
+
+
+--
+
+
+.pull-left[
+
+```r
+birthday &lt;- "2002-05-20"
+```
+
+
+```
+## [1] "Age: 19 (Do not sell)"
+```
+]
+--
+
+
+.pull-right[
+
+```r
+birthday &lt;- "1970-12-15"
+```
+
+
+```
+## [1] "Age: 50 (Sell)"
+```
+]
+---
+`if()` statements do not need an else statement, if there is no alternative
+
+```r
+number &lt;- 31
+
+# If number is even
+if(number %% 2 == 0){
+  print("Congratulations! It's an even number.")
+}
+```
+--
+
+You can also have multiple `if/else` statements in a row, if there are more than two outcomes
+
+```r
+number &lt;- 27
+
+if(number %% 2 == 0){
+  print("Congratulations! It's an even number!")
+} else if(number %% 3 == 0){
+  print("Your number is divisible by 3")
+} else {
+  print("Your number is not even or divisible by 3")
+}
+```
+
+```
+## [1] "Your number is divisible by 3"
+```
+---
+The statements evaluated by `if()` *always* need to return a single `TRUE` or `FALSE` value
+.smallish[
+
+```r
+if(TRUE){
+  print("This will always run")
+} else {
+  print("This will **never** run")
+}
+```
+
+```
+## [1] "This will always run"
+```
+
+
+```r
+if("Character"){
+  print("Take the course")
+}
+```
+
+```
+## Error in if ("Character") {: argument is not interpretable as logical
+```
+]
+--
+
+
+Be careful, though! R will coerce values inside `if()` in unexpected ways:
+
+.smallish[
+.pull-left[
+
+```r
+if(359){
+  print("This code ran")
+}
+```
+
+```
+## [1] "This code ran"
+```
+]
+
+.pull-right[
+
+```r
+if("TRUE"){
+  print("This code ran")
+}
+```
+
+```
+## [1] "This code ran"
+```
+]
+]
+---
+You can have multiple conditions inside an `if()` statement as well with `else if()`
+
+
+```r
+age &lt;- 36
+hasmoney &lt;- TRUE
+
+if(age &gt; 21 &amp;&amp; hasmoney){
+  print("Sell!")
+*} else if(age &gt; 21 &amp;&amp; !hasmoney){ # of age, but no money
+  print("Sell when they have money!")
+} else {
+  print("Do not sell")
+}
+```
+
+```
+## [1] "Sell!"
+```
+--
+
+.smallish[
+.pull-left[
+
+```r
+age &lt;- 36
+hasmoney &lt;- FALSE
+```
+
+
+```
+## [1] "Sell when they have money!"
+```
+]
+
+.pull-right[
+
+```r
+age &lt;- 12
+hasmoney &lt;- TRUE
+```
+
+
+```
+## [1] "Do not sell"
+```
+]
+]
+---
+# `ifelse()` and `if_else()`
+
+`if/else` takes *one* `TRUE` or `FALSE` value, but sometimes we want to evaluate multiple values at once
+--
+
+
+`ifelse()` is a **vectorized** version of `if/else` that can operator over vectors:
+
+```r
+ages &lt;- c(35, 12, 82, 21, 15)
+ifelse(ages &gt; 21, "Sell alcohol", "Do not sell alcohol")
+```
+
+```
+## [1] "Sell alcohol"        "Do not sell alcohol" "Sell alcohol"       
+## [4] "Do not sell alcohol" "Do not sell alcohol"
+```
+--
+
+
+.pull-left[
+`ifelse()` if very useful inside a dataframe to transform your data.
+
+Remember the `uwclinspsych` dataframe from last week? 👉
+]
+
+
+.pull-right[
+
+```
+##     name grads fullprof
+## 1  Corey     1    FALSE
+## 2 Angela     0    FALSE
+## 3   Bill     4     TRUE
+## 4   Mary     3     TRUE
+## 5   Jane     2     TRUE
+## 6   Lori     3     TRUE
+```
+]
+---
+Lets create a new variable inside `uwclinpsych` called `newgrad` that is the number of grad students each faculty is allowed to take this year
+
+If a faculty has 3+ grad students they aren't allowed to take any, but if they have 0-2 they are allowed to take up to 2:
+--
+
+
+
+```r
+uwclinpsych$newgrad &lt;- ifelse(test = uwclinpsych$grads &gt;= 3,
+                              yes = 0,
+                              no = 2)
+print(uwclinpsych)
+```
+
+```
+##     name grads fullprof newgrad
+## 1  Corey     1    FALSE       2
+## 2 Angela     0    FALSE       2
+## 3   Bill     4     TRUE       0
+## 4   Mary     3     TRUE       0
+## 5   Jane     2     TRUE       2
+## 6   Lori     3     TRUE       0
+```
+---
+`if_else()` from the `dplyr` package&lt;sup&gt;1&lt;/sup&gt; is *very* similar to base R's `ifelse()` except it makes sure the return values are the same type:
+
+```r
+mylets &lt;- factor(sample(letters[1:5], 10, replace = TRUE))
+print(mylets)
+```
+
+```
+##  [1] b d d e a d e b e a
+## Levels: a b d e
+```
+
+```r
+ifelse(mylets %in% c("a", "b", "c"), mylets, factor(NA))
+```
+
+```
+##  [1]  2 NA NA NA  1 NA NA  2 NA  1
+```
+
+```r
+dplyr::if_else(mylets %in% c("a", "b", "c"), mylets, factor(NA))
+```
+
+```
+##  [1] b    &lt;NA&gt; &lt;NA&gt; &lt;NA&gt; a    &lt;NA&gt; &lt;NA&gt; b    &lt;NA&gt; a   
+## Levels: a b d e
+```
+
+.footnote[[1] The `dplyr` package is written by [Hadley Wickham](http://hadley.nz/) and is part of the [Tidyverse](https://www.tidyverse.org/).]
+---
+# `switch()`
+
+`switch()` operates in much the same way as `if/else` statements by letting you select among a list of alternatives given one input value
+--
+
+
+`switch()` is useful when you have:
+- one single test condition
+--
+
+- your test condition is character or an integer representing an index within a list of option
+--
+
+- you have 2+ conditions
+
+******
+--
+
+
+From `help(switch)`:
+
+
+```r
+switch(EXPR, ...)
+```
+
+- `EXPR` = an expression evaluating to a number or a character string
+- ... the list of alternatives. If it is intended that EXPR has a character-string value these will be named, perhaps except for one alternative to be used as a ‘default’ value.
+---
+If `EXPR` is **numeric**, R will return the list of alternatives corresponding with that index:
+
+.pull-left[
+
+```r
+switch(1,
+       "First",
+       "Second",
+       "Third")
+```
+
+```
+## [1] "First"
+```
+]
+
+.pull-right[
+
+```r
+switch(3,
+       "First",
+       "Second",
+       "Third")
+```
+
+```
+## [1] "Third"
+```
+]
+--
+
+
+If `EXPR` is **character**, R will search the list of alternatives and return the associated value:
+
+&lt;div&gt;
+.pull-left[
+
+```r
+switch("this",
+       this = "This one!",
+       that = "That one!",
+       "The other one!")
+```
+
+```
+## [1] "This one!"
+```
+]
+
+.pull-right[
+
+```r
+switch("Not this or that!",
+       this = "This one!",
+       that = "That one!",
+       "The other one!")
+```
+
+```
+## [1] "The other one!"
+```
+]
+&lt;/div&gt;
+
+&lt;div style="text-align:center;"&gt;
+☝️ Notice the unnamed argument at the end! This is optional. ☝️
+&lt;/div&gt;
+
+---
+Using `switch()` prevents you from having to write a bunch of `if/else` statements (it can also result in faster code, but this is generally negligible):
+
+
+```r
+switch("this",
+       this = "This one!",
+       that = "That one!",
+       "The other one!")
+```
+
+☝️ is equivalent to 👇
+
+
+```r
+if(x == "this"){
+  "This one!"
+} else if(x == "that"){
+  "That one!"
+} else {
+  "The other one!"
+}
+```
+---
+class: inverse
+# Loops
+---
+Computers are *really* good at repeating the same task over and over, and loops are the way to accomplish it
+
+From [Wikipedia](https://en.wikipedia.org/wiki/Control_flow#Loops):
+&gt;A loop is a sequence of statements which is specified once but which may be carried out several times in succession. The code "inside" the loop is obeyed a specified number of times, or once for each of a collection of items, or until some condition is met, or indefinitely.''
+
+******
+--
+
+There are three types of loops in R:
+--
+
+
+- `for` loops
+--
+
+
+- `while` loops
+--
+
+
+- `repeat` loops
+
+---
+&lt;span style="color:#ad1010; font-weight:bold"&gt;Bad&lt;/span&gt; repetition: Let's say you wanted to take the mean of all columns in the `swiss` dataset:
+
+
+```r
+mean1 &lt;- mean(swiss$Fertility)
+mean2 &lt;- mean(swiss$Agriculture)
+mean3 &lt;- mean(swissExamination)
+mean4 &lt;- mean(swiss$Fertility)
+mean5 &lt;- mean(swiss$Catholic)
+mean5 &lt;- mean(swiss$Infant.Mortality)
+c(mean1, mean2 mean3, mean4, mean5, man6)
+```
+
+
+Can you spot the problems with this code?
+--
+
+
+How frustrated would you be if `swiss` had 200 columns instead of 6?
+---
+# DRY vs. WET Programming
+
+**DRY:** **d**o not **r**epeat **y**ourself! If you are wriing the the same code over several lines, there's probably a more efficient way to write it
+
+**WET:**
+- **w**rite **e**very **t**ime
+- **w**rite **e**verything **t**wice
+- **w**e **e**njoy **t**yping
+- **w**aste **e**veryone's **t**ime
+
+Writing DRY code reduces risk of making typos in your code, *substantially* reduces the time and effort involves in processing large volumes of data, and is more readable and easier to troubleshoot
+---
+# `for` Loop
+
+`for` loops iterate over a vector of values (any atomic type!) and execute instructions (R code) after each iteration
+--
+
+
+In English: "**for** each of these values, in this order, execute this set of instructions"
+--
+
+
+General structure of  a `for` loop:
+
+```r
+*for(var in seq){
+  expr
+}
+```
+
+- `var` is an index variable that holds the current value in `seq` (You can call this *whatever* you want! In most cases it is custom to call it `i` but there are meaningful exceptions to this)
+- `seq` is a vector of values that you want to iterate over
+- `expr` is the R code you want to run for each iteration
+---
+# `for` Loop: Diagram
+
+*Given a set of values:*
+
+
+![Diagram of a for loop](images/forloop.svg)
+---
+# `for` Loop Example
+
+.pull-left[
+
+```r
+for(i in 1:10){
+  print(i^2)
+}
+```
+
+```
+## [1] 1
+## [1] 4
+## [1] 9
+## [1] 16
+## [1] 25
+## [1] 36
+## [1] 49
+## [1] 64
+## [1] 81
+## [1] 100
+```
+same as 👉
+]
+
+.pull-right[
+
+```r
+i &lt;- 1
+print(i^2)
+```
+
+```
+## [1] 1
+```
+
+```r
+i &lt;- 2
+print(i^2)
+```
+
+```
+## [1] 4
+```
+
+```r
+i &lt;- 3
+print(i^2)
+```
+
+```
+## [1] 9
+```
+
+*and so on...*
+]
+---
+# Nested `for` Loops
+
+.pull-left[
+You can have `for` loops inside of `for` loops inside of `for` loops inside of...
+
+
+```r
+for(i in 1:5){
+  for(j in 1:5){
+    print(i + j)
+  }
+}
+```
+
+- How many times will `print()` be called?
+- What is the first, second, and third output going to be?
+]
+--
+
+
+.pull-right[
+
+```
+## 2		(i=1 j=1)
+## 3		(i=1 j=2)
+## 4		(i=1 j=3)
+## 5		(i=1 j=4)
+## 6		(i=1 j=5)
+## 3		(i=2 j=1)
+## 4		(i=2 j=2)
+## 5		(i=2 j=3)
+## 6		(i=2 j=4)
+## 7		(i=2 j=5)
+## 4		(i=3 j=1)
+## 5		(i=3 j=2)
+## 6		(i=3 j=3)
+## 7		(i=3 j=4)
+## 8		(i=3 j=5)
+```
+
+and so on...
+]
+
+---
+There's no limit to how nested you can get&lt;sup&gt;1&lt;/sup&gt;:
+
+
+```r
+for(i in 1:10){
+  for(j in 50:70){
+    for(k in letters){
+      for(l in LETTERS){
+        for(m in -5:5){
+          print(paste(i, j, k, l, m))
+        }
+      }
+    }
+  }
+}
+```
+
+
+```
+## [1] "1 50 a A -5"
+## [1] "1 50 a A -4"
+## [1] "1 50 a A -3"
+## [1] "1 50 a A -2"
+```
+
+*and so on...*
+
+.footnote[[1] There *are* limits to the computational power you have and to how readable your code is, however. Before using a nested `for` loop, ask yourself if there is a more simple and efficient way of doing what you want]
+
+---
+# `for` Loop Conventions
+
+- We call what happens in the loop for one particular value one **iteration**
+--
+
+
+- While you can iterate over any vector, iterating over indices `1:n` is *very* common. `n` might be the length of a vector, the number of rows or columns in a dataframes, or the number of elements in a list
+--
+
+
+- Common notation: `i` is the object that holds the current value inside the loop
+  - If loops are **nested** (one loop inside the other), you will often see `j` and `k` used for the inner loops
+  - This notation is similar to indexing in mathematical symbols (e.g., `\(\sum\limits_{i=1}^n\)`)
+--
+
+
+- `i` (and `j`, `k`, etc.) are just normal objects. You can use any name you want (e.g., `row` when iterating down rows of a dataframe)
+---
+# Iterating Over Characters
+&lt;!-- Break and Next --&gt;
+
+You don't have to iterate over a numeric vector (although this is most common). You can also iterate over a character vector!
+
+.smallish[
+
+```r
+faculty &lt;- c("Corey", "Angela", "Bill", "Mary", "Jane", "Lori")
+for(name in faculty){
+  print(name)
+}
+```
+
+```
+## [1] "Corey"
+## [1] "Angela"
+## [1] "Bill"
+## [1] "Mary"
+## [1] "Jane"
+## [1] "Lori"
+```
+]
+
+**Warning:** the *last* value of `var` (in this case `name`) continues to exist outside of the loop. You should *never* name `var` the name of another object.
+
+```r
+print(name)
+```
+
+```
+## [1] "Lori"
+```
+---
+# Pre-allocation
+
+Usually in a `for` loop you are not just printing output, but want to store results from calculations in each iteration somewhere
+--
+
+
+To do that, figure out what you want to store and **pre-allocate** an object of the right size as a placeholder (typically filled with `NA`)
+
+
+```r
+results &lt;- rep(NA_real_, 10000) # Vectors with 10,000 NAs (numeric)
+
+for(i in 1:10000){
+  results[i] &lt;- i + i^2 + i^3
+}
+head(results)
+```
+
+```
+## [1]   3  14  39  84 155 258
+```
+
+
+```r
+# Check if there are any NAs still in results
+any(is.na(results))
+```
+
+```
+## [1] FALSE
+```
+---
+You don't need to pre-allocate a vector. Instead you can instantiate (i.e., create) an empty vector and fill it in as you go:
+
+```r
+results &lt;- c()
+
+for(i in 1:10000){
+  results[i] &lt;- i + i^2 + i^3
+}
+head(results)
+```
+
+```
+## [1]   3  14  39  84 155 258
+```
+--
+
+
+You can also use the `append()` function to add values to the end (or the `after`&lt;sup&gt;th&lt;/sup&gt; value) of the vector&lt;sup&gt;1&lt;/sup&gt;
+
+```r
+for(i in 1:10000){
+* results &lt;- append(results, i + i^2 + i^3)
+}
+```
+
+.footnote[[1] See `?append` to learn more about the function]
+---
+**Warning:** Although it likely won't make much of a difference for you, pre-allocating a vector is substantially faster than filling in an empty vector
+
+Let's see how long it takes for R to fill in 100 million values in an empty and a pre-allocated vector
+
+.small[
+
+```r
+n &lt;- 100000000
+
+system.time({
+  vec &lt;- rep(NA_real_, n)
+  
+  for(i in 1:n){
+    vec[i] &lt;- i
+  } 
+})
+```
+
+```
+##    user  system elapsed 
+##   5.405   0.248   5.654
+```
+
+```r
+system.time({
+  vec &lt;- c()
+  
+  for(i in 1:n){
+    vec[i] &lt;- i
+  } 
+})
+```
+
+```
+##    user  system elapsed 
+##  26.658   2.496  29.156
+```
+]
+---
+# `setNames()`
+
+Using the `setNames()` function, you can pre-allocate a *named* vector:
+
+```r
+vec &lt;- setNames(object = rep(NA_real_, 10), # vector
+                nm = paste0("elem", 1:10))  # names
+
+print(vec)
+```
+
+```
+##  elem1  elem2  elem3  elem4  elem5  elem6  elem7  elem8  elem9 elem10 
+##     NA     NA     NA     NA     NA     NA     NA     NA     NA     NA
+```
+---
+# Debugging `for` Loops
+
+
+Let's say we want to take the mean across all columns in the `swiss` dataset: 
+
+```r
+swissmeans &lt;- c()
+
+for(i in 1:ncol(swiss)){ # vector 1, 2, 3,... ncols in swiss
+  swissmeans[i] &lt;- mean(swiss[, i], na.rm = T)
+}
+```
+
+```
+## Warning in mean.default(swiss[, i], na.rm = T): argument is not numeric or
+## logical: returning NA
+```
+
+☝ This warning tells us that our call to `mean()` didn't work for one iteration, but we don't know *which* iteration. Understanding warnings and errors inside loops becomes even more challening when you have a lot of instructions inside the loop!
+---
+One way to debug a `for` loop is to simulate every iteration of the loop yourself. In this case, this would look like:
+
+```r
+i &lt;- 1 # set i manually
+mean(swiss[, i], na.rm = T) # run suspect code
+```
+
+```
+## [1] 70.14255
+```
+
+```r
+i &lt;- 2 # increment i manually
+mean(swiss[, i], na.rm = T) # run suspect code
+```
+
+```
+## [1] 50.65957
+```
+
+This is very time consuming, especially when you have many iterations and/or lots of R code to execute
+
+---
+### Debug with `print()` and `Sys.sleep()`
+
+.small[
+Instead of running through the loop manually, use `print()` to print the current iteration and any variables you think might be responsible for the bug
+
+Use `Sys.sleep()` if you want to slow the loop down during debugging to give you more time to process what's happening:
+
+
+```r
+for(i in 1:ncol(swiss)){
+  print(i)
+  print(colnames(swiss)[i])
+  swissmeans[i] &lt;- mean(swiss[, i])
+  Sys.sleep(1) # Wait 1s before next interation
+}
+```
+
+&lt;div style="text-align:center;"&gt;
+   &lt;img src="images/loopdebugging.gif" style="max-width:55%;"&gt;
+&lt;/div&gt;
+
+]
+---
+# Example: LOOCV
+
+Leave-one-out cross-validation (LOOCV) is a method used to evaluate how well a model will predict a *new* observation (i.e., not an observation in the "training" data, which is characterized by the residual term)
+
+To perform LOOCV:
+1. Remove one observation from the data
+2. Fit your model
+3. See how well the model predicts the removed observation
+4. Repeat with a newly removed observation for *n observations*
+
+******
+--
+
+
+.smallish[
+**Simulate data for example:**
+]
+
+.small[
+
+
+```r
+set.seed(98195)
+n &lt;- 300
+
+# tibbles are like dataframes (we will cover them later this quarter)
+dat_sim &lt;- tibble(x = rnorm(n, mean = 5, sd = 4),
+                  z = x + rnorm(n, mean = 0, sd = 10),
+*                 y = 2 + (-0.5*x) + (.5*x^2) + (-0.5*z) + rnorm(n))
+```
+]
+---
+### Visualizing `dat_sim`
+<div id="htmlwidget-889cd5f1c1dfd47d49b8" style="width:576px;height:576px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-889cd5f1c1dfd47d49b8">{"x":{"visdat":{"4fe2af1811b":["function () ","plotlyVisDat"]},"cur_data":"4fe2af1811b","attrs":{"4fe2af1811b":{"y":{},"x":{},"z":{},"size":1,"alpha_stroke":1,"sizes":[10,100],"spans":[1,20]}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"z"},"yaxis":{"title":"x"},"zaxis":{"title":"y"}},"hovermode":"closest","showlegend":false},"source":"A","config":{"showSendToCloud":false,"displayModeBar":false},"data":[{"y":[1.41098492100008,10.7626574721119,7.12026181999345,9.98983885576616,10.4934562968473,4.48008184828221,3.65057218864995,3.02321402909969,4.4527713917548,10.2381240035643,8.52632706614841,2.42457654538246,3.21922293801998,6.204211089624,6.30661595302952,6.67366342278249,0.941106383066202,5.54135551643235,7.64717424244755,6.79826293943737,4.92478675667291,3.50801127267052,9.84116930146477,3.37308754739583,-2.12795113016822,4.89564281255005,2.34022947591113,-1.28083446164323,5.43227186362398,11.0423423484138,6.96287802423286,0.580902041594849,8.26280360467529,2.922116931592,12.9839372949496,-1.65745662773828,4.16081569197327,8.65630635267203,10.2438370894515,7.70169649490049,8.71186746688729,6.95949445701036,0.98706314414838,0.693853565517581,5.85532977478646,0.779636113110277,14.1963579106398,5.06605148739392,5.62090768006368,2.47052818866608,7.08605782006681,2.28658607054777,-0.184838192175365,-3.61267341584244,7.83448245905914,4.43036538573353,5.86915167697684,-0.418150036943782,2.47384308428741,8.64859248575451,-1.57533136227472,7.17583920600081,3.93686955897877,2.88248203123505,4.41056724927196,1.06587156482997,5.8295899734957,4.10539671374067,8.78601717648278,7.41880433176432,-1.90080412710502,8.45568648554702,-0.17661134153094,4.19743337999302,2.67321837387927,8.64425172549093,8.15048477794431,0.590825886171732,5.50384789593926,3.79286679199549,10.2846770999164,2.11873144681377,4.75982324262438,6.08408627102945,4.30048446433906,1.66641720685688,5.8386944909508,2.95506150295196,7.7366453653732,1.85923367896628,2.23027016519607,5.87437261949658,2.27301081186133,-2.62914942402754,-0.0762200249941341,9.91578697138467,0.997013167435759,10.8200638301979,-2.76321938007802,2.0826219212423,7.96092016825237,-2.85056603682326,7.75248126779523,7.40640044330917,2.1164258521834,4.12832181830605,1.06172841453495,7.64304842480996,4.68618539800816,13.7922318503509,8.74510913921897,3.48346169787476,2.35875021632173,4.4177286054842,13.3817223827261,-0.731825749351434,5.93107259088152,0.70119307511067,-1.70044622630495,5.26432646474651,7.28807335567099,3.83433338781754,1.25437755011514,10.3172854709425,2.61736989830185,3.95839685620089,3.91578957557844,5.3924208361509,5.01196791175874,4.66595258817224,5.31570802235676,6.63597832419981,6.99646604979094,-0.572379578554075,4.81106179414884,4.83257434813218,-0.394566702191384,4.57768281022675,5.23404066016646,-2.43094448672978,9.93483760379833,4.63750059645281,0.82885016068215,1.3754157362444,-3.91897819734401,6.29047824217382,13.531844854902,8.0249065623351,9.655648983227,11.1828616942047,14.2013990107035,-0.0909216123720569,-1.40376167946167,-2.27594783355491,5.74499043654653,6.18573282547894,12.2222975230328,3.26256264350199,6.47120448527249,12.3246727952203,5.05200446899734,4.80825453274952,1.21934844425849,8.4267115254942,8.63062826904923,9.94017114674775,11.1078904004472,3.15620984574794,-0.0551266643929127,3.98033227146757,3.60798240126153,9.52441369142307,11.7509122947952,9.06582580685328,5.77475004216917,2.07293904162894,4.13265673191967,7.87860084089324,9.45204766516588,8.68648552885768,1.70538471933526,11.8597373784954,7.25219919246156,1.86644593532267,8.91462330379241,0.211152516815195,1.55292554897591,-0.300492560610871,3.97903690782607,2.08973370447267,11.2323338688228,1.27706218474106,2.8044007525679,2.44628988406891,0.684405810678855,8.77328953345003,14.3899845093182,2.95448304843765,4.98588965753115,8.02973613095008,4.47232335849927,-1.01647562393863,4.78424398721834,4.31792538498699,6.93874632018487,7.52324279221069,7.42948028320336,3.64942902979464,8.66221285111224,0.433480696168975,10.0957030388844,-0.346257242221848,5.85776587327603,9.86924466065915,14.0649104301925,-1.58179464687792,4.53825589381451,6.02306931290571,7.11375085899432,2.75519480013869,6.31802466194787,4.931754890223,8.47156682473871,8.83233524376625,14.3175482838039,4.12585006164806,8.52327528114178,14.2867985718228,1.49095551701804,1.32046837229813,4.85170392299197,4.75503656901497,1.05294936253102,5.96440519350169,9.99806899773909,0.207732797059148,13.218083059738,12.8381919090645,4.62023595455153,0.85198731570555,4.56448310608362,5.57467315989554,-0.733772501176909,9.08012488453564,5.67545253933913,6.59812725685781,10.9112194080692,8.25699146730769,0.760836690732464,0.254707481189584,6.84028840515121,3.87396156867219,7.11145583444062,1.42760235404836,0.340402802098252,3.97609227746524,-2.41299844629193,7.29286728060918,1.503651530378,8.61364353194236,5.13026753106945,3.30210463548994,4.81476678423895,11.5390657454744,-3.78587087896441,2.0222884237753,-0.927847885843308,9.11816528216023,2.80711648504384,6.64396749551864,7.29291192331917,11.0831568107543,5.35382188038697,6.45694400775965,5.97824443862762,11.1278557253189,-2.20533930805769,9.91786600098802,7.62359752954711,1.26363386545933,8.73541722853272,4.95814610461256,4.8802426476646,11.1987647567791,12.3364577717505,1.02903150795926,11.0862005344586,5.30910093233181,4.44778462796982,9.80592400919288,7.95851025715097,9.36640559442723,6.62519203115885,4.18110068241715,15.3100922871872,8.19722066815118,2.61514936136813,9.17831432875614,5.61135771276243,11.7956154207865],"x":[15.7687181428516,5.40688224524701,12.7901838990616,5.35972429333778,17.8424775106855,6.82633390314716,1.89509543507806,3.52751487506453,6.45793803564871,7.92857743444701,19.7203253662582,0.986387488054651,12.7617558527888,22.3241077630161,10.0462190437856,10.7137223463191,-4.05626002492659,12.8404016074133,4.84975012392421,5.63441163399981,-7.18456291356766,6.0674087651349,15.2230708006877,-4.60401469506753,-14.0629419938288,-0.0971868088890684,-9.24653010041,-3.1746612569319,12.0197716786841,14.2063266276089,12.3629294832657,11.479319643517,17.2505533373324,4.84831322562138,6.47646999657151,1.36608944608677,-7.81424981635011,11.515224531558,26.900727335321,-4.66881199150181,-2.51978573504661,18.9905941188654,-15.6120532732666,0.370477103662042,7.15694120045155,-3.363456253238,28.7244126780031,1.16379783434817,-4.32058140589507,8.31685142017446,23.8861642010862,2.88092332472201,1.0021591153186,13.8094607427831,-5.82757065623435,2.57971419453512,-23.9247689684224,12.6244003697778,20.6878839598135,23.8935242668561,-15.6014452690011,4.30126105731729,7.10438591610132,-6.0533066474871,12.6675088047523,-8.32451980708183,13.6882072394475,22.768205085726,16.1307330796325,7.60770766166095,-8.55474495886261,-7.57370342610086,21.131666606322,3.28561913061248,-0.519859382194294,9.46726631657143,-6.58182685683873,-14.3856509235,3.41002608492391,-3.52804799704909,22.2782105088993,4.29461760645188,25.2897119310137,10.0155975847129,8.14421299946183,13.6762904765652,-9.6066863793971,6.70512152199525,16.5279893935067,16.0938047152067,-6.55764471138473,4.06883917891777,11.6302561578581,23.6102140422062,-21.2474751824504,-3.9609901930096,-2.3678107485252,4.11156738361505,-18.9868709298896,16.795542533049,-0.165397739525671,6.67667813712004,12.3105428728158,-7.1524768485871,-3.74464208319778,8.18968495590924,15.9194986138471,10.9489660321754,4.50006807179383,5.84924614686409,-3.16778878790073,-10.3630504216321,3.69950412673525,-17.593294938254,6.87251625152075,-5.63896757156215,3.23014483957805,6.1011705630082,-2.55795410976692,22.6928486970287,8.46183552659809,11.7234309277359,-7.50541294253253,2.02644357475745,9.56132874811866,-3.89177685494652,-8.56850751573133,18.4572270018863,-0.694257383100853,5.78571924796628,20.7903560191019,23.2825562056405,3.17946414338026,6.30063993645181,2.21389504651329,26.6517907698693,-10.7832563633883,3.07471180754562,-3.2194071978039,-3.03739466119114,16.2219689506087,13.5244103215175,-1.29131153201598,-3.75040343048747,0.0574474674612606,4.95729834807837,14.0934379515731,6.1120456079157,5.24980373424412,4.83181634380991,17.7738774394092,7.56562077676584,-12.8213124613654,-10.1044622677131,-21.0779430267443,7.47211783151618,12.665217148445,-8.45545315232724,-10.2952692335988,18.93082897319,4.23054135839214,10.6474550488977,-15.6239581362559,13.3629315219596,2.08053785531666,27.8580898226908,21.4930691559894,2.51763042608843,6.16785960298058,-6.05694054247828,-2.67120917361803,-7.48798415862659,13.1357667572835,26.067527187172,0.0628009444026958,-1.02333813444487,-4.96979453269707,10.2994720661996,7.07209686554619,5.4521432229648,-13.9531580520734,-3.69834269188435,25.8788376031264,-20.1511138444756,6.83398052759819,-4.77578949278093,6.22847297794538,4.94082454602773,5.04490005423263,-9.47153011029147,-5.62047702848119,13.6057383352512,9.54564141101039,2.6823661916186,14.3940183526509,23.0101303228136,16.4966556791983,-7.40329413870514,8.6680107426203,13.5244832264314,13.0292480345711,1.01526589156472,2.78266411733841,-7.26703370969167,-6.78018486219105,1.73505752014296,2.21492396475167,13.8302957294886,-0.602300743997409,7.07008594191679,22.9877753887214,-16.3389406648345,-9.10356384863571,5.4324683673489,-0.119880644278386,6.1959162892437,5.2821417815548,18.4456510468102,8.23076010991966,4.38663034616789,3.56526449929215,10.9192214691359,7.51876347682934,21.7353535771746,25.3454895305089,4.15033118713622,12.3949236027389,24.1081801534347,0.64421783431997,2.69051396581377,6.89877016577703,18.8416496718516,5.26337654678466,13.5211762674083,8.9778140203612,-14.2771923617121,13.8098871862174,22.5743137402473,7.12034267277919,-1.04571592791734,14.2468634967543,7.42971460379895,-8.53199055944247,15.1342518037012,25.4465706690551,-2.36119797560644,-7.69174722024496,17.9458038498682,-15.6397816165212,20.0673914966424,23.6660998875527,-0.20968402039344,9.27626633201657,7.15135130289308,-21.4677433948306,24.3233906332737,-8.07462145667108,20.7626876118318,16.6545535483128,-2.56066417334948,-16.9861948977238,-4.30196714347491,-11.8104711327542,-1.60397668862129,-3.23236605737433,4.3103983806698,-10.6285871422136,12.1265130117039,-7.03207195317961,5.74571876067622,-6.19767139428993,19.6351577482155,10.466998705341,11.3228992602161,12.2059240968624,15.3342127168411,7.49838321910449,9.35355802158531,19.0873585719128,-14.5630405418846,5.54622221912118,-12.6210955528597,7.83296423251318,17.504273749055,4.29115306712701,-6.42250944690896,9.23396866655107,6.82215776418623,-1.62450813060093,19.5434618216115,-1.92172871874384,1.22937393582172,-5.91573762188275,26.6271184903777,24.0302379107618,14.3073282050535,8.71301902656246,10.4611670303693,3.74890527761294,20.1387116555485],"z":[-6.0254831582193,51.7094814023447,17.1965394966763,44.6133439370488,42.0608725991518,5.66808357438217,6.3049077260471,2.2930143506247,7.38038657307138,44.2088519964068,23.4127267509093,2.57540129937797,-2.06517832704015,4.90998945855839,14.9511541721151,15.8067694360183,3.29311545708232,7.64344163496194,25.1940630104691,21.9999010327461,15.0390813305815,3.27504666438734,38.151768029599,10.3537499953983,11.7451129023643,11.37436654543,8.04565053115491,5.37008315094522,8.31694596393685,49.5346616559008,16.6911305340061,-4.50555566706562,23.3156415928324,1.88720673253312,75.6516609661181,4.39910642445618,12.1317086138794,28.6180472374434,35.7039032592535,29.527662559422,38.7812780111652,13.2567285071072,9.82770378316532,1.69939468082899,11.7346831916077,2.6439230159234,80.8757834456281,11.8473213032537,16.7502367420047,-2.11594465287311,11.4646205363786,1.81229093617364,0.639564067428982,3.90278166232698,32.6156335960496,7.78402329175245,27.966605177992,-2.3318353668282,-5.23803310466272,22.2779046070721,12.44472309596,21.2056295816897,5.01361021050255,7.51509432662648,3.34314088711665,6.88230421382193,8.81002273288552,-4.02069780331073,30.0588528103012,22.7120099481002,9.47473748983293,37.9680205035066,-7.31123662618615,6.56341643361867,5.52574924859318,30.494494203576,33.9827401393227,9.00880108202335,11.9747514426176,9.4101349083849,36.9392784228005,2.00030189560584,-2.1660258996162,10.7297180824093,4.85865834350845,-4.7040668118183,20.6557365034397,1.5161042246239,22.6534667373915,-5.17132984892026,6.39851051864557,14.2895740509126,0.194860269870688,-4.98881298190947,12.9053954347492,49.058705441117,6.06567279732168,53.4529436511672,17.1908526135861,-4.98031666672244,29.2807074921879,4.47952106700063,22.1174867625544,27.8394158303583,5.26556581350043,3.0343672199637,-5.41744821826366,22.4922894874444,9.0572761380628,88.215329636772,36.374505262492,11.88393923868,1.31274562881052,16.3212146763982,78.3256848287115,4.60518318783664,13.7881831998055,-1.96242888493686,3.91505308921248,1.16312244353195,19.9860698979816,1.0082808441025,5.89435532749901,49.0149188208666,-0.90117249206399,9.94716151182947,13.4280284559797,3.40899306080676,11.9950841609768,6.42551409994488,1.6161012373993,7.44037511175674,22.6076646611676,-1.13925734700015,11.0153286999537,-0.0548121913450785,8.09441698821943,8.85979768058321,15.2190819406811,8.52861454203816,37.2389266026842,4.27232946963756,3.31696353053106,4.31968785735007,13.6240703350634,17.4155605493416,80.3150796218088,27.0885746848056,39.8609578248699,56.86212069244,85.8224787191449,-1.91226183084869,11.6686604993385,13.0183303559969,26.1264554541101,13.5148400186803,63.4188087048417,9.79561019437653,24.3302359907969,62.2339784844935,12.2631120505846,5.14068868141465,9.2867124653182,26.9147134703214,31.9390617876121,32.7042197394594,48.3851440857119,4.54969328970072,-0.964412138512174,11.1661558171591,7.50592417350216,46.7263610372232,59.9730560649356,23.7879432661529,15.6349117627769,5.65182910721803,9.85358243405366,25.9057588521589,39.8390613144258,29.9737741694935,8.00101874773421,69.4036618156016,13.1940971025569,11.9078176935857,33.857423448618,4.97543433452917,0.699032517069166,0.155606096691063,6.48260340835079,7.02391420418227,62.9502526935273,-5.70929272424304,-0.413336195671381,3.05622403668269,-6.11877830669058,22.9194905546631,88.1290692339171,9.1051537171181,7.73637169161332,23.3619141403839,3.48191898321384,3.08917149041075,10.7604890536788,14.1764012899807,24.7456386732174,25.8691265426682,24.0969023892917,-1.96178486916347,35.0462689249921,-1.52613108370242,35.0253939922115,10.752062899026,19.867711164436,46.0753080085444,94.0445824882008,0.978103522535772,9.36790895240388,9.84950453004384,20.7697549911076,1.05607375696262,18.6894387771169,6.47702494605906,29.9011172916157,25.7383482594171,85.9853316929466,4.75139306898409,27.392077105417,84.7379714345757,1.9474836411021,0.845549029633484,8.0823503336442,3.79132060034255,1.15336530807806,9.68894292677861,42.9492091857389,8.44441671168797,75.117683255348,66.0245848241369,6.09618510142724,2.28022792909278,4.66808217251688,10.6053906603298,8.3757946945289,31.0416757343539,1.54014066055205,21.7200061464886,59.0293253213758,22.9597178783302,9.28907164132396,-6.36680322294696,10.1028203984713,7.2966135651289,20.8766987695614,-0.249905997385249,14.554807810247,-3.8515577696843,9.53383814446508,14.4072745242308,-6.10135211770413,35.3076836447065,20.4816046854665,8.23769930178429,16.817035382632,62.1470899638469,12.5016251760672,2.14835506703805,8.13866680686421,34.2323468694093,6.27786513613315,18.6621365385023,27.1307728415117,48.4687626956931,6.96860209592761,16.7596712684635,10.192057245412,50.596746756243,2.14363812705242,42.0981241233814,18.3521839212245,9.32587426384262,33.8433626848084,16.6640761475832,8.2574645969535,50.9705192731983,68.5428053579759,4.61218801647549,53.3298764991213,10.3739855773722,9.87612607208591,34.4261008613217,30.6027198360444,39.8627060371314,25.2444297365204,-5.80292586612529,101.527576394407,24.474994544721,-0.594072916074536,34.4557039560526,14.1449182079256,56.8347884763907],"type":"scatter3d","mode":"markers","marker":{"color":"rgba(31,119,180,1)","size":[55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55,55],"sizemode":"area","line":{"color":"rgba(31,119,180,1)"}},"textfont":{"size":55},"error_y":{"color":"rgba(31,119,180,1)","width":55},"error_x":{"color":"rgba(31,119,180,1)","width":55},"line":{"color":"rgba(31,119,180,1)","width":55},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+---
+.smallish[
+
+```r
+# Empty column to hold the results
+dat_sim$ypred &lt;- rep(NA_real_, nrow(dat_sim))
+
+# Conduct LOOCV
+for(i in 1:nrow(dat_sim)){
+  # Estimate linear model
+  fit &lt;- lm(y ~ x + I(x^2) + z,
+            data = dat_sim[-i, ]) # Remove ith row of dat_sim
+  
+  # Predict y of removed observation
+  # (equivalent to just plugging in the numbers ourselves)
+  dat_sim$ypred[i] &lt;- predict(fit, newdata = dat_sim[i, c("x", "z")])
+}
+
+head(dat_sim)
+```
+
+```
+## # A tibble: 6 x 4
+##       x     z     y ypred
+##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  1.41 15.8  -6.03 -5.39
+## 2 10.8   5.41 51.7  51.7 
+## 3  7.12 12.8  17.2  17.4 
+## 4  9.99  5.36 44.6  44.1 
+## 5 10.5  17.8  42.1  42.8 
+## 6  4.48  6.83  5.67  6.41
+```
+]
+---
+By definition, the residuals from `lm()` will be smaller than from `LOOCV` &lt;u&gt;on the same dataset&lt;/u&gt;. Let's check to make sure this is true:
+
+```r
+#  lm()
+pred_lm &lt;- predict(lm(y ~ x + I(x^2) + z,
+                      data = dat_sim))
+
+mean((pred_lm - dat_sim$y)^2)
+```
+
+```
+## [1] 1.062459
+```
+
+```r
+# LOOCV
+mean((dat_sim$ypred - dat_sim$y)^2)
+```
+
+```
+## [1] 1.093004
+```
+---
+## Example: K-Fold Cross Validation
+
+K-fold cross validation involves running your model on random subsets of your data and using the remaining data to estimate how well the model performed
+--
+
+
+LOOCV is a form of k-fold cross validation where *K* is the number of rows
+--
+
+
+1. Split your data into *K* **folds**
+2. For each fold `\(i=1,...,K\)`:
+  - Fit the model to all the data *except* that in fold *i*
+  - Make predictions for the omitted data in fold *i*
+3. Calculate accuracy (mean squared erro or however you'd like)
+
+A model that fits well has a *lower* mean squared error
+---
+![K-fold cross-validation example](images/crossvalidation1.svg)
+---
+![K-fold cross-validation example](images/crossvalidation2.svg)
+---
+Let's simulate some fake data for this using the `rnorm()` function to generate random values from a normal distribution.
+
+
+```r
+set.seed(98195)
+n &lt;- 300
+dat_sim &lt;- tibble(x = rnorm(n, mean = 5, sd = 4),
+                  y = -0.5 * x + 0.05 * x^2 + rnorm(n, sd = 1))
+```
+
+This generates a dataframe of 300 observations where `y` is dependent on `x`, with some uncorrelated, normally-distributed residual (from `rnorm()`).
+
+![](PSYCH548_Week3_Control_Structures_files/figure-html/unnamed-chunk-55-1.svg)&lt;!-- --&gt;
+---
+# Candidate Regression Models
+
+Let's say we want to consider several different regression models to draw trendlines through these data:
+
+- **Intercept Only:** draw a horizontal line that best fits the `y` values.
+`$$\hat{y}_{i} = \beta_0$$`
+- **Linear Model:** draw a line that best fits the `y` values as a function of `x`.
+`$$\hat{y}_{i} = \beta_0 + \beta_1x_i$$`
+- **Quadratic Model:** draw a quadratic curve that best summarizes the `y` values as a function of `x`.
+`$$\hat{y}_{i} = \beta_0 + \beta_1 x_i + \beta_2 x_i^2$$`
+- **Cubic Model:** draw a cubic curve that best summarizes the `y` values as a function of `x`.
+
+`$$\hat{y}_{i} = \beta_0 + \beta_1 x_i + \beta_2 x_i^2 + \beta_3  x_i^3$$`
+---
+# Pre-Allocating for CV
+
+.small[
+Let's make a *named character vector* for the formulas we'll use in `lm()`:
+
+
+```r
+models &lt;- c("intercept only" = "y ~ 1",
+            "linear" = "y ~ x",
+            "quadratic" = "y ~ x + I(x^2)",
+            "cubic" = "y ~ x + I(x^2) + I(x^3)")
+```
+
+
+Let's also split the data into `\(K=10\)` folds. We will make a new dataframe to hold the data and sampled fold numbers that we'll add predictions to later.
+
+
+```r
+K &lt;- 10
+CV_pred &lt;- dat_sim
+CV_pred$fold &lt;- sample(rep(1:K, length.out = nrow(CV_pred)),
+                        replace = FALSE)
+CV_pred[ , names(models)] &lt;- NA_real_
+head(CV_pred)
+```
+
+
+```
+##           x          y fold intercept only linear quadratic cubic
+## 1  1.410985  0.8298248    6             NA     NA        NA    NA
+## 2 10.762657 -0.1251665    9             NA     NA        NA    NA
+## 3  7.120262 -0.4582323    8             NA     NA        NA    NA
+## 4  9.989839 -0.4680869    7             NA     NA        NA    NA
+## 5 10.493456  0.9938052    8             NA     NA        NA    NA
+## 6  4.480082 -1.0018591    7             NA     NA        NA    NA
+```
+]
+---
+# Double-Looping for CV
+
+Next, let's loop *over* each model (`mod`), and *within* each model loop over each fold (`k`) to fit the model and make predictions.
+
+.smallish[
+
+```r
+for(mod in names(models)) {
+    for(k in 1:K) {
+      
+        # Fit model to data not in fold
+        fit &lt;- lm(formula(models[mod]),
+                  data = CV_pred[CV_pred$fold != k, ])
+        
+        # Predict on data in fold
+        CV_pred[CV_pred$fold == k, mod] &lt;- predict(fit, newdata = CV_pred[CV_pred$fold == k, ])
+    }
+}
+```
+]
+
+Note the models are fit *without* the fold rows, but prediction is done on *only the left-out fold rows*.
+
+---
+# Which Model Fit Best?
+
+Let's write another loop to compute the mean squared error of these CV predictions
+
+The squared error is equal to the difference between the observed values and predicted values squared. The MSE is the mean of all the squared errors of each prediction.
+
+
+```r
+CV_MSE &lt;- setNames(numeric(length(models)), names(models))
+for(mod in names(models)) {
+    pred_sq_error &lt;- (CV_pred$y - CV_pred[[mod]])^2
+    CV_MSE[mod] &lt;- mean(pred_sq_error)
+}
+print(CV_MSE)
+```
+
+```
+## intercept only         linear      quadratic          cubic 
+##       2.196284       2.164999       1.060667       1.070219
+```
+
+Based on these results, which model would you choose?
+---
+# `while` Loop
+
+`while` loops repeat a set of instructions (R code) &lt;u&gt;**while** a certain condition is met&lt;/u&gt;
+
+
+```r
+*while(cond){
+  expr
+}
+```
+
+.pull-left[
+- `cond` is a logical statement that evaluates to `TRUE`/`FALSE`
+- `expr` is the R code you want to run iteratively
+]
+
+&lt;div class="pull-right" style="text-align:center;"&gt;
+  &lt;img src="images/whileloop.jpg" style="max-width:85%;"&gt;
+&lt;/div&gt;
+---
+# `while` Loop
+
+
+```r
+# Initialize x
+x &lt;- 0
+
+while(x &lt; 10){
+  # Incremement x
+  x &lt;- x + 2
+  
+  print(x)
+}
+```
+
+```
+## [1] 2
+## [1] 4
+## [1] 6
+## [1] 8
+## [1] 10
+```
+
+Notice that, unlike the `for` loop, we don't necessarily know how long the `while` loop will run. This is exactly when a `while` loop is preferred!
+---
+# `while` Loop: Example
+
+Let's say we want to know how much times a number can be cut in half until it is less than or equal to 1:
+
+.smallish[
+.pull-left[
+
+```r
+count &lt;- 0
+number &lt;- 32
+while(number &gt; 1){
+  print(number)
+  number &lt;- number / 2
+  count &lt;- count + 1
+}
+```
+
+```
+## [1] 32
+## [1] 16
+## [1] 8
+## [1] 4
+## [1] 2
+```
+
+```r
+print(paste(count, "times!"))
+```
+
+```
+## [1] "5 times!"
+```
+]
+
+.pull-right[
+
+```r
+count &lt;- 0
+number &lt;- 908345903485304
+while(number &gt; 1){
+  print(number)
+  number &lt;- number / 2
+  count &lt;- count + 1
+}
+```
+
+
+```
+## [1] 9.083459e+14
+## [1] 4.54173e+14
+## [1] 2.270865e+14
+## [1] 1.135432e+14
+## ...
+```
+
+
+
+```r
+print(paste(count, "times!"))
+```
+
+
+```
+## [1] "50 times!"
+```
+]
+]
+
+---
+# `while` Loops: A Warning
+
+Be careful when writing a `while` loop to make sure the condition will be met eventually!
+
+This will run forever:
+
+```r
+while(TRUE){
+  print(😭)
+}
+```
+😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭😭...
+---
+# `repeat` Loop
+
+`repeat` loops repeat a set of instructions &lt;u&gt;until a certain condition is met&lt;/u&gt;
+
+`repeat` loops differ from `while` loops because the *condition* is evaluated at the end (rather than the begining) of the loop
+
+******
+
+.pull-left[
+
+```r
+repeat {
+  expr
+  if(condition){
+    break
+  }
+}
+```
+
+**Warning**: even more so than the `while` loop, a `repeat` loop will run forever until you tell it to stop!
+
+To stop the loop, use the `break` statement
+]
+
+&lt;div class="pull-right" style="text-align:center;"&gt;
+  &lt;img src="images/repeatloop.jpg" style="max-width:80%;"&gt;
+&lt;/div&gt;
+---
+# `repeat` Loop: Example
+
+Using a `repeat` loop, find the factorial of a given number (the product of all integers from 1 to *number*) 
+
+.smallish[
+
+```r
+# Initialize objects
+number &lt;- 30
+i &lt;- 2 # counter
+res &lt;- 1 # holds result
+
+repeat{
+  
+  res &lt;- res*i
+  
+  # If 1*2*3...n, stop
+  if(i == number){
+    break
+  }
+  
+  # Increment counter
+  i &lt;- i + 1
+}
+
+print(res)
+```
+
+```
+## [1] 2.652529e+32
+```
+]
+
+---
+# `next`
+
+`next` allows you to immediately skip to the **next** iteration of a loop &lt;u&gt;without executing the code below&lt;/u&gt;. You can use this in all three types of loops!
+.smallish[
+.pull-left[
+
+```r
+for(i in 1:15){
+  # Notice that the entire if()
+  # statement is on one line.
+  # This is okay when it is
+  # simple like this
+  if(i %in% 6:10) next
+  print(i)
+}
+```
+
+```
+## [1] 1
+## [1] 2
+## [1] 3
+## [1] 4
+## [1] 5
+## [1] 11
+## [1] 12
+## [1] 13
+## [1] 14
+## [1] 15
+```
+]
+
+.pull-right[
+
+```r
+i &lt;- 0
+while(i &lt; 15){
+  i &lt;- i + 1
+  if(i %in% 6:10) next
+  print(i)
+}
+```
+
+
+
+```r
+i &lt;- 0
+repeat{
+  i &lt;- i + 1
+  if(i %in% 6:10) next
+  print(i)
+  if(i == 15) break
+}
+```
+]
+]
+---
+class: inverse
+# Vectorization
+---
+# What is Vectorization?
+
+One of the many things that makes R a unique and useful language for working with data is the concept of **vectorization**
+
+******
+--
+
+
+Consider a simple data cleaning problem where you need to convert all 0s to 1s and all 1s to 0s (e.g., to change the reference group in your linear model). To do this, all you need to do is subtract each observation from 1. But what if you have hundreds, thousands, or even millions of observations?
+
+Good thing we just learned about loops!
+--
+
+
+.small[
+
+.pull-left[
+
+```r
+# Create vector of 100,000,000 0s and 1s 
+vec &lt;- sample(0:1, 100000000, TRUE)
+
+system.time(
+  for(i in 1:length(vec)){
+    vec[i] &lt;- 1 - vec[i]
+  }
+)
+```
+
+```
+##    user  system elapsed 
+##   6.897   0.376   7.273
+```
+]
+]
+
+.pull-right[
+&lt;div style="text-align:center;"&gt;
+  &lt;img src="images/catfilenail.gif" style="max-width:60%;"&gt;&lt;br&gt;
+  &lt;span style="font-size:80%;"&gt;👈 This takes forever!&lt;/span&gt;
+&lt;/div&gt;
+
+]
+---
+# Vectorization Wins
+
+Instead of using a loop to do this task, we can use R's vector addition, which is a **vectorized** function
+
+&lt;div style="text-align:center;"&gt;
+  &lt;img src="images/vectorization.png" style="max-width:70%;"&gt;
+&lt;/div&gt;
+
+.small[
+
+.pull-left[
+
+
+
+```r
+system.time(
+  
+* 1 - vec
+  
+)
+```
+
+```
+##    user  system elapsed 
+##   0.310   0.208   0.518
+```
+]
+
+.pull-right[
+
+```r
+system.time(
+* for(i in 1:length(vec)){
+*   vec[i] &lt;- 1 - vec[i]
+* }
+)
+```
+
+
+```
+##    user  system elapsed 
+##   8.308   0.280   8.592
+```
+]
+]
+---
+# Vectorization Examples
+
+`rowSums()`, `colSums()`, `rowMeans()`, `colMeans()` return a vector of sums or means over rows or columns of data (these are very useful for constructing scale scores!)
+
+
+```r
+my_matrix &lt;- matrix(1:12, nrow = 3, ncol = 4, byrow = TRUE)
+print(my_matrix)
+```
+
+```
+##      [,1] [,2] [,3] [,4]
+## [1,]    1    2    3    4
+## [2,]    5    6    7    8
+## [3,]    9   10   11   12
+```
+
+```r
+rowSums(my_matrix)
+```
+
+```
+## [1] 10 26 42
+```
+---
+# More Vectorization Examples
+
+&lt;div style="font-size:90%;"&gt;
+`cumsum()`, `cumprod()`, `cummin()`, `cummax()` return a vector of cumulative quantities
+
+```r
+cumsum(1:10)
+```
+
+```
+##  [1]  1  3  6 10 15 21 28 36 45 55
+```
+
+```r
+cummin(c(3:1, 2:0, 4:2))
+```
+
+```
+## [1] 3 2 1 1 1 0 0 0 0
+```
+
+`pmax()` and `pmin()` take a matrix or set of vectors and return the min or max for each **p**osition (after recycling)
+
+```r
+pmax(c(0, 3, 4),
+     c(1, 1, 1),
+     c(2, 2, 2))
+```
+
+```
+## [1] 2 3 4
+```
+&lt;div&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "tomorrow-night-bright",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
