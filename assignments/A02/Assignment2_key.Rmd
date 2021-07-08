@@ -1,0 +1,411 @@
+---
+title: "Assignment 2"
+subtitle: "Data Structures"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+```{css, echo=F}
+pre {
+  max-height: 450px;
+}
+```
+
+<button id="togglebutton" style="width: 100px;" onclick="toggleOutput()">
+Show Output
+</button>
+
+## Atomic Types, Type Coercion, and Logical/Relational Operators
+
+<ol>
+<li> Without running it, what does this code return? </li>
+
+- `typeof(c(1, 4, 2))`
+- `is.logical(FALSE)`
+- `as.logical(as.numeric("1234"))`
+- `as.logical(as.character(1234))`
+- `typeof(c(1L, 4L, 2L))`
+- `typeof(c(6L, 4, 2L, 40L))`
+- `as.logical(1)`
+- `TRUE + FALSE + FALSE^FALSE`
+- `FALSE + 1 + (T^999 * 0.5) %/% 3`
+- `!TRUE * 4 %/% 2`
+- `!0`
+- `!1`
+- `!-29`
+- `typeof(c(1, 1.0, "1.0"))`
+- `as.numeric(c(1, 1.0, "1.0", TRUE))`
+- `TRUE && !FALSE`
+- `5 > 2 * 3 || 9 == 19%/%2`
+- `0 && 0`
+- `as.numeric(9 != 9 && 10 > 11)`
+- `!is.integer(650)`
+
+<li>Use `sprintf()` to a make a Mad Libs style paragraph, incorporating all of the variables in the list below (in no particular order). In other words, you are constructing the shell of the sentence with "blanks" where these words/numbers can be inserted, regardless of their value. All words are lower case (don't worry about capitalization for now).</li>
+
+- `exclamation` (e.g., "oh no!")
+- `plural_noun` (e.g., "words")
+- `verb` (e.g., "write")
+- `adverb` (e.g., "slowly")
+- `singular_noun` (e.g., "word")
+- `verb_ing` (e.g., "sitting")
+- `adjective` (e.g., "smart")
+- `food_item` (e.g., "rice")
+- `verbing_in_place` (e.g., "eating in Brazil")
+- `integer` (e.g., 1)
+- `double` (e.g., 1.2345678)
+
+```{r}
+# Run t 
+source("madlibs.R")
+
+# Write sprintf() code here
+
+```
+
+
+Write this same exact sentence using `paste()`
+
+
+Write this same exact sentence using `glue::glue()` (you will need to install the `glue` package if it is not already installed)
+
+
+<li>The `sleep` dataset in R (see `help(sleep)`) are data from within-subjects (`ID`) experimental research showing the effect of two different drugs (`group`) on change in sleep (`extra`). The `group` variable is currently coded as `1` and `2`,  which isn't particularly informative. Change `group` to be a `factor` and give it labels (i.e., drug names) of whatever you want! (Note that `group` is already ` factor` in the data with uninformative labels. For this problem, assume it is a numeric variable).</li>
+```{r}
+sleep$group <- factor(sleep$group,
+                      levels = 1:2, 
+                      labels = c("Drug", "Control"))
+```
+
+
+</ol>
+
+## Coding with Vectors
+1. Use `c()` to create the following vector
+```{r}
+c("Apples", "Oranges", "Bananas", "Ice Cream")
+```
+
+2. Use `:` to create an integer vector of the numbers -6 to 20
+```{r}
+-6:20
+```
+
+3. Use `seq()` to create a vector of 10 numbers evenly spaced from 0 to 27.
+```{r}
+seq(0, 27, length.out = 10)
+```
+
+4. Use `seq()` to create a vector of numbers 1 through 69 by 17
+```{r}
+seq(1, 69, 17)
+```
+
+5. Use `seq_len()` to create an integer vector of the numbers 1 through 7
+```{r}
+seq_len(7)
+```
+
+6. Use `rep()` to create a character vector filled with 25 `NA`s
+```{r}
+rep(NA_character_, 25)
+```
+
+7. Use `rep()` to create a vector with two values (`"group1"` and `"group2"`) repeated 10 times each as follows
+```{r}
+rep(c("Group1", "Group2"), each = 10)
+```
+
+8. Use `rep()` to create a character vector with 14 elements where each *even* numbered element has the value `"even"` and each *odd* numbered element has the value `"odd"`
+```{r}
+rep(c("odd", "even"), times = 7)
+```
+
+9. Use `LETTERS` and `[` `]` to create a vector of the last 10 capital letters
+```{r}
+LETTERS[seq(to = 26, length.out = 10)]
+```
+
+10. Use `letters` and `[` `]` to get every 3rd letter of the lower-case alphabet
+```{r}
+letters[seq(3, length(letters), 3)]
+```
+
+11. Create **(1)** a vector with `letters` 1 through 9, **(2)** another vector with `LETTERS` 10 through 21, and **(3)** another vector with `letters` 22 through 26. Then, create a vector called `alPHAbet` using `c()` to combine these three vectors together.
+```{r}
+letters1 <- letters[1:9]
+letters2 <- LETTERS[10:21]
+letters3 <- letters[22:26]
+alPHAbet <- c(letters1, letters2, letters3)
+```
+
+12. Use `c()` and `[` `]` to combine the first 4 element of `letters` with the 4th, 5th, and 9th, elements of `LETTERS` into a vector called `my_letters`
+```{r}
+my_letters <- c(letters[1:4], LETTERS[c(4, 5, 9)])
+my_letters
+```
+13. Use `rev()` to reverse the order of `letters`
+```{r}
+rev(letters)
+```
+
+14. Create a numeric vector called `numbers` that is 10 elements long with any numbers you would like. Then add 3 to each odd numbered element (i.e. elements 1, 3, 5, etc.) and 7 to each even numbered element.
+```{r}
+numbers <- 101:110
+numbers
+c(3, 7) + numbers
+```
+
+15. Below is a vector of forcasted temperatures in degrees celcius in Seattle Friday (6/25/21) to Friday (7/2/21). Use the following formula to convert this vector to farenheit and save it in a new vector called `tempsF`.
+
+$$^{\circ}F=^{\circ}C\times\frac{9}{5}+32$$
+
+```{r, echo=T}
+tempsC <- c(29, 35, 38, 41, 31, 28, 29, 29)
+```
+
+```{r}
+tempsF <- tempsC * 9/5 + 32
+tempsF
+```
+
+16. Give `tempsF` names that correspond with the days of the week. The first element (29) is Friday, the second (35) is Saturday, etc.
+```{r}
+names(tempsF) <- c("Friday", "Saturday", "Sunday", "Monday",
+                   "Tuesday", "Wednesday", "Thursday", "Friday")
+tempsF
+```
+
+17. Using relational operator(s), subset `tempsF` to days where it was over 100 <span>&deg;</span>F
+```{r}
+tempsF[tempsF > 100]
+```
+
+## Coding with Matrices
+1. Use `matrix()` to create a matrix called `my_matrix` with 10 rows and four columns filled with `NA`
+```{r}
+my_matrix <- matrix(NA, nrow = 10, ncol = 4)
+my_matrix
+```
+
+
+2. Create a vector called `vec_num` of 10 numbers evenly spaced from 0 to 15. Then assign `vec_num` to the first column of `my_matrix`.
+```{r}
+vec_num <- seq(0, 15, length.out = 10)
+my_matrix[, 1] <- vec_num
+my_matrix
+```
+
+3. Create an integer vector called `vec_int` of numbers 7 through 16. Then assign `vec_int` to the second column of `my_matrix`.
+```{r}
+vec_int <- 7:16
+my_matrix[, 2] <- vec_int
+my_matrix
+```
+
+4. Use `letters`, `LETTERS`, and `[` `]` to get the first 10 letters to columns 3 and 4 of `my_matrix`.
+```{r}
+my_matrix[, 3:4] <- c(letters[1:10], LETTERS[1:10])
+my_matrix
+```
+
+5. Select the fourth row from `my_matrix` and assign it to the object `row_4` as a vector.
+```{r}
+row_4 <- my_matrix[4, ]
+row_4
+```
+
+6. Assign the element in the 6th row and 2nd column of `my_matrix` to `val_6_2` as a numeric value.
+```{r}
+val_6_2 <- as.numeric(my_matrix[6, 2])
+val_6_2
+```
+
+7. Use `cbind()` to combine `vec_num`, `vec_int`, and the first 10 elements of `letters` and `LETTERS` into a matrix called `my_matrix2`.
+```{r}
+my_matrix2 <- cbind(vec_num, vec_int, letters[1:10], LETTERS[1:10])
+my_matrix2
+```
+
+8. Next, first transpose `my_matrix2`, then select only the first four columns and assign to `my_matrix2_t`.
+```{r}
+my_matrix2_t <- t(my_matrix2)[, 1:4]
+my_matrix2_t
+```
+
+9.  Use `rbind()` to add the rows from `my_matrix` to `my_matrix2_t` and assign this combination to `big_matrix`.
+```{r}
+big_matrix <- rbind(my_matrix2_t, my_matrix)
+big_matrix
+```
+
+10. Use `cov()` to get the variance-covariance matrix of the `mtcars` dataset (all variables are already numeric) and same this to a variable called `mtcars_varcov`. Then save the covariances of each variable of `mtcars` (i.e., all elements on the diagonal of `mtcars_varcov`) to a vector called `mtcars_cov`.
+
+```{r}
+mtcars_varcov <- cov(mtcars)
+mtcars_cov <- diag(mtcars_varcov)
+```
+
+
+## Coding with Lists
+
+1. Use `list()` to create a list that contains `vec_num` and `row_4`, and assign the names `vec_num` and `row_4` to these two elements of `list_1`.
+```{r}
+list_1 <- list("vec_num" = vec_num,
+               "row_4" = row_4)
+list_1
+```
+
+2. Using `$`, extract `row4` from `list_1` and assign it to the object `row_4_2`.
+```{r}
+row_4_2 <- list_1$row_4
+row_4_2
+```
+
+3. Create another list that contains `val_6_2` and `big_matrix` called `list_2`.
+```{r}
+list_2 <- list(val_6_2, big_matrix)
+list_2
+```
+
+4. Combine `list_1` and `list_2` together using `c()` and assign them to `list_3`.
+```{r}
+list_3 <- c(list_1, list_2)
+list_3
+```
+
+5. Use `unlist()` to turn `list_3` into a vector and assign it to `vector_3`.
+```{r}
+vector_3 <- unlist(list_3)
+vector_3
+```
+
+6. Use `as.list()` to convert `vector_3` into a list and assign it to `list_big`.
+```{r}
+list_big <- as.list(vector_3)
+list_big
+```
+
+7. Now copy `list_3` as `list_4` and use `[[` `]]` to assign `list_3` as the last (fifth) element of `list_4`. This is, you should end up with a list with five elements named `list_4` that contains the same four elements as `list_3` plus a fifth element that is itself a list, as one object.
+```{r}
+list_4 <- list_3
+list_4[[5]] <- list_3
+list_4
+```
+
+8. Select the third element (that is, the sub-element) of the the fifth element of `list_4` and assign it to an object called `element_5_3` using `[[` `]]`.
+```{r}
+element_5_3 <- list_4[[5]][[3]]
+```
+
+9. Lastly, repeat the previous assignment of the third element of the fifth element, but extract the element as a list rather than scalar using `[` `]` and assign it to `list_5_3`.
+```{r}
+list_5_3 <- list_4[[5]][3]
+```
+
+10. Let's run a linear regression predicting miles per gallon (`mpg`) with number of cylinders (`cyl`), displacement (`disp`), and weight (`wt`), saving the result in an object called `fit`. Using either `$` or `[[` `]]`, extract the coefficients and the residuals. (Hint: to see the names of `fit`, you can types `fit$` in RStudio and it will give you a dropdown menu with all the names. Or you can type `names(fit)` into your console).
+
+```{r, echo=T}
+fit <- lm(mpg ~ cyl + disp + wt,
+          data = mtcars)
+```
+
+```{r}
+fit$coefficients
+fit[["residuals"]]
+```
+
+## Coding with data.frames
+1. Use `data.frame()` to combine `vec_num` (first column) and `vec_int` (second column) into `df1`.
+```{r}
+df1 <- data.frame(vec_num, vec_int)
+df1
+```
+
+2. Use `$` to extract `vec_num` from `df1`, reverse it with `rev()`, and assign it as the vector `vec_num2`.
+```{r}
+vec_num2 <- rev(df1$vec_num)
+vec_num2
+```
+
+3. Use `$` to add `vec_num2` to `df1` as a new column with the name `number_vector`.
+```{r}
+df1$number_vector <- vec_num2
+df1
+```
+
+4. Combine `df1` with itself using `rbind()` and make sure to save it as `df1`
+```{r}
+df1 <- rbind(df1, df1)
+df1
+```
+
+5. Add 20 to all values in `number_vector`. Do this without removing it from the dataframe.
+```{r}
+df1$number_vector <- df1$number_vector + 20
+df1
+```
+
+6. Subset `df1` to get only the rows where `vec_num` is greater than or equal to 5.
+```{r}
+df1[df1$vec_num >= 5, ]
+```
+
+7. Subset `df1` to get only the `vec_int` and `number_vector` columns and only the rows where `vec_num` is not 0 or 10.
+```{r}
+df1[!df1$vec_num %in% c(0, 10), c("vec_int", "number_vector")]
+```
+
+8. Subset `mtcars` to get only those cars with the minimum number of cylinders (`cyl`) and the maximum number of cylinders. Then, using `rownames()`, print which cars fall in this category. Bonus if you do this programmatically (i.e., do not assume you know the exact min and max values of `cyl`). 
+```{r}
+rownames(
+  mtcars[mtcars$cyl %in% c(min(mtcars$cyl), max(mtcars$cyl)), ]
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{js, echo=F}
+window.onload = () => {
+  document.getElementById('togglebutton').click();
+};
+
+function toggleOutput(){
+
+  let e = document.getElementById('togglebutton')
+
+  if(e.innerHTML == "Show Output"){
+    e.innerHTML = "Hide Output";
+  } else {
+    e.innerHTML = "Show Output";
+  }
+
+  var outputs = document.getElementsByClassName('hljs');
+  
+  // pre of class R is code, not output
+  for(var i = 0; i < outputs.length; i++){
+    if(outputs[i].parentNode.style.display == "none"){
+      outputs[i].parentNode.style.display = "block";
+    } else {
+      if(outputs[i].parentNode.className != "r"){
+        outputs[i].parentNode.style.display = "none";
+      }
+    }
+  }
+};
+```
+
