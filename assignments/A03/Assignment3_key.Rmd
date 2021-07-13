@@ -1,0 +1,280 @@
+---
+title: "Assignment 3"
+subtitle: "Control Structures"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+```{css, echo=F}
+pre {
+  max-height: 450px;
+}
+```
+
+<button id="togglebutton" style="width: 100px; margin-bottom: 25px;" onclick="toggleOutput()">
+Show Output
+</button>
+
+<span style="color: white; background-color: black; font-weight:bold; padding: 2px;">
+Please submit both the .Rmd and a .html file on Canvas.
+</span>
+
+You do not need any extra packages to do this homework (i.e., everything can be done using base R functions!)
+
+
+## 2016 King County Elections Data
+
+For much of this assignment you will be using 2016 general election data from King County, which I got directly from the county [here](https://data.kingcounty.gov/Voting-Elections/2016-General-Election-Results-by-precinct-complete/b27z-cdmk). Take a look at the data using some of the functions we have learned about (`colnames()`, `str()`, `head()`, `View()`, etc.) to familiarize yourself with the dataset.
+
+```{r, echo=T}
+d <- read.csv("https://adamkucz.github.io/psych548/data/KCelections_2016.csv")
+```
+
+
+## Problem 1
+
+Using a loop, determine the following information for each column in `d`. Hold your results in a dataframe called `results` where each row is one column in the dataframe:
+
+- The column name (`cname`)
+- The atomic type of the column vector (`type`)
+- How many unique values are in each column (`nvals`)
+- For character columns, what is the longest string? If there are ties for longest, paste them together separated by a semicolon and save that value (hint: the `paste()` function will help you with this; `longstrings`)
+- For numeric columns, take the mean, standard deviation, and sum (saved in three separate columns; `mean`, `sd`, `sum`)
+
+The final `results` dataframe should look like this:
+```{r}
+results <- data.frame(cname = character(),
+                      type = character(),
+                      nvals = numeric(),
+                      longstrings = character(),
+                      mean = numeric(),
+                      sd = numeric(),
+                      sum = numeric())
+
+for(i in 1:ncol(d)){
+  
+  # Fill in results$cname
+  results[i, "cname"] <- colnames(d)[i]
+  
+  # Fill in results$type
+  results[i, "type"] <- typeof(d[, i])
+  
+  # Fill in results$nvals
+  results[i, "nvals"] <- length(unique(d[, i]))
+  
+  if(typeof(d[, i]) == "character"){
+    
+    # Fill in results$longstrings
+    results[i, "longstrings"] <- paste(unique(d[nchar(d[, i]) == max(nchar(d[, i])), i]), collapse = ",")
+    
+  } else if(typeof(d[, i]) %in% c("integer", "double")){
+    
+    # Fill in results$mean
+    results[i, "mean"] <- mean(d[, i], na.rm = T)
+    
+    # Fill in results$sd
+    results[i, "sd"] <- sd(d[, i], na.rm = T)
+    
+    # Fill in results$sum
+    results[i, "sum"] <- sum(d[, i], na.rm = T)
+  }
+}
+
+knitr::kable(results)
+```
+
+
+## Problem 2
+
+Using a loop, iterate over each of the 98 races (`Race`) that occurred in King County in 2016 and find the total number of votes cast in each race (`SumOfCount`). Make sure to exclude counts of blank votes (`CounterType == "Times Blank Voted"`), the number of registered voters (`CounterType == "Registered Voters"`), times votes were over counted (`CounterType == "Times Over Voted"`), and the sum of actual votes and blank votes (`CounterType == "Times Counted"`). Save this in a *named* vector of length 98 called `totalcounts` where the names are the name of the unique race.
+```{r}
+totalcounts <- setNames(object = rep(NA_real_, length(unique(d$Race))),
+                        nm = unique(d$Race))
+
+for(race in unique(d$Race)){
+  totalcounts[race] <- sum(d$SumOfCount[d$Race == race & !d$CounterType %in%  c("Times Blank Voted", "Registered Voters", "Times Over Voted", "Times Counted")])
+}
+
+totalcounts
+```
+
+- Which race (or races, in the event of a tie) got the most amount of votes?
+```{r}
+names(totalcounts)[totalcounts == max(totalcounts)]
+```
+
+- Which race for the least amount of votes?
+```{r}
+names(totalcounts)[totalcounts == min(totalcounts)]
+```
+
+## Problem 3
+
+Washington's [45th legislative district](https://senatedemocrats.wa.gov/dhingra/district-team/) runs from Kirkland on the west to Duvall on the east and Sammamish to the south. In 2016, Ramiro Valderrama was facing up against Roger Goodman for a spot in the WA House of Representatives. Let's figure out which precincts Ramiro Valderrama won.
+
+First, subset the data to include only the Legislative District 45 Representative Position 1 race. Call your dataframe `d_ld45rp1`.
+```{r}
+d_ld45rp1 <- d[d$Race == "Legislative District 45 Representative Position 1", ]
+```
+
+Then, for each precinct that voted in that race, determine whether Ramiro Valderrama won (`TRUE`) or lost (`FALSE`) that precinct. Save these values in a *named* logical vector called `valderrama_precincts` where the names are the precinct names.
+```{r}
+valderrama_precints <- setNames(object = rep(NA, length(unique(d_ld45rp1$Precinct))),
+                                nm = unique(d_ld45rp1$Precinct))
+
+for(precinct in unique(d_ld45rp1$Precinct)){
+  
+  # Count votes for Valderrama and Goodman
+  votes_valderrama <- d_ld45rp1$SumOfCount[d_ld45rp1$Precinct == precinct & d_ld45rp1$CounterType == "Ramiro Valderrama"]
+  votes_goodman <- d_ld45rp1$SumOfCount[d_ld45rp1$Precinct == precinct & d_ld45rp1$CounterType == "Roger Goodman"]
+  
+  # If Valderrama got more votes than Goodman TRUE otherwise FALSE  
+  valderrama_precints[precinct] <- votes_valderrama > votes_goodman
+}
+```
+
+- How many precincts did Ramiro Valderrama win?
+```{r}
+sum(valderrama_precints)
+```
+
+- What percentage of all precincts is this? See if you can do this all with R code (i.e., do not write in the number of precincts yourself, let R figure that out)
+```{r}
+(sum(valderrama_precints) / length(unique(d_ld45rp1$Precinct))) * 100
+```
+
+## Problem 4
+
+Create a new column in `d` called `Party_Simplified`. When `Party` is `Dem` or `Dcr` or `DPN`, `Party_Simplified` should take on the value `Democrat`. When `Party` is `Rep` or `GP` or `RPN`, `Party_Simplified` should take on the value `Republican`. When `Party` is `NP` (non-partisan), `Party_Simplified` should take on the value `Non-partisan`. For all other values of `Party`, `Party_Simplified` should take on the value `Third Party`.
+
+Do this problem in two ways:
+
+1. Using a loop
+2. Not using a loop
+
+Tip: The first method should take quite a while to run. To knit your document faster (the second time and on after initially knitting with this code), use the `cache=TRUE` chunk option on this chunk, which will store the output for all future knitting instead of re-running the code each time.
+
+```{r, cache=T}
+# First method (not vectorized)
+for(i in 1:nrow(d)){
+  if(d$Party[i] %in% c("Dem", "Dcr", "DPN")){
+    d$Party_Simplified[i] <- "Democrat"
+  } else if(d$Party[i] %in% c("REP", "GP", "RPN")){
+    d$Party_Simplified[i] <- "Republican"
+  } else if(d$Party[i] == "NP"){
+    d$Party_Simplified[i] <- "Non-partisan"
+  } else {
+    d$Party_Simplified[i] <- "Third Party"
+  } 
+}
+
+# Second method (vectorized)
+d$Party_Simplified <- ifelse(d$Party %in% c("Dem", "Dcr", "DPN"), "Democract",
+                             ifelse(d$Party %in% c("REP", "GP", "RPN"), "Republican",
+                                    ifelse(d$Party == "NP", "Non-partisan",
+                                           "Third Party")))
+```
+
+## Problem 5
+
+Write a game where the computer is thinking of a random number between 1 and 10 (inclusive) and the user needs to guess which number the computer is thinking of. The game will take place in the console, once the R code for the game is executed. When the user guesses the *wrong* answer, the computer informs them of the error and asks them to guess again. When the user guesses the *correct* answer, the computer informs them of their success and the game is over. The computer should keep the same number "in mind" until the user guesses correctly. Below is some code to help you.
+
+Bonus: Write the game such that the user can elect to play again (Y/N) without having to re-run the code. When the user plays again, the computer thinks of a new value for the user to guess. The game continues until the user says they want to quit ("N") or rage quits with the `Esc` button.
+
+```{r, eval=F, echo=T}
+# Note: keep eval=F for this chunk because it isn't friendly to the knitted format.
+# I will run this code myself when you submit your assignment.
+
+# This will sample 1 value between 1 and 10
+number <- sample(1:10, 1)
+
+# The readline() function prints to the console and waits for the user to type input. The user's
+# input can be saved in an object for later use throughout your code.
+guess <- readline("I am thinking of a number between 1 and 10. What number am I thinking of? ")
+guess <- readline("That is not the number I am thinking of. Guess again: ")
+
+# For bonus:
+readline("That is the number I was thinking of! Would you like to play again? [Y/N] ")
+```
+
+```{r, eval=F}
+
+play <- TRUE
+
+while(play){
+  
+  # Randomly select number between 1 and 10
+  number <- sample(1:10, 1)
+  
+  # Ask user for guess
+  guess <- readline("I am thinking of a number between 1 and 10. What number am I thinking of? ")
+  
+  if(guess == number){
+    
+    playagain <- readline("That is the number I was thinking of! Would you like to play again? [Y/N] ")
+    
+    # Does user want to play again?
+    if(playagain == "Y") play <- T else play <- F
+    
+  } else {
+    
+    # Keep asking user for number until they guess correctly
+    repeat{
+      guess <- readline("That is not the number I am thinking of. Guess again: ")
+      
+      if(guess == number){
+        playagain <- readline("That is the number I was thinking of! Would you like to play again? [Y/N] ")
+        
+        # Does user want to play again?
+        if(playagain == "Y") play <- T else play <- F
+        
+        # Go back up to the while() evaluation
+        break
+        
+      } else {
+        # User guessed incorrectly. Ask again.
+        next
+      } 
+    } 
+  }
+}
+```
+
+
+
+
+
+
+
+```{js, echo=F}
+window.onload = () => {
+  document.getElementById('togglebutton').click();
+};
+
+function toggleOutput(){
+
+  let e = document.getElementById('togglebutton')
+
+  if(e.innerHTML == "Show Output"){
+    e.innerHTML = "Hide Output";
+  } else {
+    e.innerHTML = "Show Output";
+  }
+
+  var outputs = document.getElementsByClassName('hljs');
+  
+  // pre of class R is code, not output
+  for(var i = 0; i < outputs.length; i++){
+    if(outputs[i].parentNode.style.display == "none"){
+      outputs[i].parentNode.style.display = "block";
+    } else {
+      if(outputs[i].parentNode.className != "r"){
+        outputs[i].parentNode.style.display = "none";
+      }
+    }
+  }
+};
+```
