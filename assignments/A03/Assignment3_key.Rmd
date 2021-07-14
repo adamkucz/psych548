@@ -106,7 +106,7 @@ totalcounts
 names(totalcounts)[totalcounts == max(totalcounts)]
 ```
 
-- Which race for the least amount of votes?
+- Which race got the least amount of votes?
 ```{r}
 names(totalcounts)[totalcounts == min(totalcounts)]
 ```
@@ -172,7 +172,7 @@ for(i in 1:nrow(d)){
 }
 
 # Second method (vectorized)
-d$Party_Simplified <- ifelse(d$Party %in% c("Dem", "Dcr", "DPN"), "Democract",
+d$Party_Simplified <- ifelse(d$Party %in% c("Dem", "Dcr", "DPN"), "Democrat",
                              ifelse(d$Party %in% c("REP", "GP", "RPN"), "Republican",
                                     ifelse(d$Party == "NP", "Non-partisan",
                                            "Third Party")))
