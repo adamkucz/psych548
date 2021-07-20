@@ -1,0 +1,1203 @@
+---
+title: "Functions and apply et al."
+author: "Adam Kuczynski"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: main.css
+    nature:
+      highlightStyle: tomorrow-night-bright
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: ["center","top"]
+---
+
+```{r setup, include=FALSE, purl=FALSE}
+library(knitr)
+library(magrittr)
+
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(comment = "##")
+```
+
+```{css, echo=F}
+.code-overflow .remark-code,
+.code-overflow pre{
+  max-height: 250px !important;
+  overflow: auto !important;
+}
+```
+
+# What are functions?
+.small[
+A **function** is a chunk of R code that (typically) takes a set of inputs (i.e., **arguments**) and performs some sort of operation on them.
+
+.pull-left[
+There are three components of a function:
+- `body()`: the code inside the function
+- `formals()`: the list of arguments which controls how you can call the function
+- `environment()` the "map" of the location of the function's variables
+
+```{r}
+formals(sample)
+```
+]  
+  
+.pull-right[
+```{r}
+body(sample)
+environment(sample)
+```
+]
+
+.footnote[The `sample()` function randomly samples *size* draws from a given vector]
+]
+---
+# Function Output
+Often a function will **return** an object. For example:
+- `mean()` returns a numeric vector of length 1
+--
+
+- `sample()` returns a numeric vector of length *size*
+--
+
+- `typeof()` returns a character vector of length 1
+--
+
+- `cor()` returns a matrix of size *rows $\times$ columns*
+--
+
+- `lm()` returns lists nested in a list of length 12
+--
+
+
+When a function returns an object, you'll often want to assign that object to save the output. For example:
+```{r}
+shuffled_letters <- sample(letters, length(letters))
+shuffled_letters
+```
+---
+Functions don't *always* return an object. Sometimes they print text to the console or perform some other operation on your computer
+
+```{r}
+# Has no return value, just prints text!
+message("This is a message!")
+```
+
+```{r, eval=FALSE}
+# This just runs another R script!
+source("My Script.R")
+```
+
+******
+--
+
+
+.smallish[
+The data that you give (i.e., pass) a function are called **arguments**. Functions can have an unlimited amount of arguments. You can view the arguments of a function in the help pages: `?function_name`
+
+When you call a function, you can specify the argument names or you can choose not to. <u> If you do not specify argument names, you *must* pass them in the order the function is written in.</u> Otherwise you have to specify the argument name.
+
+```{r, eval=FALSE}
+# 300 random draws from normal distribution mean = 5, sd = 10
+rnorm(300, 5, 10)
+
+# Same
+rnorm(sd = 10, n = 300, mean = 5)
+```
+]
+---
+# Packages
+
+What if there isn't a function in base R for something you want to do?
+--
+
+
+One of R's greatest features is the ability to extend the functionality of base R with **packages** (bundles of code that others have written to perform a set of tasks)
+--
+
+
+*Anybody* can write a package, which means that there are a lot of packages available - 17,911 at the time of this lecture - for you to use (for free!). If you need to do something base R cannot, chances are there's a package for it.
+--
+
+
+There's even an R package to generate ASCII art!
+
+.pull-left[
+```{r, eval=FALSE}
+cowsay::say("Isn't R cool?!",
+            by = "cow")
+```
+
+See `?cowsay::say` for other animals and options!
+
+]
+
+<div style="font-size:70%;">
+.pull-right[
+```{r, echo=FALSE}
+cowsay::say("Isn't R cool?!",
+            by = "cow")
+```
+]
+</div>
+---
+## Installing Packages: A Warning
+
+R packages are typically high quality and trustworthy. However, even the best packages contain bugs!
+
+.footnote[[1] It is good practice to cite package names and versions in your manuscripts. See `?citation` and `?packageVersion` for help]
+--
+
+
+.pull-left[
+Also, because *anybody* can write an R package, you might find yourself using a package that is not well built or, even worse, contains malicious code
+]
+
+
+.pull-right[
+<div style="text-align:center;">
+  <img src="images/davidrose.gif" style="max-width:50%;">
+</div>
+]
+--
+
+
+.smallish[
+<div style="height:25px;"></div>
+**Bottom line:** It is important to vet the packages you use prior to installing them!
+
+<u>Look for</u>:
+- Names/organizations of well-known developers
+- Extensive documentation (including source code)
+- Package citations<sup>1</sup>
+]
+---
+# User-defined Functions
+
+.smallish[
+What if you want to do something that can't be done with a pre-written function from base R *or* a package? Don't worry! One of the primary strengths of using R for your analyses is the ability to write code that does basically whatever you want.
+
+******
+
+Functions are just another type of object in R. To create a **function** object, use the `function()` function.
+
+From `help("function")`:
+```{r, eval=FALSE}
+function( arglist ) expr
+return(value)
+\( arglist ) expr # we'll talk about this later
+
+```
+
+- `arglist` is a comma separated list of the arguments that your function will take
+  - for example: `sample()` takes 4 arguements: `x`, `size`, `replace`, and `prob`
+  - there's no limit to how many arguments you can take
+  - arguments can have default values such as `replace=` in `sample()`
+- `expr` is the R code that the function will execute each time it is called
+- `return` is a special function that denotes the **return value** (i.e., the output of the function)
+]
+---
+
+## Example: `firstlast()`
+
+.smallish[
+Let's write a function that takes a vector as input and outputs a named vector of the first and last elements:
+
+```{r}
+firstlast <- function(x) {
+    first <- x[1]
+    last  <- x[length(x)]
+    return(c("first" = first, "last" = last))
+}
+```
+
+Test it out:
+
+```{r, cache=TRUE}
+firstlast(c(4, 3, 1, 8))
+set.seed(1)
+firstlast(sample(1:99999999))
+```
+]
+---
+# Testing `firstlast()`
+
+When writing your own function, it is important that you think about how the function will be used. This is particularly important if you are writing a function that others will use, and you can't anticipate exactly what the input will be.
+
+For example: What happens if I pass `firstlast()` the following objects?
+
+.pull-left[
+```{r}
+firstlast(10)
+```
+
+```{r}
+firstlast(numeric())
+```
+]
+
+.pull-right[
+```{r}
+firstlast(mtcars)
+```
+
+]
+---
+# Checking Inputs
+
+.smallish[
+
+Using a combination of `if/else` statements and `stop()` (which stops the function from running and prints the text inside as an error message), you can make sure valid information is passed to your function
+
+```{r, error=TRUE}
+firstlast <- function(x){
+  
+  # Check that x is valid
+  if(!is.vector(x) || length(x) < 2){
+    stop("`x` needs to be vector of length 2 or larger") #<<
+  }
+  
+  first <- x[1]
+  last  <- x[length(x)]
+  return(c("first" = first, "last" = last))
+}
+
+firstlast(10)
+firstlast(mtcars)
+```
+]
+---
+# Example: Reporting Quantiles
+
+.smallish[
+```{r}
+reportQuantiles <- function(x, na.rm = FALSE){
+  quants <- quantile(x = x,
+                     na.rm = na.rm,
+                     probs = c(0.01, 0.05, 0.10, 0.25, 0.50,
+                               0.75, 0.90, 0.95, 0.99))
+  
+  names(quants) <- c("Bottom 1%", "Bottom 5%", "Bottom 10%", "Bottom 25%",
+                     "Median", "Top 25%", "Top 10%", "Top 5%", "Top 1%")
+  
+  return(quants)
+}
+
+reportQuantiles(rnorm(100000))
+```
+
+Notice the `na.rm = FALSE` argument. This is a default, which means that if the user does not specify what they want `na.rm` to be, it will automatically be `FALSE
+
+You can call `reportQuantiles()` as many times as you need without writing the internal code over and over 
+]
+---
+## Functions Without Arguments
+
+Sometimes you may want to write a function that takes no arguments, but still does something useful
+
+For example, let's write a function that simulates a flip of a nickel. There's a `r round(((1-(1/6000))/2)*100, 2)`% chance the nickel lands on heads, a `r round(((1-(1/6000))/2)*100, 2)`% chance it lands on tails, and a [1 in 6000](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.48.2547) (`r round((1/6000)*100, 2)`%) chance it lands on it's edge
+
+```{r}
+flipNickel <- function(){
+  sideup <- sample(x = c("heads", "tails", "edge"),
+                   size = 1,
+                   prob = c(.5-1/6000, .5-1/6000, 1/6000))
+  
+  return(sideup)
+}
+
+flipNickel()
+```
+
+.footnote[*Note.* You can effectively achieve a 50/50 coinflip using the `rbinom()` function, which is a vectorized function that randomly draws values from the binomial distribution]
+---
+# Lexical Scoping
+
+When you call an object in R (referring to a variable, calling a function), R has to know where to look for it. R first looks in the **environment** that the object was created in. If it doesn't find it there, it goes up one level to the **parent environment**, etc.
+
+Consider the following examples. What do you think the output will be?
+
+.smallish[
+.pull-left[
+**Example 1**
+```{r, eval=FALSE}
+varA <- "A"
+varB <- "B"
+
+
+myFunc <- function(){
+  varA <- "X"
+  varB <- "Y"
+  return(paste(varA, varB))
+}
+
+myFunc()
+paste(varA, varB))
+```
+]
+
+.pull-right[
+**Example 2**
+```{r, eval=FALSE}
+varA <- "A"
+varB <- "B"
+varC <- "C"
+
+myFunc <- function(){
+  varA <- "X"
+  varB <- "Y"
+  return(paste(varA, varB, varC))
+}
+
+myFunc()
+paste(varA, varB, varC))
+```
+]
+]
+---
+.smallish[
+.pull-left[
+**Example 1**
+```{r}
+varA <- "A"
+varB <- "B"
+
+
+myFunc <- function(){
+  varA <- "X"
+  varB <- "Y"
+  return(paste(varA, varB))
+}
+
+myFunc()
+paste(c(varA, varB))
+```
+]
+
+.pull-right[
+**Example 2**
+```{r}
+varA <- "A"
+varB <- "B"
+varC <- "C"
+
+myFunc <- function(){
+  varA <- "X"
+  varB <- "Y"
+  return(paste(varA, varB, varC))
+}
+
+myFunc()
+paste(c(varA, varB, varC))
+```
+]
+
+******
+
+When an object is called inside a function, R looks within that function for the object (Example 1). If R cannot find that object in the function, it searches its parent environment (the global environment; Example 2).
+]
+---
+## R Only Searches Upwards
+
+R will search as many parent environments as it needs to find a object, but it will *never* search downwards (i.e., into child environments)
+
+```{r, error=TRUE}
+myFunc <- function(){
+  myVector <- 1:5
+  myOtherVector <- letters[1:5]
+  return(paste0(myVector, myOtherVector))
+}
+
+myFunc()
+exists("myVector")
+exists("myOtherVector")
+```
+---
+# `<<-`
+
+.smallish[
+The `<<-` assignment operator works similar to the `<-` operator except it forces R to make the assignment in the global environment. Unless you have a good reason not to do so, you should stick with the `<-` operator for assignment (it keeps your code clean and bug free). 
+
+```{r}
+myFunc <- function(){
+  myVector <<- 1:5
+  myOtherVector <<- letters[1:5]
+  return(paste0(myVector, myOtherVector))
+}
+
+myFunc()
+exists("myVector")
+exists("myOtherVector")
+```
+]
+---
+## dot-dot-dot (`...`)
+
+Many functions in R take an arbitrary number of targets but still work. These functions rely on the special 'dot-dot-dot' argument: `...`
+
+Let's create a function that takes an arbitrary number of strings and pastes them together as one comma-separated string:
+```{r}
+csString <- function(...){
+  args <- c(...)
+  string <- paste0(args, collapse = ", ")
+  return(string)
+}
+```
+
+--
+
+```{r}
+csString("a", "b", "c")
+```
+
+--
+
+```{r}
+csString("Apples", "Bananas", "Carrots", "Dates")
+```
+---
+# `...`
+
+The `...` argument is particularly useful when you are writing your own function that calls another function, and you want to allow the user to specify as many (or as few) arguments for that function as they would like.
+
+--
+
+For example, it's often useful to write your own functions to create the same plots from different data. Because `plot()` takes so many arguments, you wouldn't (and couldn't because `plot()` also has the `...` argument!) want to write *all* the argument names and their defaults in your own function.
+
+--
+
+```{r}
+myPlot <- function(...){
+  arglist <- list(...)
+  plot(axes = FALSE, pch = 20, ...)
+  box()
+  axis(side = 1, lwd = 0, lwd.ticks = 1)
+  axis(side = 2, las = 1, lwd = 0, lwd.ticks = 1)
+  abline(v = mean(arglist$x),
+         h = mean(arglist$y))
+  abline(lm(arglist$y ~ arglist$x), col = "blue")
+}
+```
+
+---
+```{r, fig.align='center', dev='svg', fig.height=5.5, fig.width=5.5}
+myPlot(x = mtcars$mpg, y = mtcars$hp)
+```
+---
+```{r, fig.align='center', dev='svg', fig.height=5, fig.width=5}
+myPlot(x = mtcars$mpg, y = mtcars$qsec, col = "purple",
+       main = "1/4 mile time by mpg")
+```
+---
+### `function(function(function()))`
+
+Functions can be supplied as arguments to other functions and <u>R will evaluate the functions inside out</u>
+.pull-left[
+```{r}
+dim(cbind(mtcars, mtcars))
+```
+same as 👉
+]
+
+.pull-right[
+```{r}
+dat <- cbind(mtcars, mtcars)
+dim(dat)
+```
+]
+
+--
+
+
+There's no limit to how nested your functions can get and, as we will see next week, it is quite common to have several layers of nested functions.
+
+--
+
+For example, technically this is a deeply nested function:
+<div>
+.pull-left[
+```{r}
+1 + 2 * 3 / 4^5
+```
+]
+
+.pull-right[
+
+```{r}
+`+`(1, `/`(`*`(2, 3), `^`(4, 5)))
+```
+]
+</div>
+---
+## Another Nested Function Example
+
+Suppose you want to summarize the `mtcars` dataframe by the numbers of cylinders in each car (4, 6, or 8), you only want to do this for the cars with more than 100 horsepower, and you want to add a column that converts miles per gallon (mpg) to kilometers per liter (kpl):
+```{r}
+transform(aggregate(formula = . ~ cyl,
+                    data = subset(mtcars, hp > 100),
+                    FUN = function(x) round(mean(x), 2)),
+          "kpl" = mpg*0.425144)
+```
+
+<div style="height:25px;"></div>
+Although this code works, it takes a lot of energy to read it and understand what's going on
+---
+.pull-left[
+<h1 style="font-family: monospace;">
+<span style="display:inline-block;margin:auto 10px">magrittr</span>
+</h1>
+]
+
+<div class=".pull-right" style="text-align:right">
+ <img src="images/magrittr.png" style="width:15%">
+</div>
+
+.small[
+The `magrittr` package in R introduced the **pipe** operator (`%>%`) to make nested function calls more intuitive to write and easier to read
+
+```{r, eval=FALSE}
+lhs %>% rhs
+```
+
+`lhs` (**l**eft **h**and **s**ide) is the function that you are *piping* to the `rhs` (**r**ight **h**and **s**ide)
+
+For example, let's compute a correlation matrix for columns 1 through 5 of the *swiss* dataframe for those rows where `Infant.Mortality` is greater than its mean:
+```{r}
+swiss %>%
+  subset(Infant.Mortality > mean(Infant.Mortality),
+         select = 1:5) %>%
+  cor()
+```
+]
+---
+## Revisiting Our Nested Function
+
+You'll recall:
+```{r, eval=FALSE}
+transform(aggregate(formula = . ~ cyl,
+                    data = subset(mtcars, hp > 100),
+                    FUN = function(x) round(mean(x), 2)),
+          "kpl" = mpg*0.425144)
+```
+
+<span style="font-size:50px">🪄</span>
+
+```{r, eval=FALSE}
+mtcars %>%
+  subset(hp > 100) %>%
+  aggregate(. ~ cyl, data = ., FUN = . %>% mean %>% round(2)) %>%
+  transform(kpl = mpg*0.425144)
+```
+
+This is much easier to read and write!
+---
+
+<h1 style="font-family: monospace;">
+Other
+<span style="display:inline-block;margin:auto 10px">magrittr</span>
+Pipes
+</h1>
+
+.smallish[
+The `magrittr` package has several other pipes that can be useful (but that are less commonly used):
+
+- `%T>%` 'tee' pipe: works like `%>%` but returns the lhs (good for rhs functions with no return value - like plots)
+
+.pull-left[
+```{r}
+1:5 %>% sum()
+```
+]
+
+.pull-right[
+```{r}
+1:5 %T>% sum()
+```
+]
+
+- `%$%` 'exposition' pipe: exposes the names of the lhs object to the rhs object
+```{r}
+mtcars %$% cor(disp, qsec)
+```
+- `%<>%` 'assignment' pipe: the result of the pipe is assigned to the lhs  object (equivalent to `lhs <- lhs %>% rhs`). It is generally discouraged to use this pipe.
+<div>
+
+```{r}
+swiss$Catholic %<>% sqrt()
+```
+]
+---
+# Base R Pipe: `|>`
+
+Recently (May 18, 2021) [R version 4.1.0 was released](https://stat.ethz.ch/pipermail/r-devel/2021-May/080724.html) with a base R pipe operator: `|>`
+
+`|>` works in much the same way as `magrittr::%>%`, except that `.` cannot be used to reference the `lhs` object:
+```{r, error=TRUE}
+10 %>% sample(1:5, ., TRUE)
+10 |> sample(1:5, ., TRUE)
+```
+
+Instead, you have to create an **anonymous function**
+```{r}
+10 |> {function(x) sample(1:5, x, TRUE)}()
+```
+
+---
+
+# The Anonymous Function
+
+.smallish[
+An **anonymous function** (also known as a **lambda** function) differs from all other functions in that it <u>does not have a name</u> . Anonymous functions are usually arguments to a higher-order (parent) function.
+
+Up until May 18, 2021, anonymous functions were created the same way all other functions are created: the `function()` function. However, many people thought these was too verbose and, following the lead of other programming languages, made a shorthand for `function()`: `\()`
+
+*Technically* `\()` can be used to write all your functions. For example:
+```{r, eval=FALSE}
+# These are equivalent
+addOne <- function(x) return(x + 1)
+addOne <- \(x) return(x + 1)
+```
+
+In practice, however, `\()` will only be used to write anonymous functions, and you should follow that custom (for code readability)
+
+.footnote[*Note.* If you are worried about your code being backwards compatible (e.g., because you are collaborating with a large group), avoid using `|>` and `\\()` for a little while]
+]
+
+---
+# Debugging Functions
+
+.smallish[
+```{r, error=TRUE}
+errorFunction <- function(){
+  a <- "a"
+  b <- "b"
+  stop("The error occurs here.")
+  c <- "c"
+}
+
+errorFunction()
+```
+
+Often it won't be clear what is causing a certain bug (unlike the above example). Sometimes it's a typo in your code, sometimes its an invalid argument.
+
+To debug a function use the `debug()` function. 
+```{r, eval=FALSE}
+debug(errorFunction)
+```
+
+When you are finished debugging, use `undebug()` so you won't go into debug mode every time the function is called
+```{r, eval=FALSE}
+undebug(errorFunction)
+```
+]
+
+---
+# Recursive functions
+
+.smallish[
+A **recursive function** is a function that calls itself. Recursive functions are useful in situations where problems can be broken down into smaller, repetitive problems, or when you need to iterate over arbitrarily nested objects.
+
+```{r}
+myFactorial <- function(number){
+  if(number == 0){
+    return(1)
+  } else{
+    return(number * myFactorial(number-1))
+  }
+}
+
+myFactorial(5)
+```
+
+This evaluated as: 
+1. `1`
+2. `2 * myFactorial(1)`
+3. `3 * myFactorial(2)`
+4. `4 * myFactorial(3)`
+5. `5 * myFactorial(4)`
+]
+---
+# Making an Operator
+
+Now that we know how to make our own functions we can make our own operators. These operators are known as **infix operators** because they are placed *between* arguments. `+`, `-`, `*`, `/`, `%*%`, `%in%`, etc. are all infix operators.
+
+******
+
+### An example:
+
+.smallish[
+Many programming languages have shorthand operators for incrementing and decrementing variables:
+
+- `+=` (add the rhs to the lhs: `lhs <- lhs + rhs`)
+- `-=` (subtracts the rhs from the lhs: `lhs <- lhs - rhs`)
+- `++` (adds one to a variable: `lhs <- lhs + 1`)
+- `--` (subtracts one from a variable: `lhs <- lhs - 1`)
+
+These are very useful in loops:
+```{r, eval=F}
+count <- 0
+while(count < 10){
+  count++ # instead of count <- count + 1
+  print(count)
+}
+```
+]
+---
+.smallish[
+Unfortunately R doesn't come with these operators. But we can make our own very easily!
+
+```{r}
+`%+=%` <- function(lhs, rhs){
+  # Evaluates the expression in the parent frame
+  # `substitute()` needed so the expression does
+  # not run in the eval.parent() call
+  eval.parent(substitute(lhs <- lhs + rhs))
+}
+
+`%-=%` <- function(lhs, rhs){
+  eval.parent(substitute(lhs <- lhs - rhs))
+}
+```
+
+.pull-left[
+```{r}
+value <- 0
+value %+=% 5
+print(value)
+value %+=% 5
+print(value)
+```
+]
+
+.pull-right[
+```{r}
+value <- 20
+value %-=% 5
+print(value)
+value %-=% 5
+print(value)
+```
+]
+]
+---
+# What about not `%in%`?
+
+.smallish[
+Recall that the `%in%` operator returns a vector of the positions of the lhs vector that are in the rhs vector:
+```{r}
+1:5 %in% 1:3
+```
+
+We can inverse this to get the opposite, but it is a bit hard to read:
+```{r}
+!1:5 %in% 1:3
+```
+
+We can *invert* or **negate**<sup>1</sup> `%in%` to get a "not in" operator:
+```{r}
+`%!in%` <- Negate(`%in%`)
+1:5 %!in% 1:3
+```
+
+.footnote[[1] `Negate()` produces logical negations of *functions*, inverting their output. For example: `is.not.numeric <- Negate(is.numeric)`]
+]
+
+---
+class: inverse
+# Classes and Methods
+---
+# Classes
+
+Objects in R are **instances** of one or more **classes**. A class defines the behavior of an object.
+
+.smallish[
+To get the class of an object, use the `class()` function:
+```{r}
+class(1:10)
+class(letters)
+class(mean)
+class(mtcars)
+```
+]
+---
+# Methods
+
+A **method** is a function associated with a specific class. There are many **generic functions** in R which change their behavior depending on the class of the object which it is passed.
+
+Methods are denoted by `.classname` after the generic function name. For example, let's take a look at the `summary` generic function, which has `r length(methods(summary))` methods:
+
+```{r}
+head(methods(summary))
+```
+
+This means that when summary is passed an object of class `aov` (`print.aov`) it works differently than when it is passed a `data.frame` (`print.data.frame`) 
+---
+# Making Our Own Method
+
+Making your own method is just like making your own function, except you need to name the function accordingly: `generic.class()`
+
+To assign an object a class, use the `class()` function
+
+```{r}
+string <- "Please print me!"
+class(string)
+print(string)
+class(string) <- "refuseprint"
+class(string)
+```
+
+
+---
+
+```{r, eval=FALSE}
+string <- "Please print me!"
+```
+
+```{r}
+# print() method for objects of r class `refuseprint`
+print.refuseprint <- function(x){
+  print("I refuse to print!!!")
+}
+
+# Notice that I don't need to call `print.refuseprint()`
+# R knows what to do!
+print(string)
+```
+
+******
+
+**Side Note:** This is why it is generally frowned upon to name objects using dot notation (e.g., `day.one`, `participant.ID`). The `.` actually means something, so it's best to reserve it for its purpose!
+
+---
+class: inverse
+# Revisiting Loops
+###`apply()` et al.
+- `apply()`
+- `lapply()`
+- `sapply()`
+- `mapply()`
+- `tapply()`
+- `replicate()`
+- `sweep()`
+---
+# Disclaimer
+
+The `apply` family of functions (`*apply`) offer a different way to loop in R
+
+--
+
+Some people argue that these functions are faster (to write and also to execute) than `for` loops.
+
+--
+
+1. `*apply` is [not faster to execute](https://faculty.washington.edu/tlumley/b514/R-fundamentals.pdf) than a `for` loop, generally speaking
+2. `*apply` may be faster to write (but may also not be)
+
+******
+
+### Advantages of `*apply`
+--
+
+- You do not need to pre-allocate 
+--
+
+- In some cases they *may* be faster than for loops (and in other cases they may not be)
+--
+
+- In some case they're easier to read (and sometimes they are not)
+
+--
+
+**Bottom line**: Use the tool that (a) makes most sense for your problem, (b) works for you and your collaborators, and (c) that you feel confident with
+---
+## `lapply()`
+
+.smallish[
+```{r, eval=FALSE}
+lapply(X, FUN, ...)
+```
+
+`lapply()` iterates over `X` (a vector, list, or columns of a data frame), applies the `FUN` function to each element, and <u>returns a list</u>. The `...` argument allows you to pass additional arguments into `FUN`
+
+.pull-left[
+```{r}
+# Vector    👇 anonymous function #<<
+lapply(1:3, function(x) x^2)
+```
+
+You can also use a named function 👇
+```{r, eval=FALSE}
+square <- function(x) x^2
+lapply(1:3, square)
+```
+]
+
+.pull-right[
+```{r}
+# List #<<
+myList <- list("One" = 1:10,
+               "Two" = lm(qsec ~ hp, mtcars),
+               "Three" = mtcars)
+lapply(myList, function(x) class(x))
+```
+]
+]
+---
+class: code-overflow
+
+## `...` in `lapply`
+
+.smallish[
+The `...` in `lapply` allow you to supply additional arguments to `FUN`.
+
+For example, let's take the mean across each column of mtcars:<sup>1</sup>
+
+```{r, eval=F, echo=F}
+mtcars[1, ] <- NA
+```
+
+.pull-left[
+```{r}
+lapply(mtcars, mean)
+```
+]
+
+.pull-right[
+```{r}
+lapply(mtcars, mean, na.rm = T)
+```
+]
+
+```{r, eval=F}
+# Equivalent to:
+lapply(mtcars, function(x) mean(x, na.rm = T))
+```
+
+```{r, eval=F, echo=F}
+data(mtcars)
+```
+
+.footnote[[1] I introduced some `NA`s into `mtcars` for this example]
+]
+
+---
+## `sapply()`: Simple `lapply()`
+
+.smallish[
+A downside of `lapply()` is that lists can be hard to work with and are also less common than other data types (vectors, dataframes, matrices). `sapply()` **s**implifies the output by returning a vector or a matrix
+
+`sapply()` is a **wrapper** for `lapply()`, which means that it calls `lapply()` itself, then does some extra work for you
+
+```{r, eval=FALSE}
+sapply(X, FUN, ..., simplify = TRUE, USE.NAMES = FALSE)
+```
+
+- `X`, `FUN`, and `...` are the same as in `lapply()`
+- `simplify`: if `TRUE`, returns a vector or matrix (whichever is most appropriate), if `FALSE` returns a list
+- `USE.NAMES`: if `TRUE` and `X` is character, use `X` as names for result
+]
+
+******
+.small[
+.pull-left[
+```{r}
+lapply(1:3, function(x) x^2)
+```
+]
+
+.pull-right[
+```{r}
+sapply(1:3, function(x) x^2)
+```
+]
+]
+---
+## `apply()`
+
+`apply()` iterates over the margins of an array<sup>1</sup> (or matrix or dataframe)
+
+```{r, eval=FALSE}
+apply(X, MARGIN, FUN, ..., simplify = TRUE)
+```
+
+- `X`: an array (or matrix or dataframe)
+- `MARGIN`: a vector specifying the subscripts that the function will be applied over
+  - `1` = rows
+  - `2` = columns
+  - `c(1, 2)` = rows and columns
+- `...`: additional arguments to `FUN`
+- `simplify`: if `TRUE` results are simplified to a vector, matrix, or dataframe (whichever is appropriate), if `FALSE` a list is returned
+
+
+.footnote[[1] an `array` is an object that can store data in more than 2 dimensions. We aren't talking about them in this class, but see `?array` for more info]
+---
+## `apply()`: Examples
+
+```{r}
+# Take the mean down all rows, across all columns
+apply(mtcars, 1, mean)
+```
+---
+## `apply()`: Examples
+
+```{r}
+# Take the mean down all rows, across all specified columns
+apply(mtcars[, c("cyl", "drat", "wt")], 1, mean)
+```
+---
+## `apply()`: Examples
+
+```{r}
+# Take the sum across all columns
+apply(mtcars, 2, sum)
+```
+
+```{r}
+# Add 3 to all values
+mtcars_p3 <- apply(mtcars, 1:2, function(x) x + 3)
+head(mtcars_p3)
+```
+---
+## `mapply()`
+
+.smallish[
+
+`mapply()` is a multivariate version of `sapply()`
+
+```{r, eval=FALSE}
+mapply(FUN, ..., MoreArgs = NULL, SIMPLIFY = TRUE, USE.NAMES = TRUE)
+```
+
+- `...` is a list of arguments to iterate over
+- `MoreArgs` is a `list` of other arguments to pass to `FUN`
+
+```{r}
+mapply(rep, 1:3, 7:5)
+```
+You can have has many `...` as you want!
+```{r}
+mapply(sum, 1:3, 4:6, 7:9)
+```
+
+]
+
+---
+## `replicate()`
+
+`replicate()` is a wrapper for a special case of `sapply()` where a single expression is **replicated** repeatedly
+
+```{r, eval=FALSE}
+replicate(n, expr, simplify = "array")
+```
+- `n` integer: the number of replications
+- `expr`: the expression (i.e., R code) to evaluate *n* times
+- `simplify` used to specify desired return value
+
+---
+## `replicate()`: Example
+
+.smallish[
+`replicate()` is really good for conducting simulations because essentially all you are doing is repeatedly sampling from the *same* distrubtion
+
+Let's simulate 10,000 samples of *n* = 300 from a uniform distribution (equal probability of all values, 0 to 10) and plot the means. **Why are these values normally distributed?**
+
+```{r, eval=F}
+hist(
+  replicate(10000, mean(runif(300, 0, 10))), #<<
+  main = "", xlab = "", breaks = 25
+)
+```
+
+```{r, fig.height=2.5, fig.width=7, fig.align='center', dev='svg', echo=F}
+par(mar = c(2, 4, 1, 2) + 0.1)
+hist(
+  replicate(10000, mean(runif(300, 0, 10))),
+  main = "", xlab = "", breaks = 25
+)
+```
+]
+
+---
+## `sweep()`
+
+`sweep()` **sweeps out** a summary statistic from an input array (typically a matrix or dataframe)
+
+```{r, eval=FALSE}
+sweep(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
+```
+
+- `x`: an array (or matrix or dataframe)
+--
+
+
+- `MARGIN`: a vector of indices which correspond with `STATS` (this is typically columns [2] but can be rows [1] or both [c(1, 2)])
+--
+
+
+- `STATS`: the summary statistic to be swept out (typically a vector)
+--
+
+
+- `FUN`: the function to be used to carry out the sweep (default is to substract_)
+--
+
+
+- `check.margin`: if `TRUE` warn if `length(STATS)` doesn't match `length(x)`
+
+---
+## `sweep()`: Example
+
+.small[
+It is often desired to *center* a variable prior to analysis. `sweep()` can be used to quickly center a bunch of columns in one call:
+```{r}
+mtcars_c <- sweep(x = mtcars,
+                  MARGIN = 2,
+                  STATS = colMeans(mtcars))
+
+head(mtcars)
+head(mtcars_c) |> round(1)
+```
+]
+
+---
+## `tapply()`
+
+.smallish[
+
+`tapply()` is used to apply a function over descrete subsets of an array
+
+```{r, eval=FALSE}
+tapply(X, INDEX, FUN = NULL, ..., default = NA, simplify = TRUE)
+```
+- `X`: an object that allows for subsetting (almost always a vector!)
+- `INDEX`: a list of 1+ vectors (same length as `X`) that specify the groups to subset by
+- `FUN`: the function to apply to each subset
+- `...`: additional arguments to pass to `FUN`
+
+******
+
+`tapply()` is *very* useful for looking at descriptive statistics by group
+
+.pull-left[
+Mean miles per gallon by automatic (0) or manual (1) transmission
+```{r}
+tapply(mtcars$mpg, mtcars$am, mean)
+```
+]
+
+.pull-right[
+Mean miles per gallon by automatic (0) or manual (1) transmission *and* number of cylinders (4, 6, or 8)
+```{r}
+tapply(mtcars$mpg, list(mtcars$am, mtcars$cyl), mean)
+```
+]
+]
+
+
+
+<!-- Either name arguments or pass in the right order -->
+
+
+<!-- # Revisiting Loops -->
+   <!-- Anonymous function -->

@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Functions and apply et al.</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Adam Kuczynski" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="main.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, top, title-slide
+
+# Functions and apply et al.
+### Adam Kuczynski
+
+---
+
+
+
+
+&lt;style type="text/css"&gt;
+.code-overflow .remark-code,
+.code-overflow pre{
+  max-height: 250px !important;
+  overflow: auto !important;
+}
+&lt;/style&gt;
+
+# What are functions?
+.small[
+A **function** is a chunk of R code that (typically) takes a set of inputs (i.e., **arguments**) and performs some sort of operation on them.
+
+.pull-left[
+There are three components of a function:
+- `body()`: the code inside the function
+- `formals()`: the list of arguments which controls how you can call the function
+- `environment()` the "map" of the location of the function's variables
+
+
+```r
+formals(sample)
+```
+
+```
+## $x
+## 
+## 
+## $size
+## 
+## 
+## $replace
+## [1] FALSE
+## 
+## $prob
+## NULL
+```
+]  
+  
+.pull-right[
+
+```r
+body(sample)
+```
+
+```
+## {
+##     if (length(x) == 1L &amp;&amp; is.numeric(x) &amp;&amp; is.finite(x) &amp;&amp; x &gt;= 
+##         1) {
+##         if (missing(size)) 
+##             size &lt;- x
+##         sample.int(x, size, replace, prob)
+##     }
+##     else {
+##         if (missing(size)) 
+##             size &lt;- length(x)
+##         x[sample.int(length(x), size, replace, prob)]
+##     }
+## }
+```
+
+```r
+environment(sample)
+```
+
+```
+## &lt;environment: namespace:base&gt;
+```
+]
+
+.footnote[The `sample()` function randomly samples *size* draws from a given vector]
+]
+---
+# Function Output
+Often a function will **return** an object. For example:
+- `mean()` returns a numeric vector of length 1
+--
+
+- `sample()` returns a numeric vector of length *size*
+--
+
+- `typeof()` returns a character vector of length 1
+--
+
+- `cor()` returns a matrix of size *rows `\(\times\)` columns*
+--
+
+- `lm()` returns lists nested in a list of length 12
+--
+
+
+When a function returns an object, you'll often want to assign that object to save the output. For example:
+
+```r
+shuffled_letters &lt;- sample(letters, length(letters))
+shuffled_letters
+```
+
+```
+##  [1] "h" "u" "o" "z" "d" "g" "q" "a" "s" "y" "f" "n" "v" "p" "r" "e" "m" "l" "t"
+## [20] "j" "w" "b" "i" "k" "x" "c"
+```
+---
+Functions don't *always* return an object. Sometimes they print text to the console or perform some other operation on your computer
+
+
+```r
+# Has no return value, just prints text!
+message("This is a message!")
+```
+
+```
+## This is a message!
+```
+
+
+```r
+# This just runs another R script!
+source("My Script.R")
+```
+
+******
+--
+
+
+.smallish[
+The data that you give (i.e., pass) a function are called **arguments**. Functions can have an unlimited amount of arguments. You can view the arguments of a function in the help pages: `?function_name`
+
+When you call a function, you can specify the argument names or you can choose not to. &lt;u&gt; If you do not specify argument names, you *must* pass them in the order the function is written in.&lt;/u&gt; Otherwise you have to specify the argument name.
+
+
+```r
+# 300 random draws from normal distribution mean = 5, sd = 10
+rnorm(300, 5, 10)
+
+# Same
+rnorm(sd = 10, n = 300, mean = 5)
+```
+]
+---
+# Packages
+
+What if there isn't a function in base R for something you want to do?
+--
+
+
+One of R's greatest features is the ability to extend the functionality of base R with **packages** (bundles of code that others have written to perform a set of tasks)
+--
+
+
+*Anybody* can write a package, which means that there are a lot of packages available - 17,911 at the time of this lecture - for you to use (for free!). If you need to do something base R cannot, chances are there's a package for it.
+--
+
+
+There's even an R package to generate ASCII art!
+
+.pull-left[
+
+```r
+cowsay::say("Isn't R cool?!",
+            by = "cow")
+```
+
+See `?cowsay::say` for other animals and options!
+
+]
+
+&lt;div style="font-size:70%;"&gt;
+.pull-right[
+
+```
+## 
+##  ----- 
+## Isn't R cool?! 
+##  ------ 
+##     \   ^__^ 
+##      \  (oo)\ ________ 
+##         (__)\         )\ /\ 
+##              ||------w|
+##              ||      ||
+```
+]
+&lt;/div&gt;
+---
+## Installing Packages: A Warning
+
+R packages are typically high quality and trustworthy. However, even the best packages contain bugs!
+
+.footnote[[1] It is good practice to cite package names and versions in your manuscripts. See `?citation` and `?packageVersion` for help]
+--
+
+
+.pull-left[
+Also, because *anybody* can write an R package, you might find yourself using a package that is not well built or, even worse, contains malicious code
+]
+
+
+.pull-right[
+&lt;div style="text-align:center;"&gt;
+  &lt;img src="images/davidrose.gif" style="max-width:50%;"&gt;
+&lt;/div&gt;
+]
+--
+
+
+.smallish[
+&lt;div style="height:25px;"&gt;&lt;/div&gt;
+**Bottom line:** It is important to vet the packages you use prior to installing them!
+
+&lt;u&gt;Look for&lt;/u&gt;:
+- Names/organizations of well-known developers
+- Extensive documentation (including source code)
+- Package citations&lt;sup&gt;1&lt;/sup&gt;
+]
+---
+# User-defined Functions
+
+.smallish[
+What if you want to do something that can't be done with a pre-written function from base R *or* a package? Don't worry! One of the primary strengths of using R for your analyses is the ability to write code that does basically whatever you want.
+
+******
+
+Functions are just another type of object in R. To create a **function** object, use the `function()` function.
+
+From `help("function")`:
+
+```r
+function( arglist ) expr
+return(value)
+\( arglist ) expr # we'll talk about this later
+```
+
+- `arglist` is a comma separated list of the arguments that your function will take
+  - for example: `sample()` takes 4 arguements: `x`, `size`, `replace`, and `prob`
+  - there's no limit to how many arguments you can take
+  - arguments can have default values such as `replace=` in `sample()`
+- `expr` is the R code that the function will execute each time it is called
+- `return` is a special function that denotes the **return value** (i.e., the output of the function)
+]
+---
+
+## Example: `firstlast()`
+
+.smallish[
+Let's write a function that takes a vector as input and outputs a named vector of the first and last elements:
+
+
+```r
+firstlast &lt;- function(x) {
+    first &lt;- x[1]
+    last  &lt;- x[length(x)]
+    return(c("first" = first, "last" = last))
+}
+```
+
+Test it out:
+
+
+```r
+firstlast(c(4, 3, 1, 8))
+```
+
+```
+## first  last 
+##     4     8
+```
+
+```r
+set.seed(1)
+firstlast(sample(1:99999999))
+```
+
+```
+##    first     last 
+## 66608964 39153287
+```
+]
+---
+# Testing `firstlast()`
+
+When writing your own function, it is important that you think about how the function will be used. This is particularly important if you are writing a function that others will use, and you can't anticipate exactly what the input will be.
+
+For example: What happens if I pass `firstlast()` the following objects?
+
+.pull-left[
+
+```r
+firstlast(10)
+```
+
+```
+## first  last 
+##    10    10
+```
+
+
+```r
+firstlast(numeric())
+```
+
+```
+## first 
+##    NA
+```
+]
+
+.pull-right[
+
+```r
+firstlast(mtcars)
+```
+
+```
+## $first.mpg
+##  [1] 21.0 21.0 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 17.8 16.4 17.3 15.2 10.4
+## [16] 10.4 14.7 32.4 30.4 33.9 21.5 15.5 15.2 13.3 19.2 27.3 26.0 30.4 15.8 19.7
+## [31] 15.0 21.4
+## 
+## $last.carb
+##  [1] 4 4 1 1 2 1 4 2 2 4 4 3 3 3 4 4 4 1 2 1 1 2 2 4 2 1 2 2 4 6 8 2
+```
+
+]
+---
+# Checking Inputs
+
+.smallish[
+
+Using a combination of `if/else` statements and `stop()` (which stops the function from running and prints the text inside as an error message), you can make sure valid information is passed to your function
+
+
+```r
+firstlast &lt;- function(x){
+  
+  # Check that x is valid
+  if(!is.vector(x) || length(x) &lt; 2){
+*   stop("`x` needs to be vector of length 2 or larger")
+  }
+  
+  first &lt;- x[1]
+  last  &lt;- x[length(x)]
+  return(c("first" = first, "last" = last))
+}
+
+firstlast(10)
+```
+
+```
+## Error in firstlast(10): `x` needs to be vector of length 2 or larger
+```
+
+```r
+firstlast(mtcars)
+```
+
+```
+## Error in firstlast(mtcars): `x` needs to be vector of length 2 or larger
+```
+]
+---
+# Example: Reporting Quantiles
+
+.smallish[
+
+```r
+reportQuantiles &lt;- function(x, na.rm = FALSE){
+  quants &lt;- quantile(x = x,
+                     na.rm = na.rm,
+                     probs = c(0.01, 0.05, 0.10, 0.25, 0.50,
+                               0.75, 0.90, 0.95, 0.99))
+  
+  names(quants) &lt;- c("Bottom 1%", "Bottom 5%", "Bottom 10%", "Bottom 25%",
+                     "Median", "Top 25%", "Top 10%", "Top 5%", "Top 1%")
+  
+  return(quants)
+}
+
+reportQuantiles(rnorm(100000))
+```
+
+```
+##    Bottom 1%    Bottom 5%   Bottom 10%   Bottom 25%       Median      Top 25% 
+## -2.317959618 -1.642248613 -1.283682278 -0.674976854 -0.006112585  0.668551795 
+##      Top 10%       Top 5%       Top 1% 
+##  1.276930110  1.639988060  2.339787800
+```
+
+Notice the `na.rm = FALSE` argument. This is a default, which means that if the user does not specify what they want `na.rm` to be, it will automatically be `FALSE
+
+You can call `reportQuantiles()` as many times as you need without writing the internal code over and over 
+]
+---
+## Functions Without Arguments
+
+Sometimes you may want to write a function that takes no arguments, but still does something useful
+
+For example, let's write a function that simulates a flip of a nickel. There's a 49.99% chance the nickel lands on heads, a 49.99% chance it lands on tails, and a [1 in 6000](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.48.2547) (0.02%) chance it lands on it's edge
+
+
+```r
+flipNickel &lt;- function(){
+  sideup &lt;- sample(x = c("heads", "tails", "edge"),
+                   size = 1,
+                   prob = c(.5-1/6000, .5-1/6000, 1/6000))
+  
+  return(sideup)
+}
+
+flipNickel()
+```
+
+```
+## [1] "tails"
+```
+
+.footnote[*Note.* You can effectively achieve a 50/50 coinflip using the `rbinom()` function, which is a vectorized function that randomly draws values from the binomial distribution]
+---
+# Lexical Scoping
+
+When you call an object in R (referring to a variable, calling a function), R has to know where to look for it. R first looks in the **environment** that the object was created in. If it doesn't find it there, it goes up one level to the **parent environment**, etc.
+
+Consider the following examples. What do you think the output will be?
+
+.smallish[
+.pull-left[
+**Example 1**
+
+```r
+varA &lt;- "A"
+varB &lt;- "B"
+
+
+myFunc &lt;- function(){
+  varA &lt;- "X"
+  varB &lt;- "Y"
+  return(paste(varA, varB))
+}
+
+myFunc()
+paste(varA, varB))
+```
+]
+
+.pull-right[
+**Example 2**
+
+```r
+varA &lt;- "A"
+varB &lt;- "B"
+varC &lt;- "C"
+
+myFunc &lt;- function(){
+  varA &lt;- "X"
+  varB &lt;- "Y"
+  return(paste(varA, varB, varC))
+}
+
+myFunc()
+paste(varA, varB, varC))
+```
+]
+]
+---
+.smallish[
+.pull-left[
+**Example 1**
+
+```r
+varA &lt;- "A"
+varB &lt;- "B"
+
+
+myFunc &lt;- function(){
+  varA &lt;- "X"
+  varB &lt;- "Y"
+  return(paste(varA, varB))
+}
+
+myFunc()
+```
+
+```
+## [1] "X Y"
+```
+
+```r
+paste(c(varA, varB))
+```
+
+```
+## [1] "A" "B"
+```
+]
+
+.pull-right[
+**Example 2**
+
+```r
+varA &lt;- "A"
+varB &lt;- "B"
+varC &lt;- "C"
+
+myFunc &lt;- function(){
+  varA &lt;- "X"
+  varB &lt;- "Y"
+  return(paste(varA, varB, varC))
+}
+
+myFunc()
+```
+
+```
+## [1] "X Y C"
+```
+
+```r
+paste(c(varA, varB, varC))
+```
+
+```
+## [1] "A" "B" "C"
+```
+]
+
+******
+
+When an object is called inside a function, R looks within that function for the object (Example 1). If R cannot find that object in the function, it searches its parent environment (the global environment; Example 2).
+]
+---
+## R Only Searches Upwards
+
+R will search as many parent environments as it needs to find a object, but it will *never* search downwards (i.e., into child environments)
+
+
+```r
+myFunc &lt;- function(){
+  myVector &lt;- 1:5
+  myOtherVector &lt;- letters[1:5]
+  return(paste0(myVector, myOtherVector))
+}
+
+myFunc()
+```
+
+```
+## [1] "1a" "2b" "3c" "4d" "5e"
+```
+
+```r
+exists("myVector")
+```
+
+```
+## [1] FALSE
+```
+
+```r
+exists("myOtherVector")
+```
+
+```
+## [1] FALSE
+```
+---
+# `&lt;&lt;-`
+
+.smallish[
+The `&lt;&lt;-` assignment operator works similar to the `&lt;-` operator except it forces R to make the assignment in the global environment. Unless you have a good reason not to do so, you should stick with the `&lt;-` operator for assignment (it keeps your code clean and bug free). 
+
+
+```r
+myFunc &lt;- function(){
+  myVector &lt;&lt;- 1:5
+  myOtherVector &lt;&lt;- letters[1:5]
+  return(paste0(myVector, myOtherVector))
+}
+
+myFunc()
+```
+
+```
+## [1] "1a" "2b" "3c" "4d" "5e"
+```
+
+```r
+exists("myVector")
+```
+
+```
+## [1] TRUE
+```
+
+```r
+exists("myOtherVector")
+```
+
+```
+## [1] TRUE
+```
+]
+---
+## dot-dot-dot (`...`)
+
+Many functions in R take an arbitrary number of targets but still work. These functions rely on the special 'dot-dot-dot' argument: `...`
+
+Let's create a function that takes an arbitrary number of strings and pastes them together as one comma-separated string:
+
+```r
+csString &lt;- function(...){
+  args &lt;- c(...)
+  string &lt;- paste0(args, collapse = ", ")
+  return(string)
+}
+```
+
+--
+
+
+```r
+csString("a", "b", "c")
+```
+
+```
+## [1] "a, b, c"
+```
+
+--
+
+
+```r
+csString("Apples", "Bananas", "Carrots", "Dates")
+```
+
+```
+## [1] "Apples, Bananas, Carrots, Dates"
+```
+---
+# `...`
+
+The `...` argument is particularly useful when you are writing your own function that calls another function, and you want to allow the user to specify as many (or as few) arguments for that function as they would like.
+
+--
+
+For example, it's often useful to write your own functions to create the same plots from different data. Because `plot()` takes so many arguments, you wouldn't (and couldn't because `plot()` also has the `...` argument!) want to write *all* the argument names and their defaults in your own function.
+
+--
+
+
+```r
+myPlot &lt;- function(...){
+  arglist &lt;- list(...)
+  plot(axes = FALSE, pch = 20, ...)
+  box()
+  axis(side = 1, lwd = 0, lwd.ticks = 1)
+  axis(side = 2, las = 1, lwd = 0, lwd.ticks = 1)
+  abline(v = mean(arglist$x),
+         h = mean(arglist$y))
+  abline(lm(arglist$y ~ arglist$x), col = "blue")
+}
+```
+
+---
+
+```r
+myPlot(x = mtcars$mpg, y = mtcars$hp)
+```
+
+&lt;img src="PSYCH548_Week5_FunctionsApply_files/figure-html/unnamed-chunk-29-1.svg" style="display: block; margin: auto;" /&gt;
+---
+
+```r
+myPlot(x = mtcars$mpg, y = mtcars$qsec, col = "purple",
+       main = "1/4 mile time by mpg")
+```
+
+&lt;img src="PSYCH548_Week5_FunctionsApply_files/figure-html/unnamed-chunk-30-1.svg" style="display: block; margin: auto;" /&gt;
+---
+### `function(function(function()))`
+
+Functions can be supplied as arguments to other functions and &lt;u&gt;R will evaluate the functions inside out&lt;/u&gt;
+.pull-left[
+
+```r
+dim(cbind(mtcars, mtcars))
+```
+
+```
+## [1] 32 22
+```
+same as 👉
+]
+
+.pull-right[
+
+```r
+dat &lt;- cbind(mtcars, mtcars)
+dim(dat)
+```
+
+```
+## [1] 32 22
+```
+]
+
+--
+
+
+There's no limit to how nested your functions can get and, as we will see next week, it is quite common to have several layers of nested functions.
+
+--
+
+For example, technically this is a deeply nested function:
+&lt;div&gt;
+.pull-left[
+
+```r
+1 + 2 * 3 / 4^5
+```
+
+```
+## [1] 1.005859
+```
+]
+
+.pull-right[
+
+
+```r
+`+`(1, `/`(`*`(2, 3), `^`(4, 5)))
+```
+
+```
+## [1] 1.005859
+```
+]
+&lt;/div&gt;
+---
+## Another Nested Function Example
+
+Suppose you want to summarize the `mtcars` dataframe by the numbers of cylinders in each car (4, 6, or 8), you only want to do this for the cars with more than 100 horsepower, and you want to add a column that converts miles per gallon (mpg) to kilometers per liter (kpl):
+
+```r
+transform(aggregate(formula = . ~ cyl,
+                    data = subset(mtcars, hp &gt; 100),
+                    FUN = function(x) round(mean(x), 2)),
+          "kpl" = mpg*0.425144)
+```
+
+```
+##   cyl   mpg   disp     hp drat   wt  qsec   vs   am gear carb       kpl
+## 1   4 25.90 108.05 111.00 3.94 2.15 17.75 1.00 1.00 4.50 2.00 11.011230
+## 2   6 19.74 183.31 122.29 3.59 3.12 17.98 0.57 0.43 3.86 3.43  8.392343
+## 3   8 15.10 353.10 209.21 3.23 4.00 16.77 0.00 0.14 3.29 3.50  6.419674
+```
+
+&lt;div style="height:25px;"&gt;&lt;/div&gt;
+Although this code works, it takes a lot of energy to read it and understand what's going on
+---
+.pull-left[
+&lt;h1 style="font-family: monospace;"&gt;
+&lt;span style="display:inline-block;margin:auto 10px"&gt;magrittr&lt;/span&gt;
+&lt;/h1&gt;
+]
+
+&lt;div class=".pull-right" style="text-align:right"&gt;
+ &lt;img src="images/magrittr.png" style="width:15%"&gt;
+&lt;/div&gt;
+
+.small[
+The `magrittr` package in R introduced the **pipe** operator (`%&gt;%`) to make nested function calls more intuitive to write and easier to read
+
+
+```r
+lhs %&gt;% rhs
+```
+
+`lhs` (**l**eft **h**and **s**ide) is the function that you are *piping* to the `rhs` (**r**ight **h**and **s**ide)
+
+For example, let's compute a correlation matrix for columns 1 through 5 of the *swiss* dataframe for those rows where `Infant.Mortality` is greater than its mean:
+
+```r
+swiss %&gt;%
+  subset(Infant.Mortality &gt; mean(Infant.Mortality),
+         select = 1:5) %&gt;%
+  cor()
+```
+
+```
+##              Fertility Agriculture Examination  Education   Catholic
+## Fertility    1.0000000   0.2913229  -0.6813507 -0.4716997  0.7231541
+## Agriculture  0.2913229   1.0000000  -0.4729718 -0.6269116  0.2675015
+## Examination -0.6813507  -0.4729718   1.0000000  0.7462636 -0.5308847
+## Education   -0.4716997  -0.6269116   0.7462636  1.0000000 -0.2594915
+## Catholic     0.7231541   0.2675015  -0.5308847 -0.2594915  1.0000000
+```
+]
+---
+## Revisiting Our Nested Function
+
+You'll recall:
+
+```r
+transform(aggregate(formula = . ~ cyl,
+                    data = subset(mtcars, hp &gt; 100),
+                    FUN = function(x) round(mean(x), 2)),
+          "kpl" = mpg*0.425144)
+```
+
+&lt;span style="font-size:50px"&gt;🪄&lt;/span&gt;
+
+
+```r
+mtcars %&gt;%
+  subset(hp &gt; 100) %&gt;%
+  aggregate(. ~ cyl, data = ., FUN = . %&gt;% mean %&gt;% round(2)) %&gt;%
+  transform(kpl = mpg*0.425144)
+```
+
+This is much easier to read and write!
+---
+
+&lt;h1 style="font-family: monospace;"&gt;
+Other
+&lt;span style="display:inline-block;margin:auto 10px"&gt;magrittr&lt;/span&gt;
+Pipes
+&lt;/h1&gt;
+
+.smallish[
+The `magrittr` package has several other pipes that can be useful (but that are less commonly used):
+
+- `%T&gt;%` 'tee' pipe: works like `%&gt;%` but returns the lhs (good for rhs functions with no return value - like plots)
+
+.pull-left[
+
+```r
+1:5 %&gt;% sum()
+```
+
+```
+## [1] 15
+```
+]
+
+.pull-right[
+
+```r
+1:5 %T&gt;% sum()
+```
+
+```
+## [1] 1 2 3 4 5
+```
+]
+
+- `%$%` 'exposition' pipe: exposes the names of the lhs object to the rhs object
+
+```r
+mtcars %$% cor(disp, qsec)
+```
+
+```
+## [1] -0.4336979
+```
+- `%&lt;&gt;%` 'assignment' pipe: the result of the pipe is assigned to the lhs  object (equivalent to `lhs &lt;- lhs %&gt;% rhs`). It is generally discouraged to use this pipe.
+&lt;div&gt;
+
+
+```r
+swiss$Catholic %&lt;&gt;% sqrt()
+```
+]
+---
+# Base R Pipe: `|&gt;`
+
+Recently (May 18, 2021) [R version 4.1.0 was released](https://stat.ethz.ch/pipermail/r-devel/2021-May/080724.html) with a base R pipe operator: `|&gt;`
+
+`|&gt;` works in much the same way as `magrittr::%&gt;%`, except that `.` cannot be used to reference the `lhs` object:
+
+```r
+10 %&gt;% sample(1:5, ., TRUE)
+```
+
+```
+##  [1] 1 5 4 2 5 1 5 4 3 2
+```
+
+```r
+10 |&gt; sample(1:5, ., TRUE)
+```
+
+```
+## Error in sample.int(x, size, replace, prob): object '.' not found
+```
+
+Instead, you have to create an **anonymous function**
+
+```r
+10 |&gt; {function(x) sample(1:5, x, TRUE)}()
+```
+
+```
+##  [1] 4 3 3 2 3 5 5 4 5 4
+```
+
+---
+
+# The Anonymous Function
+
+.smallish[
+An **anonymous function** (also known as a **lambda** function) differs from all other functions in that it &lt;u&gt;does not have a name&lt;/u&gt; . Anonymous functions are usually arguments to a higher-order (parent) function.
+
+Up until May 18, 2021, anonymous functions were created the same way all other functions are created: the `function()` function. However, many people thought these was too verbose and, following the lead of other programming languages, made a shorthand for `function()`: `\()`
+
+*Technically* `\()` can be used to write all your functions. For example:
+
+```r
+# These are equivalent
+addOne &lt;- function(x) return(x + 1)
+addOne &lt;- \(x) return(x + 1)
+```
+
+In practice, however, `\()` will only be used to write anonymous functions, and you should follow that custom (for code readability)
+
+.footnote[*Note.* If you are worried about your code being backwards compatible (e.g., because you are collaborating with a large group), avoid using `|&gt;` and `\\()` for a little while]
+]
+
+---
+# Debugging Functions
+
+.smallish[
+
+```r
+errorFunction &lt;- function(){
+  a &lt;- "a"
+  b &lt;- "b"
+  stop("The error occurs here.")
+  c &lt;- "c"
+}
+
+errorFunction()
+```
+
+```
+## Error in errorFunction(): The error occurs here.
+```
+
+Often it won't be clear what is causing a certain bug (unlike the above example). Sometimes it's a typo in your code, sometimes its an invalid argument.
+
+To debug a function use the `debug()` function. 
+
+```r
+debug(errorFunction)
+```
+
+When you are finished debugging, use `undebug()` so you won't go into debug mode every time the function is called
+
+```r
+undebug(errorFunction)
+```
+]
+
+---
+# Recursive functions
+
+.smallish[
+A **recursive function** is a function that calls itself. Recursive functions are useful in situations where problems can be broken down into smaller, repetitive problems, or when you need to iterate over arbitrarily nested objects.
+
+
+```r
+myFactorial &lt;- function(number){
+  if(number == 0){
+    return(1)
+  } else{
+    return(number * myFactorial(number-1))
+  }
+}
+
+myFactorial(5)
+```
+
+```
+## [1] 120
+```
+
+This evaluated as: 
+1. `1`
+2. `2 * myFactorial(1)`
+3. `3 * myFactorial(2)`
+4. `4 * myFactorial(3)`
+5. `5 * myFactorial(4)`
+]
+---
+# Making an Operator
+
+Now that we know how to make our own functions we can make our own operators. These operators are known as **infix operators** because they are placed *between* arguments. `+`, `-`, `*`, `/`, `%*%`, `%in%`, etc. are all infix operators.
+
+******
+
+### An example:
+
+.smallish[
+Many programming languages have shorthand operators for incrementing and decrementing variables:
+
+- `+=` (add the rhs to the lhs: `lhs &lt;- lhs + rhs`)
+- `-=` (subtracts the rhs from the lhs: `lhs &lt;- lhs - rhs`)
+- `++` (adds one to a variable: `lhs &lt;- lhs + 1`)
+- `--` (subtracts one from a variable: `lhs &lt;- lhs - 1`)
+
+These are very useful in loops:
+
+```r
+count &lt;- 0
+while(count &lt; 10){
+  count++ # instead of count &lt;- count + 1
+  print(count)
+}
+```
+]
+---
+.smallish[
+Unfortunately R doesn't come with these operators. But we can make our own very easily!
+
+
+```r
+`%+=%` &lt;- function(lhs, rhs){
+  # Evaluates the expression in the parent frame
+  # `substitute()` needed so the expression does
+  # not run in the eval.parent() call
+  eval.parent(substitute(lhs &lt;- lhs + rhs))
+}
+
+`%-=%` &lt;- function(lhs, rhs){
+  eval.parent(substitute(lhs &lt;- lhs - rhs))
+}
+```
+
+.pull-left[
+
+```r
+value &lt;- 0
+value %+=% 5
+print(value)
+```
+
+```
+## [1] 5
+```
+
+```r
+value %+=% 5
+print(value)
+```
+
+```
+## [1] 10
+```
+]
+
+.pull-right[
+
+```r
+value &lt;- 20
+value %-=% 5
+print(value)
+```
+
+```
+## [1] 15
+```
+
+```r
+value %-=% 5
+print(value)
+```
+
+```
+## [1] 10
+```
+]
+]
+---
+# What about not `%in%`?
+
+.smallish[
+Recall that the `%in%` operator returns a vector of the positions of the lhs vector that are in the rhs vector:
+
+```r
+1:5 %in% 1:3
+```
+
+```
+## [1]  TRUE  TRUE  TRUE FALSE FALSE
+```
+
+We can inverse this to get the opposite, but it is a bit hard to read:
+
+```r
+!1:5 %in% 1:3
+```
+
+```
+## [1] FALSE FALSE FALSE  TRUE  TRUE
+```
+
+We can *invert* or **negate**&lt;sup&gt;1&lt;/sup&gt; `%in%` to get a "not in" operator:
+
+```r
+`%!in%` &lt;- Negate(`%in%`)
+1:5 %!in% 1:3
+```
+
+```
+## [1] FALSE FALSE FALSE  TRUE  TRUE
+```
+
+.footnote[[1] `Negate()` produces logical negations of *functions*, inverting their output. For example: `is.not.numeric &lt;- Negate(is.numeric)`]
+]
+
+---
+class: inverse
+# Classes and Methods
+---
+# Classes
+
+Objects in R are **instances** of one or more **classes**. A class defines the behavior of an object.
+
+.smallish[
+To get the class of an object, use the `class()` function:
+
+```r
+class(1:10)
+```
+
+```
+## [1] "integer"
+```
+
+```r
+class(letters)
+```
+
+```
+## [1] "character"
+```
+
+```r
+class(mean)
+```
+
+```
+## [1] "function"
+```
+
+```r
+class(mtcars)
+```
+
+```
+## [1] "data.frame"
+```
+]
+---
+# Methods
+
+A **method** is a function associated with a specific class. There are many **generic functions** in R which change their behavior depending on the class of the object which it is passed.
+
+Methods are denoted by `.classname` after the generic function name. For example, let's take a look at the `summary` generic function, which has 34 methods:
+
+
+```r
+head(methods(summary))
+```
+
+```
+## [1] "summary.aov"                   "summary.aovlist"              
+## [3] "summary.aspell"                "summary.check_packages_in_dir"
+## [5] "summary.connection"            "summary.data.frame"
+```
+
+This means that when summary is passed an object of class `aov` (`print.aov`) it works differently than when it is passed a `data.frame` (`print.data.frame`) 
+---
+# Making Our Own Method
+
+Making your own method is just like making your own function, except you need to name the function accordingly: `generic.class()`
+
+To assign an object a class, use the `class()` function
+
+
+```r
+string &lt;- "Please print me!"
+class(string)
+```
+
+```
+## [1] "character"
+```
+
+```r
+print(string)
+```
+
+```
+## [1] "Please print me!"
+```
+
+```r
+class(string) &lt;- "refuseprint"
+class(string)
+```
+
+```
+## [1] "refuseprint"
+```
+
+
+---
+
+
+```r
+string &lt;- "Please print me!"
+```
+
+
+```r
+# print() method for objects of r class `refuseprint`
+print.refuseprint &lt;- function(x){
+  print("I refuse to print!!!")
+}
+
+# Notice that I don't need to call `print.refuseprint()`
+# R knows what to do!
+print(string)
+```
+
+```
+## [1] "I refuse to print!!!"
+```
+
+******
+
+**Side Note:** This is why it is generally frowned upon to name objects using dot notation (e.g., `day.one`, `participant.ID`). The `.` actually means something, so it's best to reserve it for its purpose!
+
+---
+class: inverse
+# Revisiting Loops
+###`apply()` et al.
+- `apply()`
+- `lapply()`
+- `sapply()`
+- `mapply()`
+- `tapply()`
+- `replicate()`
+- `sweep()`
+---
+# Disclaimer
+
+The `apply` family of functions (`*apply`) offer a different way to loop in R
+
+--
+
+Some people argue that these functions are faster (to write and also to execute) than `for` loops.
+
+--
+
+1. `*apply` is [not faster to execute](https://faculty.washington.edu/tlumley/b514/R-fundamentals.pdf) than a `for` loop, generally speaking
+2. `*apply` may be faster to write (but may also not be)
+
+******
+
+### Advantages of `*apply`
+--
+
+- You do not need to pre-allocate 
+--
+
+- In some cases they *may* be faster than for loops (and in other cases they may not be)
+--
+
+- In some case they're easier to read (and sometimes they are not)
+
+--
+
+**Bottom line**: Use the tool that (a) makes most sense for your problem, (b) works for you and your collaborators, and (c) that you feel confident with
+---
+## `lapply()`
+
+.smallish[
+
+```r
+lapply(X, FUN, ...)
+```
+
+`lapply()` iterates over `X` (a vector, list, or columns of a data frame), applies the `FUN` function to each element, and &lt;u&gt;returns a list&lt;/u&gt;. The `...` argument allows you to pass additional arguments into `FUN`
+
+.pull-left[
+
+```r
+*# Vector    👇 anonymous function
+lapply(1:3, function(x) x^2)
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] 4
+## 
+## [[3]]
+## [1] 9
+```
+
+You can also use a named function 👇
+
+```r
+square &lt;- function(x) x^2
+lapply(1:3, square)
+```
+]
+
+.pull-right[
+
+```r
+*# List
+myList &lt;- list("One" = 1:10,
+               "Two" = lm(qsec ~ hp, mtcars),
+               "Three" = mtcars)
+lapply(myList, function(x) class(x))
+```
+
+```
+## $One
+## [1] "integer"
+## 
+## $Two
+## [1] "lm"
+## 
+## $Three
+## [1] "data.frame"
+```
+]
+]
+---
+class: code-overflow
+
+## `...` in `lapply`
+
+.smallish[
+The `...` in `lapply` allow you to supply additional arguments to `FUN`.
+
+For example, let's take the mean across each column of mtcars:&lt;sup&gt;1&lt;/sup&gt;
+
+
+
+.pull-left[
+
+```r
+lapply(mtcars, mean)
+```
+
+```
+## $mpg
+## [1] 20.09062
+## 
+## $cyl
+## [1] 6.1875
+## 
+## $disp
+## [1] 230.7219
+## 
+## $hp
+## [1] 146.6875
+## 
+## $drat
+## [1] 3.596563
+## 
+## $wt
+## [1] 3.21725
+## 
+## $qsec
+## [1] 17.84875
+## 
+## $vs
+## [1] 0.4375
+## 
+## $am
+## [1] 0.40625
+## 
+## $gear
+## [1] 3.6875
+## 
+## $carb
+## [1] 2.8125
+```
+]
+
+.pull-right[
+
+```r
+lapply(mtcars, mean, na.rm = T)
+```
+
+```
+## $mpg
+## [1] 20.09062
+## 
+## $cyl
+## [1] 6.1875
+## 
+## $disp
+## [1] 230.7219
+## 
+## $hp
+## [1] 146.6875
+## 
+## $drat
+## [1] 3.596563
+## 
+## $wt
+## [1] 3.21725
+## 
+## $qsec
+## [1] 17.84875
+## 
+## $vs
+## [1] 0.4375
+## 
+## $am
+## [1] 0.40625
+## 
+## $gear
+## [1] 3.6875
+## 
+## $carb
+## [1] 2.8125
+```
+]
+
+
+```r
+# Equivalent to:
+lapply(mtcars, function(x) mean(x, na.rm = T))
+```
+
+
+
+.footnote[[1] I introduced some `NA`s into `mtcars` for this example]
+]
+
+---
+## `sapply()`: Simple `lapply()`
+
+.smallish[
+A downside of `lapply()` is that lists can be hard to work with and are also less common than other data types (vectors, dataframes, matrices). `sapply()` **s**implifies the output by returning a vector or a matrix
+
+`sapply()` is a **wrapper** for `lapply()`, which means that it calls `lapply()` itself, then does some extra work for you
+
+
+```r
+sapply(X, FUN, ..., simplify = TRUE, USE.NAMES = FALSE)
+```
+
+- `X`, `FUN`, and `...` are the same as in `lapply()`
+- `simplify`: if `TRUE`, returns a vector or matrix (whichever is most appropriate), if `FALSE` returns a list
+- `USE.NAMES`: if `TRUE` and `X` is character, use `X` as names for result
+]
+
+******
+.small[
+.pull-left[
+
+```r
+lapply(1:3, function(x) x^2)
+```
+
+```
+## [[1]]
+## [1] 1
+## 
+## [[2]]
+## [1] 4
+## 
+## [[3]]
+## [1] 9
+```
+]
+
+.pull-right[
+
+```r
+sapply(1:3, function(x) x^2)
+```
+
+```
+## [1] 1 4 9
+```
+]
+]
+---
+## `apply()`
+
+`apply()` iterates over the margins of an array&lt;sup&gt;1&lt;/sup&gt; (or matrix or dataframe)
+
+
+```r
+apply(X, MARGIN, FUN, ..., simplify = TRUE)
+```
+
+- `X`: an array (or matrix or dataframe)
+- `MARGIN`: a vector specifying the subscripts that the function will be applied over
+  - `1` = rows
+  - `2` = columns
+  - `c(1, 2)` = rows and columns
+- `...`: additional arguments to `FUN`
+- `simplify`: if `TRUE` results are simplified to a vector, matrix, or dataframe (whichever is appropriate), if `FALSE` a list is returned
+
+
+.footnote[[1] an `array` is an object that can store data in more than 2 dimensions. We aren't talking about them in this class, but see `?array` for more info]
+---
+## `apply()`: Examples
+
+
+```r
+# Take the mean down all rows, across all columns
+apply(mtcars, 1, mean)
+```
+
+```
+##           Mazda RX4       Mazda RX4 Wag          Datsun 710      Hornet 4 Drive 
+##            29.90727            29.98136            23.59818            38.73955 
+##   Hornet Sportabout             Valiant          Duster 360           Merc 240D 
+##            53.66455            35.04909            59.72000            24.63455 
+##            Merc 230            Merc 280           Merc 280C          Merc 450SE 
+##            27.23364            31.86000            31.78727            46.43091 
+##          Merc 450SL         Merc 450SLC  Cadillac Fleetwood Lincoln Continental 
+##            46.50000            46.35000            66.23273            66.05855 
+##   Chrysler Imperial            Fiat 128         Honda Civic      Toyota Corolla 
+##            65.97227            19.44091            17.74227            18.81409 
+##       Toyota Corona    Dodge Challenger         AMC Javelin          Camaro Z28 
+##            24.88864            47.24091            46.00773            58.75273 
+##    Pontiac Firebird           Fiat X1-9       Porsche 914-2        Lotus Europa 
+##            57.37955            18.92864            24.77909            24.88027 
+##      Ford Pantera L        Ferrari Dino       Maserati Bora          Volvo 142E 
+##            60.97182            34.50818            63.15545            26.26273
+```
+---
+## `apply()`: Examples
+
+
+```r
+# Take the mean down all rows, across all specified columns
+apply(mtcars[, c("cyl", "drat", "wt")], 1, mean)
+```
+
+```
+##           Mazda RX4       Mazda RX4 Wag          Datsun 710      Hornet 4 Drive 
+##            4.173333            4.258333            3.390000            4.098333 
+##   Hornet Sportabout             Valiant          Duster 360           Merc 240D 
+##            4.863333            4.073333            4.926667            3.626667 
+##            Merc 230            Merc 280           Merc 280C          Merc 450SE 
+##            3.690000            4.453333            4.453333            5.046667 
+##          Merc 450SL         Merc 450SLC  Cadillac Fleetwood Lincoln Continental 
+##            4.933333            4.950000            5.393333            5.474667 
+##   Chrysler Imperial            Fiat 128         Honda Civic      Toyota Corolla 
+##            5.525000            3.426667            3.515000            3.351667 
+##       Toyota Corona    Dodge Challenger         AMC Javelin          Camaro Z28 
+##            3.388333            4.760000            4.861667            5.190000 
+##    Pontiac Firebird           Fiat X1-9       Porsche 914-2        Lotus Europa 
+##            4.975000            3.338333            3.523333            3.094333 
+##      Ford Pantera L        Ferrari Dino       Maserati Bora          Volvo 142E 
+##            5.130000            4.130000            5.036667            3.630000
+```
+---
+## `apply()`: Examples
+
+
+```r
+# Take the sum across all columns
+apply(mtcars, 2, sum)
+```
+
+```
+##      mpg      cyl     disp       hp     drat       wt     qsec       vs 
+##  642.900  198.000 7383.100 4694.000  115.090  102.952  571.160   14.000 
+##       am     gear     carb 
+##   13.000  118.000   90.000
+```
+
+
+```r
+# Add 3 to all values
+mtcars_p3 &lt;- apply(mtcars, 1:2, function(x) x + 3)
+head(mtcars_p3)
+```
+
+```
+##                    mpg cyl disp  hp drat    wt  qsec vs am gear carb
+## Mazda RX4         24.0   9  163 113 6.90 5.620 19.46  3  4    7    7
+## Mazda RX4 Wag     24.0   9  163 113 6.90 5.875 20.02  3  4    7    7
+## Datsun 710        25.8   7  111  96 6.85 5.320 21.61  4  4    7    4
+## Hornet 4 Drive    24.4   9  261 113 6.08 6.215 22.44  4  3    6    4
+## Hornet Sportabout 21.7  11  363 178 6.15 6.440 20.02  3  3    6    5
+## Valiant           21.1   9  228 108 5.76 6.460 23.22  4  3    6    4
+```
+---
+## `mapply()`
+
+.smallish[
+
+`mapply()` is a multivariate version of `sapply()`
+
+
+```r
+mapply(FUN, ..., MoreArgs = NULL, SIMPLIFY = TRUE, USE.NAMES = TRUE)
+```
+
+- `...` is a list of arguments to iterate over
+- `MoreArgs` is a `list` of other arguments to pass to `FUN`
+
+
+```r
+mapply(rep, 1:3, 7:5)
+```
+
+```
+## [[1]]
+## [1] 1 1 1 1 1 1 1
+## 
+## [[2]]
+## [1] 2 2 2 2 2 2
+## 
+## [[3]]
+## [1] 3 3 3 3 3
+```
+You can have has many `...` as you want!
+
+```r
+mapply(sum, 1:3, 4:6, 7:9)
+```
+
+```
+## [1] 12 15 18
+```
+
+]
+
+---
+## `replicate()`
+
+`replicate()` is a wrapper for a special case of `sapply()` where a single expression is **replicated** repeatedly
+
+
+```r
+replicate(n, expr, simplify = "array")
+```
+- `n` integer: the number of replications
+- `expr`: the expression (i.e., R code) to evaluate *n* times
+- `simplify` used to specify desired return value
+
+---
+## `replicate()`: Example
+
+.smallish[
+`replicate()` is really good for conducting simulations because essentially all you are doing is repeatedly sampling from the *same* distrubtion
+
+Let's simulate 10,000 samples of *n* = 300 from a uniform distribution (equal probability of all values, 0 to 10) and plot the means. **Why are these values normally distributed?**
+
+
+```r
+hist(
+* replicate(10000, mean(runif(300, 0, 10))),
+  main = "", xlab = "", breaks = 25
+)
+```
+
+&lt;img src="PSYCH548_Week5_FunctionsApply_files/figure-html/unnamed-chunk-85-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+## `sweep()`
+
+`sweep()` **sweeps out** a summary statistic from an input array (typically a matrix or dataframe)
+
+
+```r
+sweep(x, MARGIN, STATS, FUN = "-", check.margin = TRUE, ...)
+```
+
+- `x`: an array (or matrix or dataframe)
+--
+
+
+- `MARGIN`: a vector of indices which correspond with `STATS` (this is typically columns [2] but can be rows [1] or both [c(1, 2)])
+--
+
+
+- `STATS`: the summary statistic to be swept out (typically a vector)
+--
+
+
+- `FUN`: the function to be used to carry out the sweep (default is to substract_)
+--
+
+
+- `check.margin`: if `TRUE` warn if `length(STATS)` doesn't match `length(x)`
+
+---
+## `sweep()`: Example
+
+.small[
+It is often desired to *center* a variable prior to analysis. `sweep()` can be used to quickly center a bunch of columns in one call:
+
+```r
+mtcars_c &lt;- sweep(x = mtcars,
+                  MARGIN = 2,
+                  STATS = colMeans(mtcars))
+
+head(mtcars)
+```
+
+```
+##                    mpg cyl disp  hp drat    wt  qsec vs am gear carb
+## Mazda RX4         21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
+## Mazda RX4 Wag     21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
+## Datsun 710        22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
+## Hornet 4 Drive    21.4   6  258 110 3.08 3.215 19.44  1  0    3    1
+## Hornet Sportabout 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2
+## Valiant           18.1   6  225 105 2.76 3.460 20.22  1  0    3    1
+```
+
+```r
+head(mtcars_c) |&gt; round(1)
+```
+
+```
+##                    mpg  cyl   disp    hp drat   wt qsec   vs   am gear carb
+## Mazda RX4          0.9 -0.2  -70.7 -36.7  0.3 -0.6 -1.4 -0.4  0.6  0.3  1.2
+## Mazda RX4 Wag      0.9 -0.2  -70.7 -36.7  0.3 -0.3 -0.8 -0.4  0.6  0.3  1.2
+## Datsun 710         2.7 -2.2 -122.7 -53.7  0.3 -0.9  0.8  0.6  0.6  0.3 -1.8
+## Hornet 4 Drive     1.3 -0.2   27.3 -36.7 -0.5  0.0  1.6  0.6 -0.4 -0.7 -1.8
+## Hornet Sportabout -1.4  1.8  129.3  28.3 -0.4  0.2 -0.8 -0.4 -0.4 -0.7 -0.8
+## Valiant           -2.0 -0.2   -5.7 -41.7 -0.8  0.2  2.4  0.6 -0.4 -0.7 -1.8
+```
+]
+
+---
+## `tapply()`
+
+.smallish[
+
+`tapply()` is used to apply a function over descrete subsets of an array
+
+
+```r
+tapply(X, INDEX, FUN = NULL, ..., default = NA, simplify = TRUE)
+```
+- `X`: an object that allows for subsetting (almost always a vector!)
+- `INDEX`: a list of 1+ vectors (same length as `X`) that specify the groups to subset by
+- `FUN`: the function to apply to each subset
+- `...`: additional arguments to pass to `FUN`
+
+******
+
+`tapply()` is *very* useful for looking at descriptive statistics by group
+
+.pull-left[
+Mean miles per gallon by automatic (0) or manual (1) transmission
+
+```r
+tapply(mtcars$mpg, mtcars$am, mean)
+```
+
+```
+##        0        1 
+## 17.14737 24.39231
+```
+]
+
+.pull-right[
+Mean miles per gallon by automatic (0) or manual (1) transmission *and* number of cylinders (4, 6, or 8)
+
+```r
+tapply(mtcars$mpg, list(mtcars$am, mtcars$cyl), mean)
+```
+
+```
+##        4        6     8
+## 0 22.900 19.12500 15.05
+## 1 28.075 20.56667 15.40
+```
+]
+]
+
+
+
+&lt;!-- Either name arguments or pass in the right order --&gt;
+
+
+&lt;!-- # Revisiting Loops --&gt;
+   &lt;!-- Anonymous function --&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "tomorrow-night-bright",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

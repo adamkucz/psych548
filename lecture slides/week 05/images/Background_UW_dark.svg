@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="800mm"
+   height="600mm"
+   viewBox="0 0 800 600"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="Background_UW_dark.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="900.71574"
+     inkscape:cy="-40.571696"
+     inkscape:document-units="mm"
+     inkscape:current-layer="text5209"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1043"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,303)">
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4532"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.33333206px;line-height:1.25;font-family:Quattrocento;-inkscape-font-specification:Quattrocento;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+       transform="matrix(0.26458333,0,0,0.26458333,0,-303)"><flowRegion
+         id="flowRegion4534"><rect
+           id="rect4536"
+           width="515.71429"
+           height="130.71428"
+           x="108.57144"
+           y="2148.4309" /></flowRegion><flowPara
+         id="flowPara4538"
+         style="font-weight:bold;font-size:82.66667175px" /></flowRoot>    <path
+       style="fill:none;stroke:#342c5c;stroke-width:2.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 319.91813,289.78371 H 791.51871 V -294.6011 H 8.41899 v 584.2512 h 20.579753"
+       id="path4578"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccc" />
+    <g
+       aria-label="UW CS&amp;SS"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.11111069px;line-height:1.25;font-family:Quattrocento;-inkscape-font-specification:Quattrocento;letter-spacing:0px;word-spacing:0px;fill:#342c5c;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       id="text5209"
+       transform="translate(4.913691,-1.5119047)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#342c5c;fill-opacity:1;stroke:none;stroke-width:0.07000434"
+         x="29.920713"
+         y="296.08069"
+         class="unisans"
+         id="text26"><tspan
+           sodipodi:role="line"
+           id="tspan24"
+           x="29.920713"
+           y="296.08069"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.8722229px;font-family:'Uni Sans';-inkscape-font-specification:'Uni Sans';fill:#342c5c;fill-opacity:1;stroke-width:0.07000434">UNIVERSITY <tspan
+   style="font-size:14.11111069px"
+   id="tspan4536">OF</tspan> WASHINGTON</tspan></text>
+    </g>
+  </g>
+</svg>
