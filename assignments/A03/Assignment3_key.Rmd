@@ -8,12 +8,6 @@ output: html_document
 knitr::opts_chunk$set(echo = F)
 ```
 
-```{css, echo=F}
-pre {
-  max-height: 450px;
-}
-```
-
 <button id="togglebutton" style="width: 100px; margin-bottom: 25px;" onclick="toggleOutput()">
 Show Output
 </button>
