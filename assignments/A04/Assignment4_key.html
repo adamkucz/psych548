@@ -168,9 +168,6 @@ pre code {
 </div>
 
 
-<button id="togglebutton" style="width: 100px; margin-bottom: 25px;" onclick="toggleOutput()">
-Show Output
-</button>
 <p><span style="color: white; background-color: darkorange; font-weight:bold; padding: 2px;"> Please submit both the .Rmd and a .html file on Canvas. </span></p>
 <p>You do not need any extra packages to do this homework (i.e., everything can be done using base R functions!)</p>
 <div id="problem-1" class="section level2">
@@ -247,20 +244,20 @@ quantile(observations, probs = c(0.05, 0.95))</code></pre>
   return(sideup)
 }</code></pre>
 <pre class="r"><code>flipNickel(5)</code></pre>
-<pre><code>## [1] &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;</code></pre>
+<pre><code>## [1] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;</code></pre>
 <pre class="r"><code>flipNickel(100)</code></pre>
-<pre><code>##   [1] &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot;
-##  [10] &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot;
-##  [19] &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot;
-##  [28] &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot;
-##  [37] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot;
-##  [46] &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot;
-##  [55] &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot;
-##  [64] &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;
-##  [73] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot;
-##  [82] &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot;
-##  [91] &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;
-## [100] &quot;heads&quot;</code></pre>
+<pre><code>##   [1] &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot;
+##  [10] &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot;
+##  [19] &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot;
+##  [28] &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot;
+##  [37] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot;
+##  [46] &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot;
+##  [55] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot;
+##  [64] &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;
+##  [73] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;
+##  [82] &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot;
+##  [91] &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot;
+## [100] &quot;tails&quot;</code></pre>
 <pre class="r"><code>flipNickel(-5)</code></pre>
 <pre><code>## Error in integer(n): invalid &#39;length&#39; argument</code></pre>
 </div>
@@ -313,35 +310,6 @@ quantile(observations, probs = c(0.05, 0.95))</code></pre>
 <p>Do this again to get the mean PHQ-9 Total score for individuals in a relationship (<code>relationhip == 1</code>) and those not in a relationship (<code>relationship == 0</code>).</p>
 <pre><code>##        0        1 
 ## 6.403084 6.873614</code></pre>
-<script type="text/javascript">
-window.onload = () => {
- document.getElementById('togglebutton').click();
-};
-
-function toggleOutput(){
-
-  let e = document.getElementById('togglebutton')
-
-  if(e.innerHTML == "Show Output"){
-    e.innerHTML = "Hide Output";
-  } else {
-    e.innerHTML = "Show Output";
-  }
-
-  var outputs = document.getElementsByClassName('hljs');
-  
-  // pre of class R is code, not output
-  for(var i = 0; i < outputs.length; i++){
-    if(outputs[i].parentNode.style.display == "none"){
-      outputs[i].parentNode.style.display = "block";
-    } else {
-      if(outputs[i].parentNode.className != "r"){
-        outputs[i].parentNode.style.display = "none";
-      }
-    }
-  }
-};
-</script>
 </div>
 
 

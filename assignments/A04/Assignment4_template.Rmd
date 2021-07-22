@@ -14,11 +14,7 @@ pre {
 }
 ```
 
-<button id="togglebutton" style="width: 100px; margin-bottom: 25px;" onclick="toggleOutput()">
-Show Output
-</button>
-
-<span style="color: white; background-color: black; font-weight:bold; padding: 2px;">
+<span style="color: white; background-color: darkorange; font-weight:bold; padding: 2px;">
 Please submit both the .Rmd and a .html file on Canvas.
 </span>
 
@@ -217,35 +213,4 @@ Using `tapply()`, get the mean PHQ-9 total score for individuals in each categor
 Do this again to get the mean PHQ-9 Total score for individuals in a relationship (`relationhip == 1`) and those not in a relationship (`relationship == 0`).
 ```{r}
 
-```
-
-
-```{js, echo=F}
-window.onload = () => {
-  document.getElementById('togglebutton').click();
-};
-
-function toggleOutput(){
-
-  let e = document.getElementById('togglebutton')
-
-  if(e.innerHTML == "Show Output"){
-    e.innerHTML = "Hide Output";
-  } else {
-    e.innerHTML = "Show Output";
-  }
-
-  var outputs = document.getElementsByClassName('hljs');
-  
-  // pre of class R is code, not output
-  for(var i = 0; i < outputs.length; i++){
-    if(outputs[i].parentNode.style.display == "none"){
-      outputs[i].parentNode.style.display = "block";
-    } else {
-      if(outputs[i].parentNode.className != "r"){
-        outputs[i].parentNode.style.display = "none";
-      }
-    }
-  }
-};
 ```
