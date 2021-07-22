@@ -1,0 +1,330 @@
+---
+title: "Assignment 4"
+subtitle: "Functions and apply et al."
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+<button id="togglebutton" style="width: 100px; margin-bottom: 25px;" onclick="toggleOutput()">
+Show Output
+</button>
+
+<span style="color: white; background-color: darkorange; font-weight:bold; padding: 2px;">
+Please submit both the .Rmd and a .html file on Canvas.
+</span>
+
+You do not need any extra packages to do this homework (i.e., everything can be done using base R functions!)
+
+## Problem 1
+
+Write a function called `minAndMax` that takes a vector of any length (`x`) and returns a named vector of length 2 (names = "min" and "max") with the minimum and maximum value of that vector. Before taking the minimum and maximum values of the vector, use what you know about control structures and checking the atomic type of a variable to ensure that the vector is numeric. If the vector is not numeric, you will want to throw an error (i.e., tell the user you can't find the maximum value of a non-numeric vector). Code to throw an error is below. Bonus points if you get the error message to inform the user which type of vector they passed to your function.
+
+```{r, echo=T, eval=F}
+stop("`x` must be a numeric vector")
+```
+
+```{r}
+minAndMax <- function(x){
+  # Throw error if x is non-numeric
+  if(!is.numeric(x)){
+    stop(paste("`x` must be a numeric vector but you passed it a", typeof(x), "vector."))
+  }
+  
+  minmaxvals <- c("min" = min(x, na.rm = T),
+                  "max" = max(x, na.rm = T))
+  
+  return(minmaxvals)
+}
+```
+
+Call your function to make sure it works! First, let's pass it a numeric vector: 
+```{r}
+minAndMax(-500:300)
+```
+
+Then pass it a non-numeric vector to make sure it throws an error:
+```{r, error=TRUE}
+minAndMax(c("UW", "WSU", "WWU", "CWU", "EWU", "SU", "SPU"))
+minAndMax(c(T, T, F, F, T, T, T, T, F))
+```
+
+## Problem 2
+
+Let's create a proper function out of the number guessing game you wrote in Assignment 2 Problem 5. Create a function called `guessingGame` that takes the following arguments:
+
+1. `min`: a numeric value indicating the minimum number that can be chosen. Defaults to 1.
+2. `max`: a numeric value indicating the maximum number that can be chosen. Defaults to 10.
+3. `play_again`: a logical value that when `TRUE` prompts the user to play again after they guess correctly and when `FALSE` plays only once with the user (when the call the function). Defaults to `TRUE`.
+
+Modify your code from assignment 2 problem 5 (or use mine, if you prefer) to guess a number between `min` and `max` and `repeat` only if the user says they want to be asked.
+
+```{r}
+guessingGame <- function(min = 1, max = 10, play_again = TRUE){
+  play <- "Y"
+  
+  while(play == "Y"){
+    # Select number and query user for value
+    number <- sample(min:max, 1)
+    guess <- readline("I am thinking of a number between 1 and 10. What number am I thinking of? ")
+  
+    # Query user until guess is correct
+    repeat{
+      if(guess != number){
+      guess <- readline("That is not the number I am thinking of. Guess again: ")
+      } else {
+        
+        # When guess is correct, ask to play again (or not)
+        if(play_again){
+          play <- readline("That is the number I was thinking of! Would you like to play again? [Y/N] ")
+        } else {
+          print("That is the number I was thinking of! Good job.")
+          play <- "N"
+        }
+        break
+      }
+    }
+  }
+}
+```
+
+
+## Problem 3
+
+Trimming is a statistical procedure wherein the most extreme cases on both ends of a univariate distribution are removed. Winsorizing is similar, but the removed observations are replaced with values that correspond with chosen quantiles. When trimming/winsorizing, you have to decide which quantiles you want to trim/winsorize by. For example, consider the following vector:
+
+```{r, echo=T}
+observations <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+```
+A 10% trim (keeping everything between the 5th and 95th percentile) would remove the first and last observation:
+```{r}
+c(2, 3, 4, 5, 6, 7, 8, 9)
+```
+
+And a 10% winsorize would result in the following:
+```{r, echo=T}
+# Observe quantiles
+quantile(observations, probs = c(0.05, 0.95))
+```
+
+```{r}
+c(1.45, 2, 3, 4, 5, 6, 7, 8, 9, 9.55)
+```
+
+Create a function called `trim` that takes a numeric vector of any length as input and returns that same vector trimmed or winsorized. For simplicity, assume the user is giving you a large enough vector (i.e., they won't ask you to trim a vector of length 2). Your function should have the following arguments:
+
+- `x`: a numeric vector of any length
+- `probs`: numeric vector of probabilities with values in [0, 1] to be passed to `quantile`. Defaults to `c(0.05, 0.95)`.
+- `winsorize`: a logical value whether to return a trimmed (`FALSE`) or winsorized (`TRUE`) vector. Defaults to `FALSE`.
+
+Bonus points if you make sure that all of the arguments are valid before performing the trim.
+
+```{r}
+trim <- function(x, probs = c(0.05, 0.95), winsorize = FALSE){
+  # Check if user passed numeric value to x
+  if(!is.numeric(x)){
+    stop(paste("`x` must be a numeric vector but you passed it a", typeof(x), "vector."))
+  }
+  
+  # Check that pct is valid
+  if(!is.numeric(probs) || length(probs) != 2 || min(probs) <= 0 || max(probs) >= 1){
+    stop(paste0("`probs` must be numeric vector of length 2 between 0 and 1. '", deparse(match.call()$probs), "' is not a valid value."))
+  }
+
+  if(!is.logical(winsorize) || is.na(winsorize)){
+    stop(paste0("`winsorize` must be TRUE or FALSE. '", winsorize, "' is not a valid value."))
+  }
+  
+  # Get quantiles
+  quants <- quantile(x, probs)
+  
+  if(winsorize){ # winsorize
+    x[x < quants[1]] <- quants[1]
+    x[x > quants[2]] <- quants[2]
+  } else { # trim
+    x <- x[x > quants[1] & x < quants[2]]
+  }
+  
+  return(x)
+}
+```
+
+Test to make sure `trim()` does what you want! Here are a few test cases. Can you think of others?
+```{r, echo=T}
+trim(1:13)
+trim(1:13, probs = c(.1, .9))
+trim(1:13, probs = c(.1, .9), winsorize = TRUE)
+trim(c(5, 13, 11, 8, 9, 2, 12, 10, 1, 3, 6, 4, 7))
+```
+
+Make sure to test that `trim()` throws an error when you would expect it to!
+```{r, error=T, echo=T}
+trim()
+trim(1:13, probs = c(.05, .10, .15))
+trim(1:13, probs = c(5, 95))
+trim(1:13, winsorize = "Yes please")
+```
+
+## Problem 4
+
+### Part A
+
+Using `replicate()`, modify the nickel coin flip function from Lecture 5 slide 12 to perform `nflips` flips. Return the results in a vector of length `nflips` (hint: you'll have one argument called nflips). Create a few test cases to make sure it works as intended.
+
+```{r, echo=T}
+flipNickel <- function(){
+  sideup <- sample(x = c("heads", "tails", "edge"),
+         size = 1,
+         prob = c(.5-1/6000, .5-1/6000, 1/6000))
+  return(sideup)
+}
+```
+
+
+```{r}
+flipNickel <- function(nflips = 1){
+  sideup <- replicate(nflips, sample(x = c("heads", "tails", "edge"),
+                                     size = 1,
+                                     prob = c(.5-1/6000, .5-1/6000, 1/6000)))
+  return(sideup)
+}
+```
+
+```{r, error=TRUE, echo=T}
+flipNickel(5)
+flipNickel(100)
+flipNickel(-5)
+```
+
+### Part B
+Modify the function from Lecture 4 slide 12 to flip the nickle `nflips` times. This time, however, you do not want to use any sort of looping function (no `for` loops, no `apply` functions, no `replicate`, etc.). Hint: the answer is probably more simple than you think! Make sure you understand what is inside the original function well.
+```{r, echo=T}
+flipNickel <- function(){
+  sideup <- sample(x = c("heads", "tails", "edge"),
+                   size = 1,
+                   prob = c(.5-1/6000, .5-1/6000, 1/6000))
+  return(sideup)
+}
+```
+
+```{r}
+flipNickel <- function(nflips){
+  sideup <- sample(x = c("heads", "tails", "edge"),
+                   size = nflips,
+                   replace = TRUE,
+                   prob = c(.5-1/6000, .5-1/6000, 1/6000))
+  return(sideup)
+}
+```
+
+## Problem 5
+
+Below is a dataset from 1,867 undergrads at UW who filled out the PHQ-9 (a short measure of depression symptoms). There are 9 items of the PHQ-9 (take a look at the data however you would like to get a sense of its structure).
+```{r, echo=T}
+d_phq <- read.csv("https://adamkucz.github.io/psych548/data/PHQ_Data.csv")
+```
+
+Using a `for` loop, create a variable inside `d_phq` called `phq_total_forloop` that holds the **sum** of all PHQ-9 items for each row.
+```{r}
+for(i in 1:nrow(d_phq)){
+  d_phq$phq_total_forloop[i] <- sum(d_phq[i, paste0("phq_", 1:9)], na.rm = T)
+}
+```
+
+Using `apply()`, create a variable inside `d_phq` called `phq_total_apply` that holds the **sum** of all PHQ-9 items for each row.
+```{r}
+d_phq$phq_total_apply <- apply(X = d_phq,
+                               MARGIN = 1,
+                               FUN = \(x){
+                                 sum(x[paste0("phq_", 1:9)], na.rm = T)
+                                 })
+```
+
+Using `mapply()`, create a variable inside `d_phq` called `phq_total_mapply` that holds the **sum** of all PHQ-9 items for each row.
+
+```{r}
+d_phq$phq_total_mapply <- mapply(sum, d_phq$phq_1, d_phq$phq_2, d_phq$phq_3, d_phq$phq_4, d_phq$phq_5,
+                                 d_phq$phq_6, d_phq$phq_7, d_phq$phq_8, d_phq$phq_9,
+                                 MoreArgs = list(na.rm = T))
+```
+
+Using the `rowSums()` function, create a variable inside `d_phq` called `phq_total_rowsums` that holds the **sum** of all PHQ-9 items for each row.
+```{r}
+d_phq$phq_total_rowsums <- rowSums(d_phq[, paste0("phq_", 1:9)], na.rm = T)
+```
+
+Check that these three columns are all equal to each other
+```{r, echo=T, results='hide'}
+all(d_phq$phq_total_forloop == d_phq$phq_total_apply)
+all(d_phq$phq_total_apply == d_phq$phq_total_rowsums)
+all(d_phq$phq_total_rowsums == d_phq$phq_total_mapply)
+```
+
+The PHQ total score has cut points that correspond with the following:
+
+- 0-4 = "minimal depression"
+- 5-9 = "mild depression"
+- 10-14 = "moderate depression"
+- 15-19 = "moderately severe depression"
+- 20-27 = "severe depression"
+
+Create a new variable in `d_phq` called `depression_severity` that takes on the values above based on the `phq_total` score in each row. (Hint: you do not need any sort of loop to do this, and you've written similar code before!)
+```{r}
+d_phq$depression_severity <- ifelse(d_phq$phq_total_rowsums %in% 0:4, "minimal depression",
+                                    ifelse(d_phq$phq_total_rowsums %in% 5:9, "mild depression",
+                                           ifelse(d_phq$phq_total_rowsums %in% 10:14, "moderate depression",
+                                                  ifelse(d_phq$phq_total_rowsums %in% 15:19, "moderately severe depression",
+                                                         ifelse(d_phq$phq_total_rowsums %in% 20:27, "severe depression",
+                                                                NA_character_)))))
+```
+
+
+Now use `lapply()` with `unlist()` or `sapply()` alone to create a named vector (same names as the phq columns in `d_phq`) with the mean of each column of PHQ data (`phq_1` through `phq_9`). Call your vector `phq_item_means`.
+```{r}
+phq_item_means <- sapply(d_phq[, paste0("phq_", 1:9)], mean, na.rm = T)
+```
+
+## Problem 6
+
+Using `tapply()`, get the mean PHQ-9 total score for individuals in each category of `depression_severity` 
+```{r}
+tapply(d_phq$phq_total_rowsums, d_phq$depression_severity, mean, na.rm = T)
+```
+
+Do this again to get the mean PHQ-9 Total score for individuals in a relationship (`relationhip == 1`) and those not in a relationship (`relationship == 0`).
+```{r}
+tapply(d_phq$phq_total_rowsums, d_phq$relationship, mean, na.rm = T)
+```
+
+
+```{js, echo=F}
+window.onload = () => {
+  document.getElementById('togglebutton').click();
+};
+
+function toggleOutput(){
+
+  let e = document.getElementById('togglebutton')
+
+  if(e.innerHTML == "Show Output"){
+    e.innerHTML = "Hide Output";
+  } else {
+    e.innerHTML = "Show Output";
+  }
+
+  var outputs = document.getElementsByClassName('hljs');
+  
+  // pre of class R is code, not output
+  for(var i = 0; i < outputs.length; i++){
+    if(outputs[i].parentNode.style.display == "none"){
+      outputs[i].parentNode.style.display = "block";
+    } else {
+      if(outputs[i].parentNode.className != "r"){
+        outputs[i].parentNode.style.display = "none";
+      }
+    }
+  }
+};
+```
