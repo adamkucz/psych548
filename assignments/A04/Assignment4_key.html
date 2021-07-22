@@ -10,8 +10,6 @@
 <link rel="stylesheet" href="../../css/assignments.css">
 
 
-
-
 <title>Assignment 4</title>
 
 <script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
@@ -180,10 +178,13 @@ Show Output
 <p>Write a function called <code>minAndMax</code> that takes a vector of any length (<code>x</code>) and returns a named vector of length 2 (names = “min” and “max”) with the minimum and maximum value of that vector. Before taking the minimum and maximum values of the vector, use what you know about control structures and checking the atomic type of a variable to ensure that the vector is numeric. If the vector is not numeric, you will want to throw an error (i.e., tell the user you can’t find the maximum value of a non-numeric vector). Code to throw an error is below. Bonus points if you get the error message to inform the user which type of vector they passed to your function.</p>
 <pre class="r"><code>stop(&quot;`x` must be a numeric vector&quot;)</code></pre>
 <p>Call your function to make sure it works! First, let’s pass it a numeric vector:</p>
+<pre class="r"><code>minAndMax(-500:300)</code></pre>
 <pre><code>##  min  max 
 ## -500  300</code></pre>
 <p>Then pass it a non-numeric vector to make sure it throws an error:</p>
+<pre class="r"><code>minAndMax(c(&quot;UW&quot;, &quot;WSU&quot;, &quot;WWU&quot;, &quot;CWU&quot;, &quot;EWU&quot;, &quot;SU&quot;, &quot;SPU&quot;))</code></pre>
 <pre><code>## Error in minAndMax(c(&quot;UW&quot;, &quot;WSU&quot;, &quot;WWU&quot;, &quot;CWU&quot;, &quot;EWU&quot;, &quot;SU&quot;, &quot;SPU&quot;)): `x` must be a numeric vector but you passed it a character vector.</code></pre>
+<pre class="r"><code>minAndMax(c(T, T, F, F, T, T, T, T, F))</code></pre>
 <pre><code>## Error in minAndMax(c(T, T, F, F, T, T, T, T, F)): `x` must be a numeric vector but you passed it a logical vector.</code></pre>
 </div>
 <div id="problem-2" class="section level2">
@@ -246,20 +247,20 @@ quantile(observations, probs = c(0.05, 0.95))</code></pre>
   return(sideup)
 }</code></pre>
 <pre class="r"><code>flipNickel(5)</code></pre>
-<pre><code>## [1] &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot;</code></pre>
+<pre><code>## [1] &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;</code></pre>
 <pre class="r"><code>flipNickel(100)</code></pre>
-<pre><code>##   [1] &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot;
-##  [10] &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot;
-##  [19] &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;
-##  [28] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;
-##  [37] &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot;
-##  [46] &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot;
-##  [55] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot;
-##  [64] &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot;
-##  [73] &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot;
-##  [82] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot;
-##  [91] &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot;
-## [100] &quot;tails&quot;</code></pre>
+<pre><code>##   [1] &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot;
+##  [10] &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot;
+##  [19] &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot;
+##  [28] &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot;
+##  [37] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot;
+##  [46] &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot;
+##  [55] &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot;
+##  [64] &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;
+##  [73] &quot;tails&quot; &quot;tails&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot;
+##  [82] &quot;tails&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;heads&quot; &quot;tails&quot;
+##  [91] &quot;tails&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;heads&quot; &quot;tails&quot; &quot;tails&quot; &quot;tails&quot;
+## [100] &quot;heads&quot;</code></pre>
 <pre class="r"><code>flipNickel(-5)</code></pre>
 <pre><code>## Error in integer(n): invalid &#39;length&#39; argument</code></pre>
 </div>
@@ -283,9 +284,12 @@ quantile(observations, probs = c(0.05, 0.95))</code></pre>
 <p>Using <code>mapply()</code>, create a variable inside <code>d_phq</code> called <code>phq_total_mapply</code> that holds the <strong>sum</strong> of all PHQ-9 items for each row.</p>
 <p>Using the <code>rowSums()</code> function, create a variable inside <code>d_phq</code> called <code>phq_total_rowsums</code> that holds the <strong>sum</strong> of all PHQ-9 items for each row.</p>
 <p>Check that these three columns are all equal to each other</p>
-<pre class="r"><code>all(d_phq$phq_total_forloop == d_phq$phq_total_apply)
-all(d_phq$phq_total_apply == d_phq$phq_total_rowsums)
-all(d_phq$phq_total_rowsums == d_phq$phq_total_mapply)</code></pre>
+<pre class="r"><code>all(d_phq$phq_total_forloop == d_phq$phq_total_apply)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>all(d_phq$phq_total_apply == d_phq$phq_total_rowsums)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>all(d_phq$phq_total_rowsums == d_phq$phq_total_mapply)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
 <p>The PHQ total score has cut points that correspond with the following:</p>
 <ul>
 <li>0-4 = “minimal depression”</li>
@@ -311,7 +315,7 @@ all(d_phq$phq_total_rowsums == d_phq$phq_total_mapply)</code></pre>
 ## 6.403084 6.873614</code></pre>
 <script type="text/javascript">
 window.onload = () => {
-  document.getElementById('togglebutton').click();
+ document.getElementById('togglebutton').click();
 };
 
 function toggleOutput(){

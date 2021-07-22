@@ -41,12 +41,12 @@ minAndMax <- function(x){
 ```
 
 Call your function to make sure it works! First, let's pass it a numeric vector: 
-```{r}
+```{r, echo=T}
 minAndMax(-500:300)
 ```
 
 Then pass it a non-numeric vector to make sure it throws an error:
-```{r, error=TRUE}
+```{r, error=TRUE, echo=T}
 minAndMax(c("UW", "WSU", "WWU", "CWU", "EWU", "SU", "SPU"))
 minAndMax(c(T, T, F, F, T, T, T, T, F))
 ```
@@ -256,7 +256,7 @@ d_phq$phq_total_rowsums <- rowSums(d_phq[, paste0("phq_", 1:9)], na.rm = T)
 ```
 
 Check that these three columns are all equal to each other
-```{r, echo=T, results='hide'}
+```{r, echo=T}
 all(d_phq$phq_total_forloop == d_phq$phq_total_apply)
 all(d_phq$phq_total_apply == d_phq$phq_total_rowsums)
 all(d_phq$phq_total_rowsums == d_phq$phq_total_mapply)
@@ -301,7 +301,7 @@ tapply(d_phq$phq_total_rowsums, d_phq$relationship, mean, na.rm = T)
 
 ```{js, echo=F}
 window.onload = () => {
-  document.getElementById('togglebutton').click();
+ document.getElementById('togglebutton').click();
 };
 
 function toggleOutput(){
