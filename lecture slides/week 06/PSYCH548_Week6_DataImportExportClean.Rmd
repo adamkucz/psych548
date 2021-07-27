@@ -1,0 +1,1293 @@
+---
+title: "Importing, Exporting, and Cleaning Data"
+author: "Adam Kuczynski"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: main.css
+    nature:
+      highlightStyle: tomorrow-night-bright
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: ["center","top"]
+---
+
+```{r setup, include=FALSE, purl=FALSE}
+library(knitr)
+library(readr)
+library(magrittr)
+library(tidyr)
+library(dplyr)
+library(lubridate)
+library(forcats)
+library(stringr)
+
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(comment = "##")
+```
+
+```{css, echo=FALSE}
+#importing-exporting-and-cleaning-data {
+  font-size: 45px;
+}
+```
+
+# Today's Theme:
+## "Data Custodian Work"
+
+Issues around getting data *in* and *out* of R and making it ready for your analyses:
+--
+
+
+- Working directories and projects
+--
+
+
+- Importing and Exporting data: `readr` and `haven`
+--
+
+
+- Cleaning and reshaping data: `tidyr`
+--
+
+
+- Dates and times: `lubridate`
+--
+
+
+- Controlling factor variables: `forcats`
+--
+
+
+- Working with strings: regular expressions and `stringr`
+
+---
+# Working Directory
+
+<div style="font-size:90%;">
+Your **working directory** is the folder on your computer where R will look for and save things by default
+--
+
+
+You can find your current working directory with `getwd()`
+```{r}
+getwd()
+```
+--
+
+
+You can change your working directory using `setwd()`
+```{r, eval=F}
+setwd("/home/adam/Desktop")
+```
+--
+
+R scripts are automatically run in the directory they are currently in. This means that, when you open a .R or a .Rmd file, your working directory is automatically set to that folder.<sup>1</sup>
+
+.footnote[
+[1] This only applies if RStudio is not already open.
+
+Note: Windows users need to change back slashes (`\`) to forwarded slashes (`/`) for filepaths
+]
+<div>
+---
+# Relative Paths
+
+.smallish[
+
+In your working directory, you can (and should!) refer to files using relative paths:
+
+- `.` refers to your current working directory
+- `..` refers to the folder your working directory is located in
+
+Examples:
+
+`./data/my_data.csv` refers to a file called "my_data.csv" located in the "data" subfolder of my working directory<sup>1</sup>
+
+`../../figure1.png` refers to a file called "figure1.png" located two folders "up" from my working directory
+
+.footnote[[1] The `./` is not strictly necessary. Often you will see it written as `data/my_data.csv`, which is perfectly fine!]
+
+******
+
+#### The `here` package
+
+The `here` package offers an easy and somewhat more reliable way of constructing relative file paths. When you load the `here` package at the top of your script, it looks for a `.here` file (which is automatically generated), allowing you to reference folders regardless of where the `.R` file is in the project structure. [Check it out](https://here.r-lib.org/)!
+]
+
+---
+class: inverse
+# Importing and Exporting Data
+---
+# Helpful Packages
+
+R has the ability to read and write data in a number of formats. Although much of this functionality is built into Base R, several packages help as well:
+
+.footnote[[1] I've found this package to be a bit buggy and prefer to use `haven`]
+
+--
+
+- `haven` (SPSS, Stata, and SAS files)
+
+--
+
+- `foreign` (SPSS, Stata, SAS, and other files)<sup>1</sup>
+
+
+
+--
+
+- `readxl` (MS Excel files)
+
+--
+
+- `googlesheets4` (communicate directly with Google Sheets)
+
+--
+
+- `readr` (enhances base R functionality)
+
+--
+
+The most common way to read/write data in R is with a `.csv` file!
+
+---
+# .csv Files
+
+<div style="font-size:15px; max-height: 200px; overflow-y:auto;">
+<pre>
+"mpg","cyl","disp","hp","drat","wt","qsec","vs","am","gear","carb"
+21,6,160,110,3.9,2.62,16.46,0,1,4,4
+21,6,160,110,3.9,2.875,17.02,0,1,4,4
+22.8,4,108,93,3.85,2.32,18.61,1,1,4,1
+21.4,6,258,110,3.08,3.215,19.44,1,0,3,1
+18.7,8,360,175,3.15,3.44,17.02,0,0,3,2
+18.1,6,225,105,2.76,3.46,20.22,1,0,3,1
+14.3,8,360,245,3.21,3.57,15.84,0,0,3,4
+24.4,4,146.7,62,3.69,3.19,20,1,0,4,2
+22.8,4,140.8,95,3.92,3.15,22.9,1,0,4,2
+19.2,6,167.6,123,3.92,3.44,18.3,1,0,4,4
+17.8,6,167.6,123,3.92,3.44,18.9,1,0,4,4
+16.4,8,275.8,180,3.07,4.07,17.4,0,0,3,3
+17.3,8,275.8,180,3.07,3.73,17.6,0,0,3,3
+15.2,8,275.8,180,3.07,3.78,18,0,0,3,3
+10.4,8,472,205,2.93,5.25,17.98,0,0,3,4
+10.4,8,460,215,3,5.424,17.82,0,0,3,4
+14.7,8,440,230,3.23,5.345,17.42,0,0,3,4
+32.4,4,78.7,66,4.08,2.2,19.47,1,1,4,1
+30.4,4,75.7,52,4.93,1.615,18.52,1,1,4,2
+33.9,4,71.1,65,4.22,1.835,19.9,1,1,4,1
+21.5,4,120.1,97,3.7,2.465,20.01,1,0,3,1
+15.5,8,318,150,2.76,3.52,16.87,0,0,3,2
+15.2,8,304,150,3.15,3.435,17.3,0,0,3,2
+13.3,8,350,245,3.73,3.84,15.41,0,0,3,4
+19.2,8,400,175,3.08,3.845,17.05,0,0,3,2
+27.3,4,79,66,4.08,1.935,18.9,1,1,4,1
+26,4,120.3,91,4.43,2.14,16.7,0,1,5,2
+30.4,4,95.1,113,3.77,1.513,16.9,1,1,5,2
+15.8,8,351,264,4.22,3.17,14.5,0,1,5,4
+19.7,6,145,175,3.62,2.77,15.5,0,1,5,6
+15,8,301,335,3.54,3.57,14.6,0,1,5,8
+21.4,4,121,109,4.11,2.78,18.6,1,1,4,2
+</pre>
+</div>
+
+**Read** .csv files with: `read.csv("data/my_data.csv")`
+
+**Write** .csv files with: `write.csv("data/my_data_cleaned.csv`)
+--
+
+
+<div style="margin-top:40px;"></div>
+Alternatively you can use `readr`...
+
+**Read** with `readr::read_csv("data/my_data.csv")`
+
+**Write** with: `readr::write_csv("data/my_data_cleaned.csv)`
+
+---
+# Alternative Formats
+
+The `read.table()` (and `write.table()`) function is a generic function that can read delimited files of any kind. In fact, `read.csv()` is a special case of `read.table()`!
+
+For example:
+--
+
+
+- To read .tsv files:<br>`read.table("data/my_data.tsv", sep = "\t")`<sup>1</sup>
+
+
+- To write .tsv files:<br>`write.table("data/my_data.tsv", sep = "\t)`
+--
+
+
+- To read in files with values separated by whitespace:<br>`read.table("data/my_data.tsv", sep = " ")`
+
+
+- To write files with values separated by whitespace:<br>`write.table("data/my_data.tsv", sep = " ")`
+
+.footnote[[1] Or `read.delim("data/my_data.tsv", sep = "\t)`]
+---
+# .RData Files
+
+.RData<sup>1</sup> files are specific to R and allow you to store as many objects as you would like into a single file
+--
+
+
+To **write** a .RData file, use the `save()` function:
+```{r, eval=F}
+save(my_data_raw, my_data_cleaned, fit_lm, fit_lm_quadratic,
+     file =  "MyStudy.RData")
+```
+--
+
+
+To **read** a .RData file, use the `load()` function:
+```{r, eval=F}
+load(file = "MyStudy.RData")
+```
+--
+
+
+☝️ When you load .Rdata files, the objects *and their names* are loaded so you do not do this (like you do with `read.csv()`):
+
+```{r, eval=F}
+mydata <- load("MyStudy.RData") # 👈 Don't do this!
+```
+
+.footnote[[1] The file extension can be whatever you want, but it defaults to .RData]
+
+---
+class: inverse
+# Cleaning Data
+<div style="text-align: center;">
+  <img src="images/tidyr.svg", alt="Tidyverse Logo" style="max-width: 80%;">
+</div>
+---
+# Initial Spot Checks
+
+First things to check after reading in data:
+- Did *all* the data make it into R?
+  - May need to use a different package or manually specify range
+--
+
+- Are the column names in good shape?
+  - Modify `col_names=` or change with `colnames()` or `dplyr::rename()` function
+--
+
+- Are there "decorative" blank rows or columns to remove?
+  - If possible, remove these from the source, otherwise do this with code (e.g., `data[-1, ]` to remove the first row)
+--
+
+- Are missing values (`""`, `NA`, `-999`, etc.) represented correctly?
+  - Modify `na=` or change these after reading in the data
+--
+
+- Are the column classes correct? Numbers are numeric, strings are character, etc...
+  - Modify with `col_types=` or change these after reading in the data
+
+---
+# Slightly Messy Data
+
+```{r, echo=F}
+d <- data.frame("Area" = c("Clinical", "Social", "Other"),
+                "FullProf" = c(8, 3, 11),
+                "NotFullProf" = c(4, 1, 10))
+kable(d)
+```
+
+- What is an observation?
+--
+
+  - A group of faculty in a given area
+--
+  
+- What are the variables
+--
+
+  - Area, Title
+--
+
+- What are the values?
+--
+
+  - Area: Clinical, Social, Other
+--
+
+  - Title: Full professor, Not full professor (as column names 👎)
+--
+
+  - Count: spread over two columns
+
+---
+# Tidy Version
+
+```{r, echo=F}
+d <- d %>%
+  pivot_longer(cols = c("FullProf", "NotFullProf"),
+               names_to = "Title",
+               values_to = "Count")
+kable(d)
+```
+--
+
+
+✅ Each variable is a column
+--
+
+
+✅ Each observation is a row
+--
+
+
+✅ Ready for analyses and plotting!
+
+---
+# Billboard data
+
+.small[
+```{r}
+# Notice how read.csv() can also take a URL #<<
+bb <- read.csv("https://adamkucz.github.io/psych548/data/billboard.csv")
+```
+
+```{r, echo=F}
+kable(head(bb[, 1:10], 10))
+```
+
+Week columns continue up to `wk76`!
+]
+
+---
+# Billboard
+
+- What are the **observations** in the data?
+  - Week since entering the Billboard Hot 100 per song
+  
+  
+- What are the **variables** in the data?
+  - Year, artist, track, song length, date entered Hot 100, week since first entered Hot 100 (spread over 76 columns 👎), rank during week (also spread over 76 columns 👎)
+  
+  
+- What are the **values** in the data?
+  - e.g., 2 Pac, Baby Don't Cry (Keep..., 4 mins 22 secs, Feb 26, 2000, week 3, rank 72
+
+---
+# Tidy Data
+
+**Tidy data** (i.e., "long data") are organized such that:
+--
+
+
+1. The values for a single observation are in their own row
+--
+
+
+2. The values for a single variable are in their own column
+--
+
+
+3. There is only one value per cell
+--
+
+
+Why organize your data in this way?
+--
+
+- Easier to understand many rows than many columns
+--
+
+
+- Required for most types of analyses
+--
+
+
+- Required for creating figures
+--
+
+
+- Fewer confusing variable names
+
+---
+# The `tidyr` Package
+
+The [`tidyr`](https://tidyr.tidyverse.org/) package is part of the [`tidyverse`](https://www.tidyverse.org/) and provides functions that help clean ("tidy up") data:
+
+--
+
+- `pivot_longer()`: takes data in **wide** format and pivots them down to make two new columns
+  - a `name` column that stores the original column names
+  - a `value` column with the values of the original columns
+  
+--
+
+- `pivot_wider()`: takes data in **long** format and pivots them into multiple columns (inverts `pivot_longer()`)
+
+--
+
+- `separate()`: pulls apart one column into multiple columns (common after `pivot_longer()` where values are embedded in column names)
+
+--
+
+- `extract()` works like `separate()` but takes a regular expression to define groups rather than separation value
+  - `extract_numeric()` does a simple version of this and just extracts the numeric part
+
+---
+# `pivot_longer()`
+
+Let's use `pivot_longer()` to get the week and rank variables out of their current layout into two columns (more rows, fewer columns):
+
+```{r}
+library(tidyr)
+library(magrittr)
+
+bb_long <- bb %>%
+  pivot_longer(cols = matches("^wk"),
+               names_to = "week",
+               values_to = "rank")
+```
+--
+
+
+We could instead use: `pivot_longer(wk1:wk76, names_to = "week", values_to = "rank")` to pull out these contiguous columns, however it is safer to reference columns by column name!
+--
+
+```{r}
+dim(bb_long)
+```
+---
+
+# `pivot`ed Weeks
+
+```{r, echo=F}
+kable(head(bb_long, 10))
+```
+
+Now we have a single week column!
+
+---
+
+# Can we `pivot()` better?
+
+```{r}
+summary(bb_long$rank)
+```
+
+This is an improvement, but we might not want to keep the 18785 rows with missing ranks (i.e., observations for weeks since entering the Hot 100 that the song was no longer on the Hot 100)
+
+---
+### Pivoting Better: `values_drop_na`
+
+.smallish[
+The argument `values_drop_na = TRUE` to `pivot_longer()` will remove rows with missing ranks
+
+```{r}
+bb_long <- bb %>%
+  pivot_longer(cols = matches("^wk"),
+               names_to = "week",
+               values_to = "rank",
+               values_drop_na = TRUE) #<<
+
+summary(bb_long$rank)
+```
+
+```{r}
+dim(bb_long)
+```
+No more `NA`s and way fewer rows!
+]
+
+---
+# `parse_number()`
+
+.smallish[
+The `week` column is character type, but we want it to be numeric:
+```{r}
+class(bb_long$week)
+```
+
+The `tidyr::parse_number()` function will extract the numeric information from a string:
+
+```{r}
+bb_long$week <- parse_number(bb_long$week)
+class(bb_long$week)
+```
+
+******
+
+`parse_number()` only extract the *first* set of numeric information. For more complex pattern matching, you'll need to use **regular expressions** (covered later today)
+
+.pull-left[
+```{r}
+parse_number("123abc456")
+```
+]
+
+.pull-right[
+```{r}
+parse_number("abc123456def789")
+```
+]
+]
+
+---
+# `names_prefix=`
+
+You can also use the `names_prefix=` argument in this case:
+```{r}
+bb_long <- bb %>%
+  pivot_longer(cols = matches("^wk"),
+               names_to = "week",
+               values_to = "rank",
+               values_drop_na = TRUE,
+               names_prefix = "wk", #<<
+               names_transform = list("week" = as.integer)) #<<
+kable(head(bb_long, 3))
+```
+
+---
+# `separate()`
+
+.smallish[
+The track length (`time`) column isn't ready for analysis. Let's convert it to length in seconds:
+
+```{r}
+bb_long <- bb_long %>%
+  separate(time, #<<
+           into = c("mins", "secs"), #<<
+           sep = ":", #<<
+           convert = T) %>% #<<
+  relocate(mins, secs, .after = "rank")
+
+
+bb_long$length <- (bb_long$mins*60) + bb_long$secs
+```
+
+```{r, echo=F}
+kable(head(bb_long, 3))
+```
+
+`relocate()` is from the [`dplyr` package](https://dplyr.tidyverse.org/) (also in the [Tidyverse](https://www.tidyverse.org/)) And allows you to manually shuffle around the order of columns. We will talk about `dplyr` next week!
+]
+
+---
+# `pivot_wider()`
+
+.smallish[
+`pivot_wider()` does the exact oppose of `pivot_longer()`, and is used when you want several columns that each represent one observation.
+
+Although most regression analyses in R require your data to be in long format, some (e.g., SEM) require it to be in wide format.
+
+Let's reshape `bb_long` back into wide format!
+
+```{r}
+bb_wide <- bb_long %>%
+  pivot_wider(names_from = "week",
+              values_from = "rank",
+              names_prefix = "wk")
+```
+]
+
+.small[
+```{r, echo=F}
+kable(head(bb_wide[, 1:9], 4))
+```
+]
+
+---
+class: inverse
+# Dates and Times
+<div style="text-align: center;">
+  <img src="images/lubridate.svg", alt="Tidyverse Logo" style="max-width: 50%;">
+</div>
+---
+
+# Working with dates and times
+
+Working with dates and times can be challenging, but fortunately R has nice built in capabilities and packages such as [lubridate](https://lubridate.tidyverse.org/) that are very helpful.
+
+******
+--
+
+
+### A note on Unix time (i.e., epoch time)
+--
+
+
+**Unix time** is the standard way computers keep track of date times, and you will likely encounter it at some point in your career. Unix time is the <u>number of seconds since midnight UTC on Jan. 1, 1970</u>. 
+
+For example, the exact time right now in Unix Time is:  <span id="timer"></span>
+
+```{js, echo=FALSE}
+setInterval(() => {
+  document.getElementById("timer").innerText = Math.floor(Date.now() / 1000);
+}, 1000);
+```
+
+To convert epoch time in R, use the `as.POSIXct()` function. Here's the datetime in PDT when we hit 1 billion seconds after Jan 1, 1970:
+```{r}
+as.POSIXct(1e9, origin = "1970-01-01")
+```
+
+---
+# Datetime Conversion
+
+Besides converting Unix Time into a more human-readable format, you will be converting datetimes from/into different formats
+--
+
+
+When converting date/datetime objects (regardless of the function), you will be using a set of **conversion specifications** which are technically unique to your OS but are widely shared across platforms. These specifications are represented as strings and start with a `%` followed by a letter. See `?strptime` for a full list of specifications
+
+.smallish[
+
+.pull-left[
+```{r}
+as.Date("20jul2021", "%d%b%Y")
+```
+]
+
+.pull-right[
+```{r}
+format(as.Date("2021-07-27"), "%B %d, %Y")
+```
+]
+
+```{r}
+as_datetime("July 27, 2021 01:00:00 PM",
+            format = "%B %d, %Y %H:%M:%S %p",
+            tz = "PDT")
+```
+
+]
+
+---
+# Math with Dates
+
+.small[
+All `Date` objects are in units of days:
+
+.pull-left[
+```{r}
+as.Date("2021-07-27") + 1
+```
+]
+
+.pull-right[
+```{r}
+as.Date("2021-07-27") + 7
+```
+]
+
+The `lubridate` package offers some nice functions to help do this more clearly:
+
+<div>
+.pull-left[
+```{r}
+as.Date("2021-07-27") + days(1)
+```
+]
+
+.pull-right[
+```{r}
+as.Date("2021-07-27") + weeks(1)
+```
+]
+</div>
+
+******
+
+`lubridate` also has some nice helper functions:
+
+<div>
+.pull-left[
+```{r}
+mday(as.Date("2021-07-27"))
+```
+]
+
+.pull-right[
+```{r}
+wday(as.Date("2021-07-27"))
+```
+]
+</div>
+
+<div>
+.pull-left[
+```{r}
+weekdays(as.Date("2021-07-27"))
+```
+]
+
+.pull-right[
+```{r}
+yday(as.Date("2021-07-27"))
+```
+]
+
+]
+
+---
+# Other Useful Date Functions
+
+.smallish[
+- `lubridate::is.Date()` returns `TRUE` if an object is `Date`, else `FALSE`
+- `lubridate::NA_Date_` is `NA` with class of `Date`
+- `lubridate` **duration objects**
+  - create specified durations of time (in seconds) that are not bound by conventions such as leap year and daylight savings time.
+  - See `?duration` for the list of functions, which operate intuitively
+
+******
+
+### `seq.Date()`
+
+Much like `seq()` and its variants, `seq.Date()` creates a `Date` vector:
+
+.pull-left[
+```{r}
+seq(from = as.Date("2021-07-27"),
+    to = as.Date("2021-08-05"),
+    by = "days")
+```
+]
+
+.pull-right[
+```{r}
+seq(from = as.Date("2021-07-27"),
+    to = as.Date("2021-09-04"),
+    length.out = 10)
+```
+]
+]
+
+
+---
+## Getting Usable Dates from Billboard
+
+In `bb_long` we have the date the songs first hit the charts, but not the dates for the later weeks. However, we can calculate these dates (now that the data are in long form 🙌) from the `week` value
+
+```{r}
+# bb_long$date <- as.Date(date.entered) + weeks(bb_long$week - 1)
+# same as 👆️ (we will discuss mutate() next week)
+bb_long <- bb_long %>%
+  mutate(date = as.Date(date.entered) + weeks(week - 1)) #<<
+```
+
+.small[
+```{r, echo=F}
+kable(head(bb_long, 3))
+```
+]
+
+First we had to convert `date.entered` from character to date. Then we added   for each week after the song entered the top 100
+
+---
+class: inverse
+# Dealing with Factors
+<div style="text-align: center;">
+  <img src="images/forcats.svg", alt="Tidyverse Logo" style="max-width: 60%;">
+</div>
+---
+
+# Factor Variables
+
+Factors variables denote categorical data and are, of course, very common to work with in R, but they can be a bit fussy. The [`forcats`](https://forcats.tidyverse.org) package (part of the [`tidyverse`](https://tidyverse.org)) helps a lot!
+--
+
+
+Most regression analyses in R will take factor variables and do the dummy coding for you. When doing so, R takes the lowest level of a factor and uses it as the reference for a regression, which is often not desirable
+--
+
+
+The order of factor levels controls the order of categories in tables, on axes, in legends, and facets (subplots; discussed in a few weeks) in `ggplot2`
+--
+
+
+`forcats` functions all start with `fct_`, which helps a lot with RStudio autocomplete
+
+To see all the functionality built into `forcats`, see [the manual](https://cran.r-project.org/web/packages/forcats/forcats.pdf)
+
+---
+# `fct_relevel()`
+
+`fct_relevel()` (similar to base R `relevel()`) allows you to reorder factor levels to any location
+
+.small[
+```{r}
+f <- factor(x = c("a", "b", "c", "d"),
+            levels = c("b", "c", "d", "a"))
+print(f)
+fct_relevel(f, "a")
+fct_relevel(f, "b", "a")
+fct_relevel(f, "a", after = 2)
+```
+]
+
+---
+# `fct_recode()`
+
+`fct_recode()` allows you to change factor levels by hand. Non-mentioned factors will remain in the data:
+
+```{r}
+x <- factor(c("apple", "apple", "cat", "banana", "dog"))
+fct_recode(x, apples = "apple", bananas = "banana")
+```
+
+If you name the level `NULL` it will be replaced with `NA` in the data
+```{r}
+fct_recode(x, NULL = "apple", bananas = "bananas")
+```
+
+---
+# `fct_collapse()`
+
+`fct_collapse()` allows you to collapse factor levels into a smaller number of groups
+
+```{r}
+party <- factor(c("strong dem", "dem", "ind", "rep", "strong rep", "green", "libertarian"))
+
+fct_collapse(party,
+             democrat = c("strong dem", "dem"),
+             republican = c("strong rep", "rep"),
+             other_level = "third_party") #<<
+```
+The `other_level_` argument allows you to collapse all non-mentioned levels into one level
+
+---
+
+# `fct_lump`
+
+.small[
+
+The `fct_lump` function provides methods to lump levels together programatically:
+
+```{r}
+x <- factor(rep(LETTERS[1:9], times = c(40, 10, 5, 27, 1, 1, 1, 1, 1)))
+table(x)
+```
+
+.pull-left[
+
+Lump together all levels except 3 most frequent
+```{r}
+levels(
+  fct_lump_n(x, 3)  
+)
+```
+]
+
+.pull-right[
+
+Lump together all levels less than `prop`
+```{r}
+levels(
+  fct_lump_prop(x, .20)
+)
+```
+]
+
+Lump together the least frequent levels, ensuring that `other` remains the smallest level
+
+```{r}
+levels(
+  fct_lump_lowfreq(x)
+)
+```
+
+
+]
+
+
+---
+
+### `fct_drop()` and `fct_expand()`
+
+.smallish[
+`fct_drop()` (similar to base R `droplevels()`) removes levels of the factor that are not in the data
+
+```{r}
+x <- factor(c("a", "b"), levels = c("a", "b", "c", "d"))
+fct_drop(x)
+fct_drop(x, only = "c")
+```
+
+******
+
+`fct_expand()` does the opposite and *adds* levels to a factor
+```{r}
+fct_expand(x, "e", "f", "g")
+```
+]
+
+---
+### `fct_infreq()` and `fct_inorder()`
+
+.smallish[
+`fct_inorder()` orders the levels of factor by the order in which they appear in the data
+```{r}
+x <- factor(c("c", "a", "b", "b", "c", "a", "b"))
+levels(x)
+levels(
+  fct_inorder(x) #<<
+)
+```
+
+`fct_infreq()` orders the levels of a factor by the count of each level in the data (descending)
+```{r}
+levels(
+  fct_infreq(x) #<<
+)
+```
+]
+
+---
+# `fct_explicit_na`
+
+`fct_explicit_na()` gives NA values an explicit factor level, which makes sure they appear in summary information (e.g., tables) and plots
+
+```{r}
+f1 <- factor(c("a", "a", NA, NA, "a", "b", NA, "c", "a", "c", "b"))
+table(f1)
+
+f1 <- fct_explicit_na(f1)
+table(f1)
+```
+
+---
+class: inverse
+# Working With Strings
+<div style="text-align: center;">
+  <img src="images/stringr.svg", alt="Tidyverse Logo" style="max-width: 50%;">
+</div>
+---
+# Regular Expressions
+
+A **regular expression** (i.e, **regex**) is a string that allows you to match, locate, and manage text data extremely flexibly. You write an **expression**, apply it to text input, and then do things with the **matches** you find.
+--
+
+
+- **Literal characters** are defined text snippets to search for (e.g., `Seattle`, `206`)
+--
+
+
+- **Metacharacters** provide flexibility in describing patterns:
+  - backslash `\`, caret `^`, dollar sign `$`, period `.`, pipe `|`, question mark `?`, asterisk `*`, plus sign `+`, parentheses `(` and `)`, square brackets `[` and `]`, curly braces `{` and `}`
+  - To search for a metacharacter as a literal character, you need to **escape** it with two preceding backslashes `\\`. For example to match `($1.50)` you'd need to write `\\(\\$1\\.50\\)`
+--
+
+
+.footnote[Always test your regular expressions! Here is a [helpful web app](https://regexr.com/) to make sure your regular expression is working the way you intend.]
+
+---
+
+## `grep()`, `gsub()`, et al.
+
+.smallish[
+`grep()` takes a regular expression (`pattern`) and a vector of text (`x`) and returns the index (`value = F`) or actual text (`value = T`) of the match. `grepl()` returns a logical vector specifiying where matches occurred:
+
+```{r}
+text <- c("a", "b", "a b", "b a", "bac", "aba")
+```
+
+.pull-left[
+```{r}
+grep("a", text); grep("a", text, value = T)
+```
+]
+
+.pull-right[
+```{r}
+grepl("a", text)
+```
+]
+
+******
+
+
+`gsub()` finds all matches and replaces them with specified text. `sub()` replaces just the first 
+
+<div>
+
+.pull-left[
+```{r}
+gsub("a", "z", text)
+```
+]
+
+.pull-right[
+```{r}
+sub("a", "z", text)
+```
+]
+
+</div>
+
+]
+
+---
+
+## Regex Metacharacters
+
+.small[
+When placed in your search string, metacharacters help you evaluate strings flexibly (i.e., without hardcoding exactly what you're searching for)
+
+```{r}
+text <- c("a", "b", "ab", "a b", "b a", "bac", "aba", "wxyz")
+```
+
+.pull-left[
+- `^` specifies the *beginning* of a string
+]
+.pull-right[
+```{r}
+grep("^a", text, value = T)
+```
+]
+
+<div>
+.pull-left[
+- `$` specifies the *end* of a string
+]
+.pull-right[
+```{r}
+grep("a$", text, value = T)
+```
+]
+</div>
+
+<div>
+.pull-left[
+- `.` matches *anything*
+]
+.pull-right[
+```{r}
+grep(".a$", text, value = T)
+```
+]
+</div>
+
+<div>
+.pull-left[
+- `?` means optionally match (i.e., "it might be there")
+]
+.pull-right[
+```{r}
+grep("^..?.$", text, value = T)
+```
+]
+</div>
+
+]
+
+---
+.small[
+
+```{r}
+text <- c("a", "b", "ab","aba", "wxyz", "123", "1b34", "aaxy52", "aaabb4c")
+```
+
+
+<div>
+.pull-left[
+- `|` means match this *or* that
+]
+.pull-right[
+```{r}
+grep("^a|4$", text, value = T)
+```
+]
+</div>
+
+<div style="margin-top:125px;">
+.pull-left[
+- `{` and `}` are used to specify the number of characters to match. If 2 numbers, specifies minimum and maximum.
+]
+.pull-right[
+```{r}
+grep("^a{2,3}", text, value = T)
+```
+]
+</div>
+
+<div style="margin-top:125px;">
+.pull-left[
+- `[` and `]` specify a *group* of characters to match. `[a-z]` matches *all* lowercase letters, `[0-9]` matches *all* numbers. `[a-zA-Z0-9@]` matches all letters, numbers, and the @ symbol.
+]
+.pull-right[
+```{r}
+grep("[0-9]{2}$", text, value = T)
+```
+]
+</div>
+
+<div style="margin-top: 375px;"></div>
+
+.pull-left[
+- `(` and `)` are used to create groups that you can reference in `gsub()`
+]
+
+.pull-right[
+```{r}
+gsub("^([a-z])(.*)$", "\\U\\1\\2_letter", text, perl = T)
+```
+]
+
+</div>
+]
+
+---
+
+.smallish[
+
+```{r}
+text <- c("a", "b", "ab", "aba", "wxyz", "123", "1b34", "aaxy52", "aaabb4c")
+```
+
+<div>
+.pull-left[
+- `*` means match 0+ times.
+]
+.pull-right[
+```{r}
+grep("^a*b", text, value = T)
+```
+]
+</div>
+
+
+<div style="margin-top: 125px;">
+.pull-left[
+- `+` means match 1+ times.
+]
+
+.pull-right[
+```{r}
+grep("^a+b", text, value = T)
+```
+]
+</div>
+
+<div style="margin-top:250px;"></div>
+
+`+` and `*` are particularly useful after groups of characters. For example:
+
+```{r}
+# Match anything that ends in 1 or more numbers
+grep("[0-9]+$", text, value = T)
+```
+
+```{r}
+# Match anything that has at least 1 number surrounded by letters
+grep("^[a-zA-Z]+[0-9]+.*[a-zA-Z]$", text, value = T)
+```
+
+]
+
+---
+
+# Metacharacter Shortcuts
+
+.noClass[
+- `[:alpha:]` matches all lowercase(`[:lower:]`) and uppercase (`[:upper:]`) letters (same as `[a-zA-Z]`)
+
+- `[:digit:]` matches digits 0 through 9 (same as `[0-9]`)
+
+- `[:alnum:]` matches all letters and digits (same as `[a-zA-Z0-9]`)
+
+- `[:blank:]` matches all blank characters (spaces, tabs; same as `[\\s\\t]`
+
+- `[:space:]` matches all space characters (tab, newline, etc.)
+
+- `[:punct:]` matches all punctuation characters (`!` `"` `#` `$` `%` `&` `'` `(` `)` `*` `+` `,` `-` `.` `/` `:` `;` `<` 
+`=` `>` `?` `@` `[` `\` `]` `^` `_` <code class="remark-inline-code">&#96;</code> `{` `|` `}` `~`)
+
+- `[:graph:]` matches all graphical characters (`[:alnum:]` and `[:punct:]`)
+]
+
+---
+
+## Lookarounds
+
+.smallish[
+A **lookahead** allows you to match characters that are (**positive lookahead** `(?=)`) or are not (**negative lookahead** `(?!)`) <u>followed</u> by certain characters
+
+```{r}
+text <- c("1a", "2a", "3b", "4b", "5c")
+grep("[0-9](?=[bc])", text, value = T, perl = T)
+grep("[0-9](?!a)", text, value = T, perl = T)
+```
+
+A **lookbehind** allows you to match characters that are (**positive lookbehind** `(?<=)`) or are not (**negative lookbehind** `(?<!)`) <u>preceded</u> by certain characters
+
+```{r}
+text <- c("1one", "2one", "3one", "4one")
+grep("(?<=[1-3])one", text, value = T, perl = T)
+grep("(?<![14])one", text, value = T, perl = T)
+```
+]
+---
+# `stringr`
+
+.small[
+The [`stringr`](https://stringr.tidyverse.org) package from the [`tidyverse`](https://tidyverse.org) offers several useful functions when working with strings (including upgraded base R functions)
+
+Functions in `stringr` begin with `str_`, which makes RStudio's autocomplete helpful
+
+- `str_detect()` is equivalent to `grepl()` and can be `!grepl()` with `negate = T`
+
+- `str_sub()` takes a substring based on `start` and `end` values. Negative values specify placement from the end of the string.
+```{r}
+str_sub("Washington", 1, -3)
+```
+
+- `str_length()` is equivalent to `nchar()` and returns the number of characters in a string
+
+- `str_to_upper()`, `str_to_lower()`, and `str_to_title()` convert cases
+
+```{r}
+str_to_upper("washington"); str_to_lower("WASHINGTON"); str_to_title(c("this is a title"))
+```
+
+]
+
+---
+
+.smallish[
+- `str_trim()` removes extra leading or trailing whitespace
+
+```{r}
+text <- c("  string       ", "mystring  ")
+str_trim(text)
+```
+
+- `str_pad()` to pad a string with characters (default is whitespace)
+
+```{r}
+str_pad("hadley", 30, "left")
+str_pad("hadley", 30, "right")
+str_pad("hadley", 30, "both")
+```
+
+
+- `str_count()` counts the number of matches in a string
+```{r}
+fruit <- c("apple", "banana", "pear", "pineapple")
+str_count(fruit, "a")
+```
+]
+
+---
+##  Food inspection data for practice
+
+.small[
+We will be using the "Food Establishment Inspection Data" from [King County](https://data.kingcounty.gov/) Dept. of Health.
+
+```{r, message=F, cache=T}
+restaurants <- read_csv("https://adamkucz.github.io/psych548/data/restaurants.csv",
+                        col_types = "ccccccccnncciclccicccc")
+```
+
+```{r, echo=F}
+glimpse(restaurants)
+```
+]
