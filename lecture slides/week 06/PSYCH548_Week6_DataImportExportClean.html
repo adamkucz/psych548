@@ -23,6 +23,13 @@ class: center, top, title-slide
 #importing-exporting-and-cleaning-data {
   font-size: 45px;
 }
+
+.code-overflow .remark-code,
+.code-overflow .r,
+.code-overflow .hljs {
+  max-height: 250px;
+  overflow: auto;
+}
 &lt;/style&gt;
 
 # Today's Theme:
@@ -1066,7 +1073,7 @@ fct_collapse(party,
 ## [7] third_party
 ## Levels: democrat republican third_party
 ```
-The `other_level_` argument allows you to collapse all non-mentioned levels into one level
+The `other_level` argument allows you to collapse all non-mentioned levels into one level
 
 ---
 
@@ -1727,6 +1734,7 @@ str_count(fruit, "a")
 ]
 
 ---
+&lt;!-- class: code-overflow --&gt;
 ##  Food inspection data for practice
 
 .small[

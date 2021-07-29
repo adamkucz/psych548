@@ -30,6 +30,13 @@ knitr::opts_chunk$set(comment = "##")
 #importing-exporting-and-cleaning-data {
   font-size: 45px;
 }
+
+.code-overflow .remark-code,
+.code-overflow .r,
+.code-overflow .hljs {
+  max-height: 250px;
+  overflow: auto;
+}
 ```
 
 # Today's Theme:
@@ -851,7 +858,7 @@ fct_collapse(party,
              republican = c("strong rep", "rep"),
              other_level = "third_party") #<<
 ```
-The `other_level_` argument allows you to collapse all non-mentioned levels into one level
+The `other_level` argument allows you to collapse all non-mentioned levels into one level
 
 ---
 
@@ -1277,6 +1284,7 @@ str_count(fruit, "a")
 ]
 
 ---
+<!-- class: code-overflow -->
 ##  Food inspection data for practice
 
 .small[
