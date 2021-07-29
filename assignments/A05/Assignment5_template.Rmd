@@ -1,0 +1,293 @@
+---
+title: "Assignment 5"
+subtitle: "Data Cleaning"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+```
+
+<span style="color: white; background-color: darkorange; font-weight:bold; padding: 2px;">
+Please submit both the .Rmd and a .html file on Canvas.
+</span>
+
+```{css, echo=F}
+.easy {
+  color: rgb(19, 135, 50);
+}
+
+.hard {
+  color: rgb(214, 36, 4);
+}
+
+.collapsible {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.active, .collapsible:hover {
+  background-color: #555;
+}
+
+.content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #f1f1f1;
+}
+```
+
+**Load your libraries here**
+```{r, message=FALSE}
+# This function prevents message output when loading packages. This is useful
+# in most cases, but clutters your final markdown file. Place your calls to
+# library() within the middle of this function call.
+suppressPackageStartupMessages({
+  library(tidyr)
+  library(lubridate)
+})
+```
+
+## Problem 0
+
+All of the data needed for this assignment is contained in a .Rdata file at: [https://github.com/adamkucz/psych548/blob/main/data/HW5.Rdata?raw=true](https://github.com/adamkucz/psych548/blob/main/data/HW5.Rdata?raw=true)
+
+Download the `.Rdata` file and use the `load()` function to read these objects into your global environment
+
+```{r}
+
+```
+
+## Problem 1
+ 
+<!-- EASIER OPTION -->
+<h3 class="easy">Easier Option</h3>
+
+The `d_dep_long` dataset contains a subset of data from a daily diary study with a community sample of adults from King County, WA. Participants completed a short survey at the end of each day for up to 75 days. There are `r nrow(d_dep_long)` rows and `r ncol(d_dep_long)` columns in the data. The `r ncol(d_dep_long)` variables are:
+
+1. `pid`: A unique identification number for each participant
+2. `day`: The day of the study for each participant
+3. `depressedmood`: Scores 0-10 (integer values) on the question "`r attributes(d_dep_long$depressedmood)$label`"
+
+**Part A: Long to Wide**
+
+Using [`pivot_wider()`](https://tidyr.tidyverse.org/articles/pivot.html) from the `tidyr` package, turn long form `d_dep_long` into wide form `d_dep_w` such that each row contains each participant's entire data. There should be `r nrow(d_dep_wide)` rows and `r ncol(d_dep_wide)` columns (1 col for `pid` and 75 for each observation of `depressedmood`. Name your columns `day_{daynumber}` where `{daynumber}` is 1 through 75. Your final data should be identical to `d_dep_wide`.
+
+```{r}
+
+```
+
+```{r, echo=T}
+# Check if they are identical (including metadata)
+# Returns TRUE if they are identical, FALSE if not
+identical(d_dep_w, d_dep_wide)
+```
+
+**Part B: Wide to Long**
+
+Using [`pivot_longer()`](https://tidyr.tidyverse.org/articles/pivot.html) from the `tidyr` package, turn wide form `d_dep_wide` into long form `d_dep_l` such that each row corresponds with 1 day from one participant. The value in `day_` corresponds with the `day` number of the study. There should be `r nrow(d_dep_long)` rows and `r ncol(d_dep_long)` columns (`pid`, `day`, `depressedmood`). Your final data should be identical to `d_dep_long`. Hint: Make sure to remove the rows where `depressedmood` is `NA` at the end.
+```{r}
+
+```
+
+```{r, echo=T}
+# Check if they are identical (excluding metadata differences)
+# Make sure datasets are arranged the same (ascending by pid and day)
+d_dep_l <- d_dep_l[order(d_dep_l$pid, d_dep_l$day), ]
+d_dep_long <- d_dep_long[order(d_dep_long$pid, d_dep_long$day), ]
+
+# Returns TRUE if they are the same, FALSE if there are differences
+all(d_dep_l == d_dep_long)
+```
+
+<!-- HARDER OPTION -->
+<h3 class="hard">Harder Option</h3>
+
+**You will have to consult the help page for `pivot_longer()` and `pivot_wider()` to complete this problem (i.e., additional arguments to those discussed in lecture are needed).**
+
+The `d_depanx_long` dataset contains a subset of data from a daily diary study with a community sample of adults from King County, WA. Participants completed a short survey at the end of each day for up to 75 days. There are `r nrow(d_depanx_long)` rows and `r ncol(d_depanx_long)` columns in the data. The `r ncol(d_depanx_long)` variables are:
+
+1. `pid`: A unique identification number for each participant
+2. `day`: The day of the study for each participant
+3. `depressedmood`: Scores 0-10 (integer values) on the question "`r attributes(d_depanx_long$depressedmood)$label`"
+4. `anhedonia`: Scores 0-10 (integer values) on the question "`r attributes(d_depanx_long$anhedonia)$label`"
+5. `anxietycovid` Scores 0-10 (integer values) on the question "`r attributes(d_depanx_long$anxietycovid)$label`"
+6. `anxietygeneral` Scores 0-10 (integer values) on the question "`r attributes(d_depanx_long$anxietygeneral)$label`"
+
+
+**Part A: Long to Wide**
+
+Using [`pivot_wider()`](https://tidyr.tidyverse.org/articles/pivot.html) from the `tidyr` package, turn long form `d_depanx_long` into wide form `d_depanx_w` such that each row contains each participant's entire data. There should be `r nrow(d_depanx_wide)` rows and `r ncol(d_depanx_wide)` columns (1 col for `pid` and 75 for each observation of `depressedmood`, `anhedonia`, `anxietycovid`, and `anxietygeneral`). Name your columns `{variable}_{daynumber}` where `{variable}` is one of the four variables in `d_depanx_long` and `{daynumber}` is 1 through 75. Your final data should be identical to `d_dep_wide`.
+
+```{r}
+
+```
+
+```{r, echo=T}
+# Check if they are identical (including metadata)
+# Returns TRUE if they are identical, FALSE if not
+identical(d_depanx_w, d_depanx_wide)
+```
+
+**Part B: Wide to Long**
+
+Using [`pivot_longer()`](https://tidyr.tidyverse.org/articles/pivot.html) from the `tidyr` package, turn wide form `d_dep_wide` into long form `d_dep_l` such that each row corresponds with 1 day from one participant. The value in `day_` corresponds with the `day` number of the study. There should be `r nrow(d_dep_long)` rows and `r ncol(d_dep_long)` columns (`pid`, `day`, `depressedmood`). Your final data should be identical to `d_dep_long`. Hint: Make sure to remove the rows where `depressedmood` is `NA` at the end.
+```{r}
+
+```
+
+```{r, echo=T}
+# Check if they are identical (excluding metadata differences)
+# Make sure datasets are arranged the same (ascending by pid and day)
+d_depanx_l <- d_depanx_l[order(d_depanx_l$pid, d_depanx_l$day), ]
+d_depanx_long <- d_depanx_long[order(d_depanx_long$pid, d_depanx_long$day), ]
+
+# Returns TRUE if they are the same, FALSE if there are differences
+all(d_depanx_l == d_depanx_long)
+```
+
+## Problem 2
+
+<!-- EASIER OPTION -->
+<h3 class="easy">Easier Option</h3>
+
+Using the `date` column from `d` dataset, create a new variable called `yearDay` that represents the *n*th day of the year. For example, an observation that is recorded on 1/3/2020 should have `yearDay` equal to `r yday(as.Date("2020-01-03"))` and an observation recorded on 2/14/2020 should have `yearDay` equal to `r yday(as.Date("2020-02-14"))`. Take note that there is missing data within!  Hint: what is the class of `date` (`class(date)`)?
+
+```{r}
+
+```
+
+<!-- HARDER OPTION -->
+<h3 class="hard">Harder Option</h3>
+
+The `day` variable in these data actually represents the number of days (starting at 1) from when the participant received their first survey alert. Because some participants did not complete their first daily survey, their first `day` value starts after 1. However, we might want a value that represents days since they actually started.
+
+Using the `date` column from `d`, create a new variable called `dayNew` that represents the *n*th day in the study for each participant after their first observation. For example, if a participant started the study on 1/1/2020, `dayNew` would be 3 on 1/3/2020. If a participant started the study on 1/2/2020, `dayNew` would be 2 on 1/3/2020. Take note that there is missing data within!
+
+```{r, warning=F}
+
+```
+
+## Problem 3
+The `date` column in `d` is currently formatted as day, month abbreviation, and year (e.g., `19Mar2020`). Suppose you want your dates instead to be in the format "mm/dd/yy" (e.g., `03/19/20`).  Use a combination of `format()`  as `as.Date()/as_date()` to complete this task (see slides) and consult with `?strptime` to find the right conversion specifications.
+
+```{r}
+
+```
+
+Now, create a new variable called `weekend` in `d` which takes on one of two values:
+
+- 0 = weekday
+- 1 = weekend
+
+Use the `lubridate` functions discussed in lecture, as well as functions for creating new variables discussed in previous weeks, to accomplish this task.
+
+```{r}
+
+```
+
+## Problem 4
+
+Suppose you are a newly minted clinician in independent practice with a caseload of 10 patients. You realize you need to keep track of your patients' diagnoses for billing purposes, so you ask your clinic manager to a you patients' diagnoses into one file for you. You get the following data:
+```{r}
+diagnoses <- read.csv("https://adamkucz.github.io/psych548/data/diagnoses.csv")
+knitr::kable(diagnoses)
+```
+
+These values correspond with the following DSM-5 disorders:
+
+- PTSD: Post-traumatic stress disorder
+- OCD: Obsessive-Compulsive Disorder
+- MDD: Major Depressive Disorder
+- GAD: Generalized Anxiety Disorder
+- BPD: Borderline Personality Disorder
+- SAD: Social Anxiety Disorder
+- PD: Panic Disorder
+- PDD: Persistent Depressive Disorder
+- OCPD: Obsessive-Compulsive Personality Disorder
+
+**First**, shift these data to be in long form. They should look like this:
+```{r}
+
+```
+
+**Second**, change each of these acronymns into their full DSM-5 disorder name. Use regular expressions to do this and keep the values in one column. Hint: Do not try to do this in one regular expression. This is a situation where you will either repeat code with values changed, or write your own function to simplify this. **Your code should work no matter what order you run your code in (e.g., whether you replace PD first or OCPD first)! Use the power of regular expressions to replace exactly what you want to replace.** 
+
+<button type="button" class="collapsible">Need a hint?</button>
+<div class="content">
+  <p>
+    Some of these acronyms share similarities (e.g., PD, PDD, OCPD), so you can't just used a fixed value (e.g., `PD`) to change
+    them because then "OCPD", for example, would become "OCPanic Disorder." You want to target certain letters (in a specific arrangement) that do not follow *something* (for you to decide) and that also are not followed by *something* (also for you to decide). Need more direction? Message me on Slack.
+  </p>
+</div>
+
+
+Your data should look like this after you are finished:
+```{r}
+
+```
+
+**Third**, choose one of these two options.
+
+<h3 class="easy">Easier Option</h3>
+
+Use `separate()` to get 1 column for each diagnoses. Because the maximum number of diagnoses given to one individual patient is 3,
+you should have separate columns. Name them: `Dx1`, `Dx2`, and `Dx3`. If a patient does not have a second or third diagnosis, their value should be `NA`.
+Your data should look like this:
+```{r}
+
+```
+
+
+<h3 class="hard">Harder Option</h3>
+
+Make 9 new columns in your data, one for each diagnosis (use the acronyms as column names). The value for each column
+should be 1 if the patient has the diagnosis, otherwise the value should be 0. This format is what you need if you wanted to
+use these data for any sort of analysis.
+
+<button type="button" class="collapsible">Need a hint?</button>
+<div class="content" style="margin-bottom: 10px;">
+  <p>
+    You will want to use `ifelse()` to construct the columns. Use several separate calls to `ifelse()` rather than the nested structure we have seen before.
+  </p>
+</div>
+
+<button type="button" class="collapsible">Need another hint?</button>
+<div class="content" style="margin-bottom: 25px;">
+  <p>
+    Inside `ifelse()` you need a vector of `TRUE`s and `FALSE`s specifying whether each disorder is in the
+    patient's list of diagnoses. Use `grepl()` to get this vector of `TRUE`s and `FALSE`s.
+  </p>
+</div>
+
+Your data should look like this: 
+```{r}
+
+```
+
+
+```{js}
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    } 
+  });
+}
+```
