@@ -1,0 +1,1379 @@
+---
+title: "Manipulating and Summarizing Data"
+author: "Adam Kuczynski"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: main.css
+    nature:
+      highlightStyle: tomorrow-night-bright
+      highlightLines: true
+      countIncrementalSlides: false
+      titleSlideClass: ["center","top"]
+---
+
+```{r setup, include=FALSE, purl=FALSE}
+library(tibble)
+library(dplyr)
+
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(comment = "##", cache = T)
+```
+
+```{css, echo=FALSE}
+#manipulating-and-summarizing-data {
+  font-size: 45px;
+}
+```
+
+# Today's Theme:
+## "Data Engineer Work"
+
+Issues around preparing a dataset for the analyses you want to run:
+
+- Subsetting data
+--
+
+
+- Performing operations across rows and columns
+--
+
+- Creating new variables
+--
+
+
+- Creating rich summaries of your data
+--
+
+
+- Merging multiple datasets together
+
+---
+class: inverse
+# Tibbles
+<div style="text-align: center;">
+  <img src="images/tibble.svg", alt="Tibble Logo" style="max-width: 60%;">
+</div>
+---
+# What is a `tibble`?
+
+From the tibble [webpage](https://tibble.tidyverse.org):
+> "A **tibble**, or `tbl_df` [the official `class` of a tibble] is a modern reimagining of the data.frame, keeping what time has proben to be effective, and throwing out what is not. Tibbles are data.frames that are lazy and surly: they do less (i.e. they don't change variable names or types, and don't do partial matching) and complain more (e.g. when a variable does not exist). This forces you to confront problems earlier, typically leading to cleaner, more expressive code. Tibbles also have an enhanced print() method which makes them easier to use with large datasets containing complex objects."
+--
+
+
+Tibbles are part of the [Tidyverse](https://tidyverse.org) and operate in much the same way as dataframes (most of the time you don't need to worry about whether your object is a tibble or a dataframe)
+--
+
+
+Although most functions from the Tidyverse set of packages will operate on both dataframes and tibbles, some (e.g., `group_by()`) will return a tibble back
+
+---
+# Making Tibbles
+
+.small[
+There are three primary ways to make a tibble:
+
+**1.** Convert a dataframe into a tibble using `tibble::as_tibble()`<sup>1</sup>
+```{r, eval=F}
+mtcars <- as_tibble(mtcars)
+class(mtcars)
+```
+
+```{r, echo=F}
+class(as_tibble(mtcars))
+```
+
+**2.** Use `tibble::tibble()`
+```{r,, results='hide'}
+uwclinpsych <- tibble(name = c("Corey", "Angela", "Bill", "Mary", "Jane", "Lori"),
+                      grads = c(1, 0, 4, 3, 2, 3),
+                      fullprof = c(F, F, T, T, T, T))
+
+head(uwclinpsych, 4)
+```
+
+
+```{r, echo=F}
+head(uwclinpsych, 4)
+```
+
+.footnote[[1] The `as_tibble()` function has been exported into the `tidyr` and `dplyr` package, so loading any of those will give you access to this function.]
+]
+
+---
+**3.** use `tibble::tribble()` to construct a tibble row-wise. Column names are denoted with a `~` in front and are not quoted. Values are comma separated and rows are separated by a newline.
+
+.smallish[
+```{r}
+uwclinpsych <- tribble(
+  ~name,     ~grads,  ~fullprof,
+  "Corey",   1,       FALSE,
+  "Angela",  0,       FALSE,
+  "Bill",    4,       TRUE,
+  "Mary",    3,       TRUE,
+  "Jane",    2,       TRUE,
+  "Lori",    3,       TRUE
+)
+
+print(uwclinpsych)
+```
+]
+---
+## A Nice Feature of `tibble()`
+
+One really nice feature of constructing tibbles from scratch is that you can build on columns dynamically:
+
+.smallish[
+.pull-left[
+`tibble()`
+```{r}
+tibble(nums = 1:10,
+       lets = letters[1:10],
+       both = paste0(nums, lets)) #<<
+```
+]
+
+
+.pull-right[
+`data.frame()`
+```{r, error=T}
+data.frame(nums = 1:10,
+           lets = letters[1:10],
+           both = paste0(nums, lets)) #<<
+```
+
+```{r, eval=F}
+df <- data.frame(nums = 1:10,
+                 lets = letters[1:10])
+df$both = paste0(df$nums, df$lets)
+print(df)
+```
+
+👈 same output as `tibble()` except the class is dataframe
+
+
+]
+]
+---
+class: inverse
+# Manipulating Data
+<div style="text-align: center;">
+  <img src="images/dplyr.svg", alt="Tibble Logo" style="max-width: 70%;">
+</div>
+---
+# Starwars Data
+
+To demonstrate much of `dplyr`'s functionality, we will use the `starwars` data that is loaded with `dplyr` and originally from [SWAPI](https://swapi.dev) (a Star Wars API)
+
+
+.smallish[
+```{r}
+glimpse(starwars)
+```
+]
+---
+## A Brief Reminder About Pipes
+
+The `dplyr` package uses **verbs** to name the functions within. As a result, they work very nicely with the pipe (`%>%`) syntax
+
+```{r, eval=F}
+take_these_data %>%
+    do_first_thing(with = this_value) %>%
+    do_next_thing(using = that_value) %>%
+```
+
+The LHS is passed as the *first argument* to the function on the RHS
+--
+
+
+You can reference the LHS with a `.` to use it in other places in the RHS function
+
+```{r, eval=F}
+take_these_data %>%
+  do_first_thing(argument = "Value", with = .) %>%
+  do_next_thing(using = that_value) %>%
+```
+
+---
+# `group_by()`
+
+`group_by()` is a special function that controls the behavior of other functions as they operate on the data
+--
+
+
+It returns a tibble with the following classes: `grouped_df`, `tbl_df`, `tbl`, and `data.frame`
+--
+
+
+Most functions called on grouped data operate *within each group* rather than on the entire dataset
+--
+
+
+Data are typically grouped by variables that are characters, factors, or integers, not continuous data
+
+---
+.small[
+For example, `group_by()` characters' `eye_color`
+```{r}
+starwars_grouped <- starwars %>%
+  group_by(eye_color)
+
+class(starwars_grouped)
+```
+
+
+Notice that this dataset has *exactly* the same data as the ungrouped version, except it now controls the output of other function calls
+
+.pull-left[
+**Not grouped**
+```{r}
+dim(starwars)
+```
+]
+
+
+.pull-right[
+**Grouped**
+```{r}
+dim(starwars_grouped)
+```
+]
+
+To remove a grouping structure use the `ungroup()` function (if left blank, *all* grouping is removed, otherwise just the specified groups are ungrouped):
+
+
+```{r}
+starwars_ungrouped <- starwars_grouped %>%
+  ungroup()
+
+class(starwars_ungrouped)
+```
+]
+---
+## `group_by()` example
+
+.small[
+**Mean mass by character gender:**
+```{r, echo=F}
+starwars <- starwars %>%
+  mutate(gender = case_when(is.na(gender) ~ "none",
+                            TRUE ~ gender))
+
+tapply(starwars$mass, starwars$gender, mean, na.rm = T)
+```
+
+```{r}
+starwars %>%
+  # Center mass by sample average
+  mutate(mass_gmc = mass - mean(mass, na.rm = T)) %>% #<<
+  group_by(gender) %>% #<<
+  # Center mass by group average
+  mutate(mass_pmc = mass - mean(mass, na.rm = T)) %>% #<<
+  select(name, gender, mass, mass_gmc, mass_pmc)
+```
+]
+
+
+---
+# Grouping Metadata
+
+.smallish[
+Sometimes it can be helpful for you to programmatically refer to your grouping structure. `dplyr` offers four functions that return grouping metadata to help with this task:
+
+Use these as stand-alone function calls:
+- `group_data()` returns a dataframe with integer vectors specifying the rows that belong to each group
+- `group_indices()` returns an integer vector of the same length as `nrow(grouped_data)` specifying which group index a row belongs to
+- `group_vars()` returns a character vector of the colnames used for grouping
+- `group_size()` returns an integer vector of length `n_groups()` specifying the number of rows within each group
+- `n_group()` returns an integer vector of length 1 with the number of groups in the data
+
+Use these inside other `dplyr` functions:
+- `cur_data()` refers to the current (ungrouped) data for the current group
+- `cur_group()` refers to the current group value(s)
+- `cur_group_id()` refers to the current group unique numeric identifier
+]
+
+---
+# `rowwise()`
+.smallish[
+`rowwise()` allows you to perform operations on data one row at a time (equivalent to `group_by()` each row or `for` looping down each row)
+
+
+For example, to simulate normally distributed data with different parameters:
+```{r, echo=F}
+set.seed(1)
+```
+
+```{r}
+df <- tibble(x = runif(6), y = runif(6), z = runif(6))
+```
+
+
+.pull-left[
+```{r}
+df %>%
+  mutate(m = mean(c(x, y, z)))
+```
+]
+
+
+.pull-right[
+```{r}
+df %>%
+  rowwise() %>%
+  mutate(m = mean(c(x, y, z)))
+```
+]
+
+.footnote[A vectorized version: `df %>% mutate(m = rowMeans(select(., x, y, z)))`]
+
+]
+---
+# `filter()`
+
+`filter()` is used to subset rows from a dataframe
+--
+
+
+Similar to `[x, ]` except that it drops NAs
+--
+
+
+```{r, eval=F}
+filter(.data, ..., .preserve = FALSE)
+```
+--
+
+
+- `.data` is the data to subset on
+--
+
+
+
+- `...` are the condition(s) that specify the subset
+--
+
+
+- `.preserve` controls the grouping of the returned dataframe<sup>1</sup>
+--
+
+
+.footnote[[1] If `.data` is grouped and `filter()` reduces the number of groups available in the data, the grouping will be recalculated (i.e., number of groups reduced) based on the new data when `.preserve` is set to `FALSE`]
+---
+## `filter()` Example
+
+.small[
+```{r}
+starwars %>%
+  filter(mass > mean(mass, na.rm = T))
+```
+
+Notice that you don't need to refer to the `mass` column as `starwars$mass` because `filter()` already knows the context from the `.data` argument.
+
+
+👇 same as
+```{r, eval=F}
+starwars[starwars$mass > mean(starwars$mass, na.rm = T), ]
+```
+]
+
+---
+## `filter()` Multiple Conditions
+
+.smallish[
+`filter()` can handle multiple conditions upon which to subset your data
+
+When you pass `filter()` multiple conditions, they are combined with the `&` operator
+
+```{r}
+starwars %>%
+  filter(mass > mean(mass, na.rm = T),
+         eye_color %in% c("blue", "red"))
+```
+]
+---
+To `filter()` using the or (`|`) operator, include it on one line as you would inside `[` `]` or `subset()`
+
+```{r}
+starwars %>%
+  filter(mass > mean(mass, na.rm = T) | eye_color %in% c("blue", "red"))
+```
+
+---
+# Filter by Group
+
+`filter()` will operate on grouped data:
+--
+
+
+👇 filter the entire dataset to characters whose mass is greater than average
+```{r}
+starwars %>%
+  filter(mass > mean(mass, na.rm = T)) %>%
+  dim()
+```
+--
+
+
+👇 filter the entire dataset to characters whose mass is greater than the average *within their eye color*
+```{r}
+starwars %>%
+  group_by(eye_color) %>%
+  filter(mass > mean(mass, na.rm = T)) %>%
+  dim()
+```
+
+---
+# `slice()`
+
+`slice()` allows you to subset rows using their integer locations
+
+Similar to passing `[x, ]` a numeric vector
+--
+
+
+- `slice()` (positive integers keep rows, negative integers remove rows)
+--
+
+
+- `slice_head()`: keep the top `n` or `prop` (proportion) rows
+--
+
+
+- `slice_tail()`: keep the bottom `n` or `prop` (proportion) rows 
+--
+
+
+- `slice_min(order_by = col)`: keeps rows where `col` is at its minimum (`col` is a column in the data)
+--
+
+
+- `slice_max(order_by = col)`: keeps rows where `col` is at its maximum (`col` is a column in the data)
+--
+
+
+- `slice_sample()`: randomly selects `n` or `prop` rows
+---
+# `slice()` example
+
+.small[
+To keep the 2nd, 54th, and 83rd row in the data:
+```{r}
+starwars %>%
+  slice(2, 54, 83)
+```
+
+To remove rows 1, 3-53, 55-82, and 84-87:
+```{r}
+starwars %>%
+  slice(-1, -(3:53), -(55:82), -(84:87))
+```
+]
+
+---
+# `slice()`: A Warning
+
+The starwars data has `r nrow(starwars)` rows:
+```{r}
+nrow(starwars)
+```
+
+**Warning**: If you try to slice off rows that don't exist, R will not throw an error! It just doesn't subset those rows...
+
+```{r}
+starwars %>%
+  slice(5, 100)
+```
+---
+# `slice()` by Group
+
+If the `.data` are grouped, `slice()` will operate on each group of the data:
+.smallish[
+```{r}
+starwars %>%
+  filter(eye_color %in% c("black", "blue", "brown")) %>%
+  group_by(eye_color) %>%
+  slice(3, 10)
+```
+]
+---
+.smallish[
+
+## `select()`
+
+`select()` is used to subset columns from a dataframe (similar to `[, x]`, but variable names don't need to be quoted or passed as a vector)
+
+```{r, eval=F}
+starwars %>%
+  select(character, mass, skin_color)
+```
+
+- `:` is used to select a range of consecutive columns
+```{r, eval=F}
+starwars %>%
+  select(birth_year:species)
+```
+
+- `!` is used to negate a selection of columns
+```{r, eval=F}
+starwars %>%
+  select(!birth_year, !vehicles, !starships)
+```
+
+- `-` is also used to negate a selection of columns
+```{r, eval=F}
+starwars %>%
+  select(-birth_year, -vehicles, -starships)
+```
+
+]
+
+---
+### `select()` helpers
+
+.small[
+You can dynamically select columns using a variety of helper functions from [tidyselect](https://tidyselect.r-lib.org/reference/language.html):
+
+- `where()` allows you to select columns based on a function that returns a logical value
+```{r, eval=T}
+starwars %>%
+  select(where(is.character)) %>%
+  colnames()
+```
+
+- `starts_with()` selects columns that start with a specified prefix
+```{r, eval=T}
+starwars %>%
+  select(starts_with("h")) %>%
+  colnames()
+```
+
+- `ends_with()` selects all columns that end with a specified suffix
+```{r, eval=T}
+starwars %>%
+  select(ends_with("color")) %>%
+  colnames()
+```
+]
+---
+.smallish[
+- `contains()` selects all columns that contain a string
+```{r}
+starwars %>%
+  select(contains("me")) %>%
+  colnames()
+```
+
+- `num_range()` matches a numerical range (e.g., `phq_1`, `phq_2`, `phq_3`, ...)
+```{r}
+psych::bfi %>%
+  select(num_range("A", 1:5)) %>%
+  colnames()
+```
+
+- `matches()` matches a regular expression
+```{r}
+starwars %>%
+  select(matches("^[ns]|s$")) %>%
+  colnames()
+```
+]
+---
+.small[
+- `all_of()` matches column names from a character vector
+```{r}
+hcols <- c("height", "hair_color", "homeworld")
+
+starwars %>%
+  select(all_of(hcols)) %>%
+  colnames()
+```
+
+- `any_of()` works the same way as `all_of()` except that no error is thrown for non-existent columns:
+
+```{r}
+hcols <- c("height", "hair_color", "homeworld", "Not_a_Column")
+```
+
+.pull-left[
+```{r, error=T}
+starwars %>%
+  select(any_of(hcols)) %>% #<<
+  colnames()
+```
+]
+
+.pull-right[
+```{r, error=T}
+starwars %>%
+  select(all_of(hcols)) %>% #<<
+  colnames()
+```
+]
+
+- `everything()` matches all columns
+```{r}
+starwars %>%
+  select(everything()) %>%
+  dim()
+```
+
+
+]
+---
+# Column Renaming
+
+You can rename variables while selecting them with `select()`:<sup>1</sup>
+```{r}
+starwars %>%
+  select(character = name, weight = mass, height) %>%
+  colnames()
+  
+```
+.footnote[[1] Notice the syntax: `select(new = old)`]
+--
+
+
+However it is more explicitly done with `rename()`:
+```{r}
+starwars %>%
+  rename(character = name, weight = mass) %>% #<<
+  select(character, weight, height) %>%
+  colnames()
+```
+
+
+---
+## Creating New Columns: `mutate()`
+.small[
+`mutate()` allows you to create a new column of data or modify existing columns
+```{r}
+starwars %>% 
+  mutate(bmi = mass / (height/100)^2) %>% # convert cm to m #<<
+  select(mass, height, bmi) %>%
+  head(3)
+```
+
+We can also convert height to meters first, then calculate BMI:
+
+.pull-left[
+```{r}
+starwars %>%
+  mutate(height = height / 100, #<<
+         bmi = mass / height^2) %>% #<<
+  select(mass, height, bmi) %>%
+  slice(1, 3)
+```
+]
+
+.pull-right[
+👈  multiple statements can be placed in the same `mutate()` call, and just like in `tibble()`, they build on each other dynamically
+]
+
+]
+---
+## `mutate(across())`
+.small[
+The helper functions discussed for `select()` can also be used with `mutate()` to modify/create several columns simultaneously, using the `across()` function
+
+`across()` takes column specifiers (e.g., using the helper functions) and a function to apply to the relevant columns. This function needs to be an anonymous function using either:
+
+- `function(args) instructions`
+- `\(args) instructions` (base R lambda function)
+- `~ instructions` (`purrr`-style lambda function, where the current column is referenced as `.x`)
+
+Three ways to square values across all numeric columns:
+```{r, eval=F}
+# Using function(args) instructions
+starwars %>%
+  mutate(across(where(is.numeric),
+                function(x) x^2)) #<<
+```
+
+```{r, eval=F}
+# Using \(args) instructions (R 4.1+ only)
+starwars %>%
+  mutate(across(where(is.numeric),
+                \(x) x^2)) #<<
+```
+
+```{r, eval=F}
+# Using dplyr ~ syntax (purrr-style lambda function)
+starwars %>%
+  mutate(across(where(is.numeric),
+                ~ .x^2)) #<<
+```
+]
+---
+## `mutate()` Example
+
+.smallish[
+Let's say we want to compute a sum score for all the `vehicles` and `starships` a character has piloted (much like creating a sum score across several items from a test). The `vehicles` and `starships` columns are both list columns where each element (i.e., cell) is a character vector of all the vehicles/starships the character has piloted
+
+First we want to determine the length of each vector for both variables, which corresponds with the number of vehicles/starships the character has piloted:
+
+```{r}
+starwars <- starwars %>%
+  rowwise() %>%
+  mutate(across(vehicles:starships,
+                ~ length(.x),
+                .names = "{.col}_n")) %>%
+  ungroup() # Remove rowwise() grouping structure
+
+starwars %>% select(matches("^vehicles|^starships")) %>% head(4)
+```
+]
+---
+.smallish[
+Then we want to take the sum of `vehicles_n` and `starships_n` and store it in a new variable called `total_piloted`:
+
+```{r}
+starwars <- starwars %>%
+  rowwise() %>%
+  mutate(total_piloted = sum(vehicles_n, starships_n, na.rm = T)) %>%
+  ungroup()
+
+starwars %>% select(vehicles_n, starships_n, total_piloted) %>% head(4)
+```
+
+
+This can also be done without using `rowwise()` (it is very slow with large dataframes) using the vectorized `rowSums()` function:
+```{r, eval=F}
+starwars <- starwars %>% 
+  mutate(total_piloted = rowSums(select(., vehicles_n, starships_n),
+                                 na.rm = T))
+```
+☝️ `rowSums()` takes a dataframe as its first argument, so you need to use `select()` on `.`
+]
+---
+## `if_else()`
+
+.smallish[
+Remember `if_else()`? We can use it inside mutate:
+```{r, echo=F}
+set.seed(2)
+```
+
+
+```{r}
+starwars <- starwars %>%
+  mutate(height_ordinal = if_else(height > (mean(height, na.rm = T) + sd(height, na.rm = T)), "tall",
+                                  if_else(height < (mean(height, na.rm = T) - sd(height, na.rm = T)), "short",
+                                          "average")))
+
+starwars %>% select(starts_with("height")) %>% slice_sample(n = 10)
+```
+]
+
+---
+## `case_when()`
+
+.smallish[
+`case_when()` allows you to vectorize multiple `if_else()` statements:
+
+```{r, echo=F}
+set.seed(2)
+```
+
+```{r}
+starwars <- starwars %>%
+  mutate(height_ordinal = case_when(height > mean(height, na.rm = T) + sd(height, na.rm = T) ~ "tall",
+                                    height < mean(height, na.rm = T) - sd(height, na.rm = T) ~ "short",
+                                    is.na(height) ~ NA_character_, # need to handle NAs explicitly
+                                    TRUE ~ "average")) # if none of the above are matched, this one will be default
+
+starwars %>% select(starts_with("height")) %>% slice_sample(n = 10)
+```
+]
+
+---
+## Example Data
+
+Consider the following example data from a fake EMA study (2 participants, 2 days, 3x/day):
+
+.smallish[
+.pull-left[
+```{r, echo=F}
+d <- tibble(id = rep(c(1001, 1002), each = 6),
+       day = rep(c(1, 1, 1, 2, 2, 2), 2),
+       ping = rep(1:3, 4),
+       x = rnorm(12, 5, 4),
+       y = x*0.3 + rnorm(12))
+
+print(d)
+```
+]
+
+.pull-right[
+```{r, eval=F}
+d <- tibble(id = rep(c(1001, 1002), each = 6),
+            day = rep(c(1, 1, 1, 2, 2, 2), 2),
+            ping = rep(1:3, 4),
+            x = rnorm(12, 5, 4),
+            y = x*0.3 + rnorm(12))
+```
+
+
+- `id` = participant ID
+
+- `day` = day in study
+
+- `ping` = prompt within each day
+
+- `x` = predictor variable
+
+- `y` = outcome variable
+
+]
+]
+---
+## `lag()` and `lead()`
+
+`lag()` allows you to create lagged variables for analysis (`lead()` does the opposite):
+
+.small[
+```{r}
+d <- d %>%
+  group_by(id) %>%
+  mutate(x_l1 = lag(x), # lag(1)
+         x_l2 = lag(x, 2)) # lag(2)
+
+print(d)
+```
+]
+---
+## Targeting the `nth()` Elements
+
+.small[
+It is often useful to target the n<sup>th</sup> element of a vector when manipulating your data. For this, we can use the `first()`, `last()`, and `nth()` functions. For example, let's say we want to predict `y` with lag(1) `x`, but we don't want to use the last observation of the day to predict the first of the next day. We can make all relevant values NA for the analysis:
+```{r}
+d %>%
+  group_by(id, day) %>%
+  arrange(id, day, ping) %>% # Necessary to make sure last() works
+  mutate(x_l1_NAlast = case_when(ping == last(ping) ~ NA_real_,
+                       TRUE ~ x_l1))
+```
+]
+
+---
+# `arrange()`
+
+.small[
+
+`arrange()` orders the rows of a dataframe by values within the specified columns
+
+Values are arranged in ascending order my default. To arrange by a column in descending order, use the `desc()` function:
+```{r}
+# Arrange ascending by id, then day, then descending by ping
+d %>%
+  arrange(id, day, desc(ping))
+```
+]
+---
+# `coalesce()`
+
+.small[
+Sometimes you have two or more mutually exclusive variables that belong in the same column for analysis. `coalesce()` helps you combines these variables by finding the first non-`NA` value.
+
+For example, suppose you have 3 columns representing how much participants like their Windows, Mac, or Linux computer (depending on which operating system they use), but you only care about their computer rating:
+.pull-left[
+```{r, eval=F}
+d_comp <- tibble(id = 1001:1003,
+                 Windows = c(NA, NA, 3),
+                 Mac = c(7, NA, NA),
+                 Linux = c(NA, 10, NA))
+
+print(d_comp)
+```
+]
+
+.pull-right[
+```{r, echo=F}
+d_comp <- tibble(id = 1001:1003,
+                 Windows = c(NA, NA, 3),
+                 Mac = c(7, NA, NA),
+                 Linux = c(NA, 10, NA))
+
+print(d_comp)
+```
+]
+
+
+Using `coalesce()` we can combine these into one variable for analysis:
+
+```{r}
+d_comp <- d_comp %>%
+  mutate(rating = coalesce(Windows, Mac, Linux)) %>%
+  select(id, rating)
+```
+
+<pre style="font-size:13.5px;">
+## # A tibble: 3 x 5
+##      id  rating
+##   &lt;int&gt;   &lt;dbl&gt;
+## 1  1001       7
+## 2  1002      10
+## 3  1003       3
+</pre>
+
+
+]
+---
+## `na_if()`
+
+.small[
+`na_if()` allows you to replace specified values with `NA`
+
+```{r}
+starwars %>%
+  mutate(eye_color_cleaned = na_if(eye_color, "unknown")) %>% #<<
+  select(name, eye_color, eye_color_cleaned) %>%
+  tail(5)
+```
+
+This does the same exact thing as: 
+
+```{r, eval=F}
+dataframe$column[dataframe$column == val] <- NA 
+```
+```{r, eval=F}
+dataframe %>%
+  mutate(column = if_else(column == value, NA, column))
+```
+```{r, eval=F}
+dataframe %>%
+  mutate(column = case_when(column == value ~ NA,
+                            TRUE ~ column)
+
+```
+
+]
+---
+## `relocate()`
+
+.smallish[
+`relocate()` allows you to rearrange columns in a dataframe
+
+```{r, eval=F}
+relocate(.data, ..., .before = NULL, .after = NULL)
+```
+
+- `.data` is the dataframe to reorder
+
+- `...` are the columns to move
+
+- `.before` destination to move columns before (colname, index, `tidy-select`)
+
+- `.after` destination to move columns after (colname, index, `tidy-select`)
+
+For example, to move all the numeric columns before the character columns:
+```{r eval=F}
+starwars %>%
+  relocate(where(is.numeric), .before = where(is.character)) %>%
+  sapply(class)
+```
+.small[
+```{r, echo=F}
+starwars %>%
+  relocate(where(is.numeric), .before = where(is.character)) %>%
+  sapply(class)
+```
+]
+]
+---
+## `distinct()`
+
+.small[
+`distinct()` selects the unique rows from a data.frame (similar to the `unique.data.frame()` function in base R, but it is faster when you are working with a large dataframe). For example:
+
+```{r}
+df <- tibble(a = c(1, 1, 2, 2),
+             b = c(1, 1, 2, 1),
+             c = c(3, 3, 2, 3))
+```
+
+```{r, echo=F}
+print(df)
+```
+
+.pull-left[
+```{r}
+# Find distinct rows based on cols a and b
+df %>%
+  distinct(a, b)
+```
+]
+
+.pull-right[
+```{r}
+# To keep all columns
+df %>%
+  distinct(a, b, .keep_all = TRUE)
+```
+]
+]
+---
+## `pull()`
+
+.smallish[
+`pull()` allows you to extract a column from a dataframe as a vector and is equivalent to `$`
+
+```{r}
+d$ping
+d %>% pull(ping)
+```
+
+`pull()` is useful when you want a column after manipulating a dataframe. For example, find the mean height of characters whose mass is greater than average and who are not orifinally from the planet Naboo:
+```{r}
+starwars %>%
+  filter(mass > mean(mass, na.rm = T),
+         homeworld != "Naboo") %>%
+  pull(height) %>%
+  mean()
+```
+]
+---
+class: inverse
+# Summarizing Data
+<div style="text-align: center;">
+  <img src="images/dplyr.svg", alt="Tibble Logo" style="max-width: 70%;">
+</div>
+---
+# `summarize()`
+
+.small[
+`summarize()` returns a dataframe with specified summary statistic(s) of your data with 1+ rows for each combination of grouping variables (1 for no grouping structure) and 1 column for each summary statistic (much like `tapply()`, but much more flexible with cleaner output)
+```{r}
+mtcars %>%
+  summarize(nobs = n(),
+            mpg_mean = mean(mpg, na.rm = T),
+            mpg_sd = sd(mpg, na.rm = T))
+```
+
+When we group the data before calling `summarize()` we will get summary statistics for each group:
+```{r}
+mtcars %>%
+  group_by(cyl) %>% #<<
+  summarize(nobs = n(),
+            mpg_mean = mean(mpg, na.rm = T),
+            mpg_sd = sd(mpg, na.rm = T))
+```
+]
+---
+
+## `summarize()` whatever you want
+
+.smallish[
+
+You can specify any function you want within `summarize()` 
+
+```{r}
+mtcars %>%
+  group_by(cyl) %>%
+  summarize(nobs = n(), # n observations for each group
+            percentN = (n() / nrow(.)) * 100, # percent of total observations
+            from_total_obs = nrow(.) - n(), # distance from total observations
+            mpg_sd_sample = sd(mpg, na.rm = T), # sample SD (n-1 in denominator)
+            mpg_sd_pop = sqrt(sum((mpg - mean(mpg, na.rm = T))^2) / (n()))) # population SD (n in denominator)
+       
+```
+]
+
+---
+## `summarize(across())`
+
+.smallish[
+Much like `mutate(across())` allowed us to manipulate several columns at once, `summarize(across())` allows us to programmatically target columns for summarizing
+
+For example, to take the mean across all numeric variables:
+```{r, eval=F}
+starwars %>%
+  group_by(sex) %>%
+  summarize(across(where(is.numeric),
+                   ~ mean(.x, na.rm = T),
+                   .names = "mean_{.col}"))
+```
+]
+
+.small[
+```{r, echo=F}
+starwars %>%
+  group_by(sex) %>%
+  summarize(across(where(is.numeric),
+                   ~ mean(.x, na.rm = T),
+                   .names = "mean_{.col}"))
+```
+]
+---
+### `summarize(across())` with Multiple Summary Functions
+
+.smallish[
+To summarize across columns with more than one summary function (e.g., count, mean, and sd), used a named list of summary functions:
+
+```{r}
+starwars %>%
+  group_by(sex) %>%
+  summarize(across(where(is.numeric),
+                   list(nobs = ~ sum(!is.na(.x)), mean = mean, sd = sd), # list of functions #<<
+                   na.rm = T)) # additional arguments passed to the functions
+```
+]
+---
+class: inverse
+# Merging Data
+<div style="text-align: center;">
+  <img src="images/dplyr.svg", alt="Tibble Logo" style="max-width: 70%;">
+</div>
+---
+# Merging Dataframes
+
+Merging dataframes together is an essential part of data management. For example:
+--
+
+
+- Merging baseline data with EMA data
+--
+
+
+- Merging self-report data to physiological data
+--
+
+
+- Merging patient data from multiple clinics
+--
+
+
+- Merging departmental revenue data to employee wage statistics
+--
+
+
+<div style="margin-top:50px;"></div>
+
+Sometimes marging data is a large part of the entire project, as in the [Washington Merged Longitudinal Administrative Data](https://dcollab.uw.edu/data/wmlad/) project at UW, which takes data from several WA State agencies to answer novel administrative questions.
+---
+### Questions to Ask Yourself When Merging
+
+When merging datasets `A` and `B`:
+--
+
+- Which *rows* do you want to keep from each dataframe?
+--
+
+
+- Which *columns* do you want to keep from each dataframe?
+--
+
+
+- Which variable(s) determine whether rows *match*?
+---
+# Data Example for Merging
+
+.smallish[
+To keep things simple, let's use the following data to practice merging:
+```{r, echo=F}
+set.seed(1)
+```
+
+
+.pull-left[
+```{r}
+A <- tibble(ID = 0:6,
+            x = rnorm(7, c(2, 2, 2, 2, 5, 5, 5, 5)),
+            y = x*0.5 + rnorm(7))
+
+```
+
+```{r, echo=F}
+A
+```
+]
+
+.pull-right[
+```{r}
+B <- tibble(ID = 1:7,
+            group = c(rep(1:2, each = 3), 2),
+            age = sample(20:50, 7))  
+```
+
+```{r, echo=F}
+B
+```
+]
+
+Notice that `ID == 0` is not in `B` and `ID == 7` is not in `A`
+
+We will use the `ID` column to merge the data (in the `by = ` argument)
+
+]
+---
+## `left_join()`
+
+<div style="margin-top:50px; margin-bottom:50px;"></div>
+
+.smallish[
+`left_join(A, B)` keeps all rows from `A`, all cols from `A` and `B`
+
+.pull-left[
+**`dplyr`**
+```{r}
+left_join(A, B, by = "ID")
+```
+]
+
+.pull-right[
+**Base R Equivalent**
+```{r}
+merge(A, B, by = "ID", all.x = T)
+```
+]
+
+☝️ `ID == 7` from `B` not in merged data ☝️
+
+.footnote[Most of your joins will probably be `left_join()`]
+]
+---
+## `right_join()`
+
+<div style="margin-top:50px; margin-bottom:50px;"></div>
+
+.smallish[
+`right_join(A, B)` keeps all rows from `B`, all cols from `A` and `B`
+
+.pull-left[
+**`dplyr`**
+```{r}
+right_join(A, B, by = "ID")
+```
+]
+
+.pull-right[
+**Base R Equivalent**
+```{r}
+merge(A, B, by = "ID", all.y = T)
+```
+]
+
+
+☝️ `ID == 0` from `A` not in merged data ☝️
+
+]
+---
+## `inner_join()`
+
+<div style="margin-top:50px; margin-bottom:50px;"></div>
+
+.smallish[
+`inner_join(A, B)` keeps only rows from `A` and `B` that match, all cols from `A` and `B`
+
+.pull-left[
+**`dplyr`**
+```{r}
+inner_join(A, B, by = "ID")
+```
+]
+
+.pull-right[
+**Base R Equivalent**
+```{r}
+merge(A, B, by = "ID", all = F)
+```
+]
+
+☝️ Neither `ID == 7` from `A` nor `ID == 0` from `B` in merged data ☝️
+
+.footnote[`all = F` is equivalent to `all.x = F, all.y = F` in base R's `merge()`]
+]
+---
+## `full_join()`
+
+<div style="margin-top:50px; margin-bottom:50px;"></div>
+
+.smallish[
+`full_join(A, B)` keeps rows from both `A` and `B`, all cols from `A` and `B`
+
+.pull-left[
+**`dplyr`**
+```{r}
+full_join(A, B, by = "ID")
+```
+]
+
+.pull-right[
+**Base R Equivalent**
+```{r}
+merge(A, B, by = "ID", all = T)
+```
+]
+
+☝️ `ID == 7` from `A` and `ID == 0` from `B` are in merged data ☝️
+
+.footnote[`all = T` is equivalent to `all.x = T, all.y = T` in base R's `merge()`]
+]
+---
+## `semi_join()`
+
+<div style="margin-top:50px; margin-bottom:50px;"></div>
+
+.smallish[
+`semi_join(A, B)` keeps only rows from both `A` and `B` that match, only cols from `A`
+
+.pull-left[
+**`dplyr`**
+```{r}
+semi_join(A, B, by = "ID")
+```
+]
+
+.pull-right[
+**Base R Equivalent**
+```{r}
+merge(A, B[, colnames(B) %in% colnames(A)],
+      by = "ID", all = F)
+```
+]
+]
+---
+## `anti_join()`
+
+<div style="margin-top:50px; margin-bottom:50px;"></div>
+
+.smallish[
+`anti_join(A, B)` keeps rows from `A` that *do not* match `B`, only cols from `A`
+
+.pull-left[
+**`dplyr`**
+```{r}
+anti_join(A, B, by = "ID")
+```
+]
+
+.pull-right[
+**Base R Equivalent**
+```{r}
+merge(A[!A$ID %in% B$ID, ],
+      B[, colnames(B) %in% colnames(A)],
+      by = "ID", all.x = T)
+```
+]
+
+.footnote[`all = T` is equivalent to `all.x = T, all.y = T` in base R's `merge()`]
+]
+---
+## Matching With `by = `
+
+- You can pass `by = ` a character vector of columns upon which to match. This is useful when merging nested data (e.g., data from clinic visits nested within patients)
+
+```{r, eval =F}
+left_join(A, B, by = c("ID", "Date"))
+merge(A, B, by = c("ID", "Date"), all.x = T)
+```
+--
+
+
+- If the `by` columns used for merging don't have the same name (e.g., "PatientNum" and "PatientID"):
+
+```{r, eval=F}
+left_join(A, B, by = c("PatientNum" = "PatientID"))
+merge(A, B, by.x = "PatientNum", by.y = "PatientID", all.x = T)
+```
