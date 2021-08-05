@@ -12,19 +12,35 @@ library(dplyr)
 
 Using data from `nycflights13`, let's look at the mean departure (`dep_delay`) and arrival delay (`arr_delay`) by origin airport:
 ```{r}
-
+flights %>%
+  group_by(origin) %>%
+  summarize(across(ends_with("_delay"),
+            ~ mean(.x, na.rm = T),
+            .names = "mean_{.col}"))
 ```
 
 It looks like planes departing LaGuardia (LGA) have the smallest average departure delay. Why is this the case? Perhaps planes leaving LGA are going to destinations that hold their departure time up. Let's add in destination (`dest`) to our summary table such that we get the mean departure delay for each combination of origin and destination airports:
 
 ```{r}
-
+flights %>%
+  group_by(origin, dest) %>%
+  summarize(mean_dep_delay = mean(dep_delay, na.rm = T)) %>%
+  arrange(dest)
 ```
 
 That lots of combinations! Suppose you're flying to O'Hare International Airport (ORD) in Chicago from New York and want to know which airport you should take to spend the least amount of time on the tarmac. Take a look at the flights leaving all NYC airports going to ORD:
 
 ```{r}
+flights %>%
+  group_by(origin, dest) %>%
+  summarize(mean_dep_delay = mean(dep_delay, na.rm = T)) %>%
+  filter(dest == "ORD")
 
+# More efficient
+flights %>%
+  filter(dest == "ORD")
+  group_by(origin) %>%
+  summarize(mean_dep_delay = mean(dep_delay, na.rm = T))
 ```
 
 LGA has the shortest delay time on average, and that is also true for flights going to ORD. Looks like you should avoid flying out of JFK if you can, even though it's average departure time overall is not much longer than LGA's.
@@ -32,7 +48,12 @@ LGA has the shortest delay time on average, and that is also true for flights go
 You may also want to know the variability of departure times, for example because you are willing to wait a few minutes longer on average if that means lower risk of much longer delays. Add in a column representing the SD departure time and the number of flights worth of data going into each summary statistic.
 
 ```{r}
-
+flights %>%
+  group_by(origin, dest) %>%
+  summarize(mean_dep_delay = mean(dep_delay, na.rm = T),
+            sd_dep_delay = sd(dep_delay, na.rm = T),
+            n = n()) %>%
+  filter(dest == "ORD")
 ```
 
 Looks like variability is pretty consistent with the average delays. All else being equal, if you're going to Chicago from NYC, it might be fastest to fly out of LaGuardia.
@@ -40,19 +61,34 @@ Looks like variability is pretty consistent with the average delays. All else be
 Let's say we want to communicate this information to others. Saying something like "the mean departure delay for LaGuardia to O'Hare is 21.55372 seconds" is a bit too scientific for everyday conversation. 
 
 ```{r}
-
+flights %>%
+  group_by(origin, dest) %>%
+  summarize(mean_dep_delay = mean(dep_delay, na.rm = T),
+            sd_dep_delay = sd(dep_delay, na.rm = T),
+            n = n()) %>%
+  filter(dest == "ORD") %>%
+  mutate(mean_delay_mins = floor(mean_dep_delay),
+         mean_delay_secs = round(mean_dep_delay %% mean_delay_mins * 60, 0),
+         delay_pretty = paste(mean_delay_mins, "mins", mean_delay_secs, "secs"))
 ```
 
 Let's take a step back and investigate why flights from EWR are taking longer than flights from both JFK and LGA. Perhaps the wind speed at EWR is stronger Let's first convert `wind_speed` from MPH to KPH, and then take a look at these descriptives.
 
 ```{r}
-
+weather %>%
+  mutate(wind_speed = wind_speed * 1.60934) %>%
+  group_by(origin) %>%
+  summarize(mean_wind_speed = mean(wind_speed, na.rm = T))
 ```
 
 Looks like mean wind speed doesn't explain it. Maybe there are differences in variability?
 
 ```{r}
-
+weather %>%
+  mutate(wind_speed = wind_speed * 1.60934) %>%
+  group_by(origin) %>%
+  summarize(mean_wind_speed = mean(wind_speed, na.rm = T),
+            sd_wind_speed = sd(wind_speed, na.rm = T))
 ```
 
 Looks like we may have found a possible explanation! For example, perhaps wind speed over a certain amount causes significant delays such that higher variability would lead to a skewed departure delay distribution.
@@ -61,23 +97,40 @@ Are there other possible explanations? Maybe smaller planes are flying out of EW
 
 We need to get the number of seats in each plane from the `planes` data into the `flights` data. 
 ```{r}
-
+flights <- flights %>%
+  left_join(select(planes, seats, tailnum), by = "tailnum")
 ```
 
 Let's take a look at the mean and SD number of seats flying out of each airport.
 
 ```{r}
-
+flights %>%
+  group_by(origin) %>%
+  summarize(mean_seats = mean(seats, na.rm = T),
+            sd_seats = sd(seats, na.rm = T))
 ```
 
 Maybe we want to look at this a different way. Instead of mean number of seats, let's create groups of plane size and look at the number of flights of each size leaving each airport.
 
 ```{r}
+quants <- quantile(planes$seats, probs = c(0, .1, .5, .9, 1))
 
+flights <- flights %>%
+  mutate(size_ord = case_when(seats >= quants["0%"] & seats <= quants["10%"] ~ "very small",
+                              seats > quants["10%"] & seats <= quants["50%"] ~ "small",
+                              seats > quants["50%"] & seats <= quants["90%"] ~ "large",
+                              seats > quants["90%"] & seats <= quants["100%"] ~ "very large"))
 ```
 
 Then we need to create our summary table. Let's create a count column and a proportion column.
 
 ```{r}
-
+flights %>%
+  filter(!is.na(size_ord)) %>%
+  group_by(origin, size_ord) %>%
+  summarize(n = n()) %>%
+  mutate(prop = n / sum(n),
+         # Create ordered factor so we can arrange accordingly
+         size_ord = factor(size_ord, c("very small", "small", "large", "very large"))) %>%
+  arrange(origin, size_ord)
 ```
