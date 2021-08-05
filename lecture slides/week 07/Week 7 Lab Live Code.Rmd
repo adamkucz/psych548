@@ -1,0 +1,83 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(nycflights13)
+library(dplyr)
+```
+
+
+Using data from `nycflights13`, let's look at the mean departure (`dep_delay`) and arrival delay (`arr_delay`) by origin airport:
+```{r}
+
+```
+
+It looks like planes departing LaGuardia (LGA) have the smallest average departure delay. Why is this the case? Perhaps planes leaving LGA are going to destinations that hold their departure time up. Let's add in destination (`dest`) to our summary table such that we get the mean departure delay for each combination of origin and destination airports:
+
+```{r}
+
+```
+
+That lots of combinations! Suppose you're flying to O'Hare International Airport (ORD) in Chicago from New York and want to know which airport you should take to spend the least amount of time on the tarmac. Take a look at the flights leaving all NYC airports going to ORD:
+
+```{r}
+
+```
+
+LGA has the shortest delay time on average, and that is also true for flights going to ORD. Looks like you should avoid flying out of JFK if you can, even though it's average departure time overall is not much longer than LGA's.
+
+You may also want to know the variability of departure times, for example because you are willing to wait a few minutes longer on average if that means lower risk of much longer delays. Add in a column representing the SD departure time and the number of flights worth of data going into each summary statistic.
+
+```{r}
+
+```
+
+Looks like variability is pretty consistent with the average delays. All else being equal, if you're going to Chicago from NYC, it might be fastest to fly out of LaGuardia.
+
+Let's say we want to communicate this information to others. Saying something like "the mean departure delay for LaGuardia to O'Hare is 21.55372 seconds" is a bit too scientific for everyday conversation. 
+
+```{r}
+
+```
+
+Let's take a step back and investigate why flights from EWR are taking longer than flights from both JFK and LGA. Perhaps the wind speed at EWR is stronger Let's first convert `wind_speed` from MPH to KPH, and then take a look at these descriptives.
+
+```{r}
+
+```
+
+Looks like mean wind speed doesn't explain it. Maybe there are differences in variability?
+
+```{r}
+
+```
+
+Looks like we may have found a possible explanation! For example, perhaps wind speed over a certain amount causes significant delays such that higher variability would lead to a skewed departure delay distribution.
+
+Are there other possible explanations? Maybe smaller planes are flying out of EWR than the other two, and they are given lower priority for take-off. Let's take a look at this.
+
+We need to get the number of seats in each plane from the `planes` data into the `flights` data. 
+```{r}
+
+```
+
+Let's take a look at the mean and SD number of seats flying out of each airport.
+
+```{r}
+
+```
+
+Maybe we want to look at this a different way. Instead of mean number of seats, let's create groups of plane size and look at the number of flights of each size leaving each airport.
+
+```{r}
+
+```
+
+Then we need to create our summary table. Let's create a count column and a proportion column.
+
+```{r}
+
+```

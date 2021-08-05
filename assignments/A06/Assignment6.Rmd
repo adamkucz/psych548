@@ -1,0 +1,89 @@
+---
+title: "Assignment 6"
+subtitle: "Manipulating and Summarizing Data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,
+                      cache = T)
+```
+
+<span style="color: white; background-color: darkorange; font-weight:bold; padding: 2px;">
+Please submit both the .Rmd and a .html file on Canvas.
+</span>
+
+**Load your libraries here**
+```{r, message=FALSE}
+# This function prevents message output when loading packages. This is useful
+# in most cases, but clutters your final markdown file. Place your calls to
+# library() within the middle of this function call.
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(nycflights13)
+})
+```
+
+```{r, eval=F}
+airlines
+airports
+flights
+planes
+weather
+```
+
+The [`nycflights13` data ](https://cran.r-project.org/web/packages/nycflights13/nycflights13.pdf) are airline on-time data for all flights departing New York City in 2013 and include 'metadata' on airlines, airports, weather, and planes. There are 5 datasets that come with this package:
+
+- `airlines`
+```{r}
+glimpse(airlines)
+```
+
+- `airports`
+```{r}
+glimpse(airports)
+```
+
+- `flights`
+```{r}
+glimpse(flights)
+```
+
+- `planes`
+```{r}
+glimpse(planes)
+```
+
+- `weather`
+```{r}
+glimpse(weather)
+```
+
+You assignment this week is to ask questions of these data, using what you've learned thus far in the class (prioritizing this week's content) to clean, subset, create new variables, merge, and summarize data. You can (and should) ask multiple questions from these data, but the exact questions you ask are up to you. For example, you might ask questions about certain airport characteristics, investigate predictors of flight delays, or look into differences among the airline carriers.
+
+Your investigation should include at least one call to each of the following (in no particular order):
+
+- `_join()` (can be any, but please explain *briefly* why you used the type of join you did)
+
+- `group_by()`
+
+- `summarize()`
+
+- `filter()`
+
+- `mutate()`
+
+- `case_when()`
+
+- `select()`
+
+- `across()` 
+
+At the end, write a short paragraph describing what you found.
+
+
+
+
+
+
+
