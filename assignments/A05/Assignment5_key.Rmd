@@ -154,14 +154,14 @@ identical(d_depanx_w, d_depanx_wide)
 
 **Part B: Wide to Long**
 
-Using [`pivot_longer()`](https://tidyr.tidyverse.org/articles/pivot.html) from the `tidyr` package, turn wide form `d_dep_wide` into long form `d_dep_l` such that each row corresponds with 1 day from one participant. The value in `day_` corresponds with the `day` number of the study. There should be `r nrow(d_dep_long)` rows and `r ncol(d_dep_long)` columns (`pid`, `day`, `depressedmood`). Your final data should be identical to `d_dep_long`. Hint: Make sure to remove the rows where `depressedmood` is `NA` at the end.
+Using [`pivot_longer()`](https://tidyr.tidyverse.org/articles/pivot.html) from the `tidyr` package, turn wide form `d_depanx_wide` into long form `d_depanx_l` such that each row corresponds with 1 day from one participant. The value in `day_` corresponds with the `day` number of the study. There should be `r nrow(d_depanx_long)` rows and `r ncol(d_depanx_long)` columns (`pid`, `day`, `depressedmood`). Your final data should be identical to `d_depanx_long`. Hint: Make sure to remove the rows where `depressedmood` is `NA` at the end.
 ```{r}
-d_depanx_l <- d_depanx_wide %>%
-  pivot_longer(cols = !pid) %>%
-  separate(name, "_", into = c("var", "day"), convert = T) %>%
-  pivot_wider(values_from = "value",
-              names_from = "var") %>%
-  drop_na(depressedmood, anhedonia, anxietycovid, anxietygeneral)
+d_depanx_l <- d_dep_wide %>%
+  pivot_longer(cols = matches("^day_"),
+               names_to = "day",
+               values_to = "depressedmood",
+               names_prefix = "day_",
+               names_transform = list("day" = as.integer))
 ```
 
 ```{r, echo=T}
