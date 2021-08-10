@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Data Visualization in Base R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Adam Kuczynski" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <script src="libs/htmlwidgets/htmlwidgets.js"></script>
+    <script src="libs/jquery/jquery.min.js"></script>
+    <link href="libs/leaflet/leaflet.css" rel="stylesheet" />
+    <script src="libs/leaflet/leaflet.js"></script>
+    <link href="libs/leafletfix/leafletfix.css" rel="stylesheet" />
+    <script src="libs/proj4/proj4.min.js"></script>
+    <script src="libs/Proj4Leaflet/proj4leaflet.js"></script>
+    <link href="libs/rstudio_leaflet/rstudio_leaflet.css" rel="stylesheet" />
+    <script src="libs/leaflet-binding/leaflet.js"></script>
+    <link rel="stylesheet" href="../../css/slides.css" type="text/css" />
+
+  </head>
+  <body>
+    <textarea id="source">
+class: center, top, title-slide
+
+# Data Visualization in Base R
+### Adam Kuczynski
+
+---
+
+
+
+
+&lt;style type="text/css"&gt;
+#data-visualization-in-base-r {
+  font-size: 45px;
+}
+
+.code-overflow .remark-code,
+.code-overflow .r,
+.code-overflow .hljs {
+  max-height: 250px;
+  overflow: auto;
+}
+&lt;/style&gt;
+
+## Why use R for data visualization?
+
+.smallish[
+- R data visualization is extremely flexible! Almost any data visualization you can think of is possible to create in R
+
+- Creating visualizations in R allows you to create dynamic plots that change with new data. This is useful when you want to create plots on a recurring basis (e.g., monthly revenue reports) or even realize that you missed some data initially. Repeat the same code every time!
+
+.pull-left[
+- There are dozens of packages that make it easier to create complex figures, including `ggplot2`, `patchwork`, `lattice`, `diagrammeR`, and more!
+
+- Create interactive visualizations with `plotly`, `ggvis`, `htmlwidgets`, `leaflet`, `shiny` apps, and other R tools
+]
+.pull-right[
+🧠 Psychology's new home
+<div id="htmlwidget-eb807f85dc8b0fef80ce" style="width:360px;height:288px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-eb807f85dc8b0fef80ce">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[47.6526131,-122.3107631,null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},"Psychology's New Home",null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[47.6526131,47.6526131],"lng":[-122.3107631,-122.3107631]}},"evals":[],"jsHooks":[]}</script>
+]
+]
+
+---
+## The Generic `plot()` Function
+
+Many data visualizations created in R start with the same function: `plot()`
+
+`plot()` knows how to handle several different types of objects because it is a **generic function** with lots of methods:
+
+
+```r
+methods(plot)
+```
+
+```
+##  [1] plot.acf*           plot.data.frame*    plot.decomposed.ts*
+##  [4] plot.default        plot.dendrogram*    plot.density*      
+##  [7] plot.ecdf           plot.factor*        plot.formula*      
+## [10] plot.function       plot.hclust*        plot.histogram*    
+## [13] plot.HoltWinters*   plot.isoreg*        plot.lm*           
+## [16] plot.medpolish*     plot.mlm*           plot.ppr*          
+## [19] plot.prcomp*        plot.princomp*      plot.profile.nls*  
+## [22] plot.R6*            plot.raster*        plot.spec*         
+## [25] plot.stepfun        plot.stl*           plot.table*        
+## [28] plot.ts             plot.tskernel*      plot.TukeyHSD*     
+## see '?methods' for accessing help and source code
+```
+---
+# `plot()` Arguments
+
+```r
+plot(x, y = NULL, type = "p",  xlim = NULL, ylim = NULL,
+     log = "", main = NULL, sub = NULL, xlab = NULL, ylab = NULL,
+     ann = par("ann"), axes = TRUE, frame.plot = axes,
+     panel.first = NULL, panel.last = NULL, asp = NA,
+     xgap.axis = NA, ygap.axis = NA,
+     ...)
+```
+
+There are **a lot** of arguments to `plot()`!
+
+Several of these arguments will be discussed in these slides, but not all of them. That means that making plots often involves teaching yourself something new each time with the help pages, Stack Overflow, and other various websites and blogs.
+
+See `help(par)` for a full list of graphical parameters, many of which can be used within the `...` argument
+
+
+---
+# Scatterplot
+
+.pull-left[
+.small[
+
+
+```r
+# Vectors of coordinates
+plot(x = mtcars$wt,
+     y = mtcars$mpg)
+```
+
+
+```r
+# Formula (`y~x`)
+plot(mtcars$mpg ~ mtcars$wt)
+```
+
+
+```r
+# Two-column dataframe of x, y coordinates
+plot(mtcars[, c("wt", "mpg")])
+```
+]
+]
+.pull-right[
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-8-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.smallish[
+- What defaults do you notice?
+
+  - Plots points (`type = "p"`) of a specific shape (`pch = 1 `)
+  
+  - Axis labels (R code supplied to the arguments)
+  
+  - No header (`main = NULL`)
+  
+  - Chooses axis ticks for you
+  
+  - ...and hundreds more!
+]
+---
+# Plot Titles
+--
+
+
+.pull-left[
+.small[
+### Main Title
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+*    main = "Vehicle Efficiency by Weight")
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-9-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+]
+--
+
+.pull-right[
+.small[
+### Axis Titles
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+*    xlab = "Vehicle Weight (1000 lbs)",
+*    ylab = "Miles Per Gallon (MPG)")
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-10-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+## Fixing Ugly Axes
+
+.pull-left[
+R default axes are not publication ready!
+
+- The axes overlap with the box around the plot
+
+- The y-axis tickmarks are vertical
+
+- The axes are thin and hard to see
+
+- The default tick marks may not be desirable
+
+- The default tick labels may not be desirable
+
+]
+
+.pull-right[
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-11-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+## `box()`
+
+.small[
+The `box()` function is responsible for placing a box around your points. There are several different box types (specified with the `bty` **b**ox **ty**pe argument):
+
+.pull-left[
+
+```r
+# full box (default)
+plot.new()
+box(bty = "o")
+```
+
+
+```r
+# bottom and left
+plot.new()
+box(bty = "L")
+```
+
+
+```r
+# top and right
+plot.new()
+box(bty = "7")
+```
+
+
+```r
+# top, left, and bottom
+plot.new()
+box(bty = "C")
+```
+
+
+```r
+# left, bottom, and right
+plot.new()
+box(bty = "U")
+```
+]
+
+
+.pull-right[
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-17-1.svg" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-18-1.svg" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-19-1.svg" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-20-1.svg" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-21-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+
+---
+## Fixing the `box()`
+.small[
+.pull-left[
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+*    axes = F) # do not plot axes
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-23-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     axes = F)
+*box() # plot box
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-25-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+## Add the axes back in
+.small[
+.pull-left[
+### x-axis
+
+```r
+plot(...,
+     axes = F,
+*    xlim = c(1, 6))
+
+box()
+
+*axis(side = 1, # x-axis
+*    at = 1:6, # ticks at 1 through 6
+*    labels = 1:6, # labels numbers 1 through 6
+*    lwd = 0, # do not plot axis
+*    lwd.ticks = 1) # plot tick marks
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-27-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+### y-axis
+
+```r
+plot(...,
+     axes = F,
+     xlim = c(1, 6),
+*    ylim = c(10, 35))
+box()
+axis(side = 1, at = 1:6, labels = 1:6,lwd = 0, lwd.ticks = 1)
+*axis(side = 2, # y-axis
+*    at = seq(10, 35, 5), # ticks every 5 points
+*    labels = seq(10, 35, 5), # labels 10:35 by 5
+*    lwd = 0, lwd.ticks = 1,
+*    las = 1) # horizonal tick labels
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-29-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+
+---
+## Change `box()` width and line type
+
+.small[
+.pull-left[
+
+```r
+box(bty = "o",
+    lwd = 3,
+    lty = 1)
+```
+
+
+```r
+box(bty = "o",
+    lwd = 3,
+    lty = 2)
+```
+
+
+```r
+box(bty = "o",
+    lwd = 3,
+    lty = 3)
+```
+
+
+```r
+box(bty = "o",
+    lwd = 3,
+    lty = 4)
+```
+
+
+```r
+box(bty = "o",
+    lwd = 3,
+    lty = 5)
+```
+
+
+```r
+box(bty = "o",
+    lwd = 3,
+    lty = 6)
+```
+
+]
+
+.pull-right[
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-36-1.svg" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-37-1.svg" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-38-1.svg" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-39-1.svg" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-40-1.svg" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-41-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+
+
+---
+## Point and Line Types
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-42-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+## Adjusting Point Shape with `pch`
+.smallish[
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+*    cex = 1.25, # size
+*    pch = 16) # shape
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-44-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+## `pch` is customizable
+
+.pull-left[
+.small[
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     cex = 1.5,
+*    pch = "+")
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-46-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+
+.pull-right[
+.small[
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     cex = 1.5,
+*    pch = "🛻") # truck emoji
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-48-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+
+---
+## `pch` is vectorized
+.pull-left[
+.small[
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     cex = 1.25,
+*    pch = 1:nrow(mtcars))
+```
+]
+]
+
+.pull-right[
+.small[
+👈 Because there are only 1:20 valid values of `pch`, R will give you a warning and recycle the 1:20 vector
+
+👈 Each value 1:20 maps onto the element passed to `x` and `y`
+]
+]
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-50-1.svg" style="display: block; margin: auto;" /&gt;
+---
+## Adding lines to your plot
+
+.small[
+There are *many* ways to add lines to a plot in R. Some of the most common lines are vertical or horizontal lines, regression lines, and local regression (LOWESS) lines.
+
+The `abline()` function can take either **(a)** a fitted regression object, **(b)** the intercept (`a`) and slope (`b`) values, **(c)** a y-axis value for horizontal lines (`h`), or **(d)** an x-axis value for vertical lines (`v`).
+
+For example, to add lines at the mean of x and y:
+
+```r
+plot(...)
+abline(v = mean(mtcars$wt, na.rm = T),
+       h = mean(mtcars$mpg, na.rm = T),
+       lty = 3)
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-52-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+## `matlines()`
+
+.small[
+
+
+```r
+plot(...)
+
+fit &lt;- lm(mpg ~ wt,
+          data = mtcars)
+
+new_wt &lt;- seq(1, 6, .05)
+pred &lt;- predict(fit,
+                newdata = data.frame(wt = new_wt),
+                interval = "confidence",
+                level = 0.95)
+
+# Plots multiple lines based on a matrix of cols (with x and y line coords)
+matlines(new_wt, pred,  lty = c(1, 3, 3), lwd = 1.5, col = c("black", "blue", "blue"))
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-54-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# `lines()`
+
+.smallish[
+The `lines()` function is a generic function that takes either `x` and `y` coordinates to plot a line (similar to `matlines()`) or a formula to compute these coordinates
+
+For example, let's draw a box around the three heaviest cars:
+
+
+```r
+plot(...)
+
+lines(x = c(5.1, 5.6, 5.6, 5.1, 5.1),
+      y = c(17, 17, 8, 8, 17))
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-56-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+## Adjusting Point Colors with `col`
+
+.pull-left[
+.small[
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     cex = 1.5,
+     pch = 16,
+*    col = "purple")
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-58-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+.pull-right[
+.small[
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     cex = 1.5,
+     pch = 16,
+*    col = "orange")
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-60-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+]
+
+---
+# R's Colors
+
+R has built-in colors that can be accessed by name or by index with the `col` argument (we did this in the previous slide). To see the list of all 657 colors, use the `colors()` function, or [see this PDF](http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf).
+
+&lt;div style="text-align:center"&gt;
+&lt;img src="images/colorchart.png" alt="R's built-in colors" style="max-width:60%"&gt;
+&lt;/div&gt;
+ 
+---
+## HTML Color Codes
+
+R can also take hex codes or RGB (red, blue, green) color codes, which gives you access to infinite colors. Use [this tool](https://htmlcolorcodes.com/) to help you find exactly the color you want.
+
+When you use RGB color codes you can also specify the **alpha channel**, which gives the colors transparency (this is also possible with HEX codes, just harder)
+
+.pull-left[
+.small[
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     cex = 1.5, pch = 16,
+*    col = "#4b2e83") # UW purple
+```
+
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     cex = 1.5, pch = 16,
+*    col = rgb(51, 0, 111,  # UW purple
+*              maxColorValue = 255))
+```
+]
+]
+
+.pull-right[
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-63-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+## Transparency with Alpha
+
+.smallish[
+
+```r
+plot(x = mtcars$wt, y = mtcars$mpg,
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     cex = 1.5, pch = 16,
+*    col = rgb(51, 0, 111, 255*.5, # 0 = transparent, 1 = completely opaque
+*              maxColorValue = 255))
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-65-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# R's Color Functions
+.smallish[
+- `rainbow()`: `n` colors (with `alpha` transparency) corresponding with the rainbow color spectrum
+
+- `heat.colors()`: `n` colors (with `alpha` transparency) ranging from red to light yellow
+
+- `terrain.colors()`: `n` colors (with `alpha` transparency) corresponding with terrain map colors
+
+- `topo.colors()`: `n` colors (with `alpha` transparency) corresponding with topography map colors
+
+- `cm.colors()`: `n` colors (with `alpha` transparency) ranging from cyan to magenta
+
+- `hcl()`: create vector of colors from vectors specifying hue (`h`), chroma (`c`), and luminance (`l`)
+
+- RColorBrewer: An R package with convenient color scheme and functions. See `RColorBrewer::display.brewer.all()` to plot the available color palettes.
+]
+---
+## `col` is vectorized
+
+.small[
+
+The `col` argument is vectorized, which means you can do things like create another dimension (color) in your data to represent more information. For example, using `heat.colors()`, we will color the fastest 1/4 mile time red and the slowest light yellow:
+
+
+```r
+*plot(x = mtcars[order(mtcars$qsec), c("wt", "mpg")], # order rows by qsec
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     pch = 16, cex = 1.50,
+*    col = heat.colors(length(mtcars$wt), alpha = .75))
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-67-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+## `cex` is vectorized
+.small[
+The `cex` argument is also vectorized and can be used to create new dimensions in your figures. In this plot, larger points represent faster 1/4 mile times.
+
+```r
+*plot(x = mtcars[order(mtcars$qsec), c("wt", "mpg")], # order rows by qsec
+     main = "Vehicle Efficiency by Weight",
+     xlab = "Vehicle Weight (1000 lbs)",
+     ylab = "Miles Per Gallon (MPG)",
+     pch = 16,
+*    cex = seq(3.5, 1.25, length.out = nrow(mtcars)),
+     col = rgb(0, 0, 0, .5))
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-69-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# Creating Grids
+
+.small[
+
+```r
+grid(nx = NULL, ny = nx, col = "lightgray", lty = "dotted",
+     lwd = par("lwd"), equilogs = TRUE)
+```
+
+By default the number of lines in the x and y directions will match the number of tick marks
+
+.pull-left[
+
+```r
+plot(...)
+grid(col = "gray48")
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-72-1.svg" style="display: block; margin: auto;" /&gt;
+
+☝️Problem: gridlines  placed on top of the points
+]
+
+.pull-right[
+
+```r
+*plot(..., type = "n") # do not plot points
+grid(col = "gray48")
+*points(x = mtcars[order(mtcars$qsec), c("wt", "mpg")],
+*      pch = 16,
+*      cex = seq(3.5, 1.25, length.out = nrow(mtcars)),
+*      col = rgb(0, 0, 0, .5))
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-74-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+
+---
+# Plot Background
+
+.small[
+To change the background of *just the plot region* (i.e., where the points go), you need to:
+
+1. Create an empty plot
+2. Create a rectangle using `rect()` of the plotting region
+3. Create points (and anything else you want to plot) over the rectangle
+
+.pull-left[
+
+```r
+plot(..., type = "n")
+
+*rect(xleft = par("usr")[1],
+*    ybottom = par("usr")[3],
+*    xright = par("usr")[2],
+*    ytop = par("usr")[4],
+*    col = "black")
+
+points(x = mtcars[order(mtcars$qsec), c("wt", "mpg")],
+       pch = 16,
+       cex = seq(3.5, 1.25, length.out = nrow(mtcars)),
+       col = rgb(255, 252, 245, 255*.5, maxColorValue = 255))
+```
+]
+
+.pull-right[
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-76-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+
+---
+### Plotting Area Background
+
+Changing the background of the entire plotting area is much easier than changing just the plotting region
+
+.small[
+
+```r
+par("bg" = "black", # Change background color
+    "fg" = "white") # Change foreground color (box, axes, tick marks)
+
+plot(...,
+     col = "white",      # Points
+     col.main = "white", # Main title
+     col.lab = "white",  # Axis labels
+     col.axis = "white") # Tick labels
+```
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-78-1.svg" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+# Legends
+
+.small[
+
+```r
+plot(x = mtcars[order(mtcars$cyl), c("wt", "mpg")], # order rows by cyl
+     col = rep(hcl.colors(3, alpha = .6), times = table(mtcars$cyl)), # color by cyl
+     ...) # color by cyl
+
+legend(x = "topleft", # takes keywords OR x, y coordinates
+       title = "Cylinders", # legend title
+       legend = seq(4, 8, 2), # values inside legend
+       col = hcl.colors(3, alpha = .75), # colors corresponding with values
+       horiz = T, # plot legend horizontally
+       pch = 16) # shape of legend point
+```
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-80-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Adding Text to Plots
+
+.small[
+
+```r
+plot(...)
+
+text(x = mtcars[, c("wt", "mpg")], # x,y coordinates of labels
+     labels = mtcars$cyl,
+     col = "white",
+     cex = .75)
+```
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-82-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Labeling Specific Points
+
+.small[
+
+```r
+plot(...)
+
+text(x = mtcars[mtcars$mpg %in% c(min(mtcars$mpg), max(mtcars$mpg)), c("wt", "mpg")],
+     labels = rownames(mtcars)[mtcars$mpg %in% c(min(mtcars$mpg), max(mtcars$mpg))],
+     cex = .75,
+     pos = c(2, 1, 2))
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-84-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+## Margin text with `mtext()`
+
+.small[
+Sometimes you want to put text in the margins of the plot (e.g., when you have multiple plots and you want to give them all one title). For that you can use the `mtext()` function (for **m**argin **text**).
+
+
+```r
+for(i in 1:4){
+  mtext(paste0("mtext(..., side = ", i, ")"), side = i)
+}
+```
+]
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-86-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+# Changing Fonts
+
+.smallish[
+Changing font size and style is easy, but changing font family is a bit trickier because it depends on the fonts you have installed on your operating system
+
+The `extrafont` package extends the fonts available for plotting in R:
+1. Install the package `install.packages("extrafont")`
+2. Import the fonts: `extrafont::font_import()`
+
+
+******
+Font `par` arguments:
+
+- `font`: Integer which specifies which font style to use for text
+  - 1 = plain
+  - 2 = **bold**
+  - 3 = *italic*
+  - 4 = __*bold italic*__
+
+- `font.axis`: Integer which specifies which font to use for axis annotation
+
+- `font.lab`: Integer which specifies which font to use for x and y labels (axis labels)
+
+- `font.main`: Integer which specifies which font to use for main titles
+
+- `font.sub`: Integer which specifies which font to use for subtitles
+
+]
+---
+
+.smallish[
+
+```r
+plot(...,
+     family = "Ubuntu", # Ubuntu font
+     font.main = 4, # Title (bold, italic)
+     font.axis = 2, # Axis tick mark labels (bold)
+     font.lab = 4) # Axis labels (bold italic)
+```
+]
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-88-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+## Multiple Plots in Same Window
+.small[
+
+There are two primary ways of creating multiple figures within the same window in R:
+- `par`'s `mfrow` and `mfcol` arguments
+- the `layout()` function
+
+******
+
+### `mfrow` and `mfcol`
+
+These functions take a vector of two elements (nrow, ncol) and draw a grid on the graphing screen that is filled with figures by row (`mfrow`) or by column (`mfcol`)
+
+.pull-left[
+
+```r
+par(mfrow = c(2, 4)
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-90-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+par(mfcol = c(2, 4)
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-92-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+## `mfrow`/`mfcol` example:
+
+.small[
+
+```r
+par(mfrow = c(2, 4))
+for(i in 1:8){
+  plot(mtcars[, c(i, i+1)],
+       main = paste(colnames(mtcars[, c(i+1, i)]),
+                    collapse = " ~ "))
+}
+```
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-94-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+## Multiple figures with `layout()`
+
+.small[
+The `layout` function takes a matrix that specifies the location of the next *N* figures created **and** the order in which they will be placed. The `widths` and `heights` arguments take the relative (or in centimeters if you prefer) row/col widths. For example:
+
+.pull-left[
+
+```r
+layout_mat &lt;- matrix(c(3, 1,
+                       6, 5,
+                       4, 2),
+                     nrow = 3,
+                     byrow = T)
+
+layout(layout_mat, c(1, 2), c(1, 1, 1))
+```
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-96-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+layout_mat &lt;- matrix(c(6, 5,
+                       2, 1,
+                       3, 4),
+                     nrow = 3,
+                     byrow = T)
+
+layout(layout_mat, c(1, 2), c(1, 1, 1))
+```
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-98-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+## Complex layouts with `layout()`
+.small[
+
+.pull-left[
+
+
+```r
+layout_mat &lt;- matrix(c(1, 1,
+                       2, 3,
+                       4, 5),
+                     nrow = 3,
+                     byrow = T)
+
+layout(layout_mat, c(1, 1), c(1, 1))
+```
+
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-100-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+
+```r
+layout_mat &lt;- matrix(c(1, 1,
+                       2, 3,
+                       4, 3),
+                     nrow = 3,
+                     byrow = T)
+
+layout(layout_mat, c(1, 1), c(2, 1))
+```
+
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-102-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+
+---
+### Example: Adding Marginal Distributions
+
+.small[
+
+
+
+```r
+layout_mat &lt;- matrix(c(2, 0,
+                       1, 3),
+                     nrow = 2 byrow = T)
+
+layout(mat = layout_mat,
+       widths = c(3, 0.5),
+       heights =  c(1, 3))
+```
+
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-104-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+.smallish[
+
+```r
+# Plot main scatterplot
+par(mar = c(5, 4, 1, 1) + 0.1)
+plot(...)
+
+# Add marginal rugs to x and y axes
+rug(mtcars$wt, side = 1)
+rug(mtcars$mpg, side = 2)
+
+# Get densities of `wt` and `mpg`
+d_wt &lt;- density(mtcars[order(mtcars$qsec), "wt"])
+d_mpg &lt;- density(mtcars[order(mtcars$qsec), "mpg"])
+
+par(mar = c(0,3,1,.1))
+plot(d_wt, axes = F, main = "", xlab= "", ylab = "", lwd = 2)
+
+par(mar = c(4.25,0,1,1))
+plot(d_mpg$y, d_mpg$x, type="l", axes = F, main = "",
+     xlab= "", ylab = "", lwd = 2)
+```
+
+]
+
+---
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-106-1.svg" style="display: block; margin: auto 0 auto auto;" /&gt;
+
+---
+.small[
+.pull-left[
+# Plot Margins
+### Inner Margins
+
+**Inner margins** refer to the margins on each axis
+
+`par("mar")` is a numerical vector corresponding with `c(bottom, left, top, right)` that specifies the number of lines of margin on each side of the plot (default = `c(5, 4, 4, 2) + 0.1`)
+
+`par("mai")` is similar to `mar`, except the margins are specified in inches (default = `c(1.02, 0.82, 0.82, 0.42)`)
+
+
+]
+
+
+.pull-right[
+&lt;div style="margin-top: 50px;"&gt;&lt;/div&gt;
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-107-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+### Outer Margins
+
+**Outer margins** correspond with the entire plotting region, not just the axes
+
+`par("oma")` is a numerical vector corresponding with `c(bottom, left, top, right)` that specifies the number of lines of margin on each side of the plot (default is no margin)
+
+`par("omi")` is similar to `oma`, except the margins are specified in inches
+]
+---
+### Example: Outer Margin Labels
+
+.small[
+
+```r
+par(..., oma = c(2, 2, 0, 4), family = "Ubuntu")
+
+mtext(text="Vehicle Height (1000lbs)", side = 1, line = 0, outer = TRUE, font = 2)
+mtext(text="Miles Per Gallon (MPG)", side = 2, line = 0, outer = TRUE, font = 2)
+```
+]
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-109-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse
+# Other Types of Plots
+---
+# Line Graph
+
+.small[
+The `Theoph` dataset in Base R has data from an experiment on the pharmacokinetics of theophylline (a medication for [lung diseases like COPD](https://www.webmd.com/drugs/2/drug-3591-3076/theophylline-oral/theophylline-sustained-release-oral/details)). Let's plot the mean theophylline concentration (mg/L) over time (within-subjects) by dose administered (between-subjects).
+
+Data need to be in long form for line graphs
+
+
+```r
+conc_data &lt;- Theoph %&gt;%
+  mutate(Subject = as.numeric(Subject)) %&gt;%
+  group_by(Subject) %&gt;%
+  arrange(Time) %&gt;%
+  mutate(timepoint = 1:n()) %&gt;%
+  group_by(Dose, timepoint) %&gt;%
+  summarize(conc = mean(conc, na.rm = T),
+            Time = mean(Time, na.rm = T))
+
+glimpse(conc_data)
+```
+
+```
+## Rows: 110
+## Columns: 4
+## Groups: Dose [10]
+## $ Dose      &lt;dbl&gt; 3.10, 3.10, 3.10, 3.10, 3.10, 3.10, 3.10, 3.10, 3.10, 3.10, …
+## $ timepoint &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9…
+## $ conc      &lt;dbl&gt; 0.00, 7.37, 9.03, 7.14, 6.33, 5.66, 5.67, 4.24, 4.11, 3.16, …
+## $ Time      &lt;dbl&gt; 0.00, 0.30, 0.63, 1.05, 2.02, 3.53, 5.02, 7.17, 8.80, 11.60,…
+```
+]
+---
+class: code-overflow
+
+.small[
+
+```r
+par(mar = c(5, 4, 0, 0))
+par(family = "Ubuntu",
+    font.lab = 4,
+    cex.lab = 1.15)
+
+# Plot empty plot with correct dimensions
+plot(x = conc_data$Time, y = conc_data$conc, type = "n", axes = F,
+     xlab = "Time (hours)", ylab = "Concentration (mg/L)",
+     ylim = c(0, 12))
+box(lwd = 1.5)
+axis(side = 1, at = axTicks(1), labels = axTicks(1), lwd = 0, lwd.ticks = 1)
+axis(side = 2, at = seq(0, 12, 2), labels = seq(0, 12, 2), lwd = 0, lwd.ticks = 1, las = 1)
+
+# Plot line of each dose over time
+# lines() is similar to points(type = "l")
+for(i in 1:length(unique(conc_data$Dose))){
+  lines(x = conc_data$Time[conc_data$Dose == unique(conc_data$Dose)[i]],
+         y = conc_data$conc[conc_data$Dose == unique(conc_data$Dose)[i]],
+         lwd = 2,
+         col = rainbow(length(unique(conc_data$Dose)))[i])
+}
+
+# Add legend
+legend(x = "topright",
+       title = "Dose (mg/kg)",
+       legend = format(unique(conc_data$Dose), nsmall = 2),
+       col = rainbow(length(unique(conc_data$Dose)), alpha = .75),
+       lwd = 2,
+       lty = 1,
+       bty = "n",
+       ncol = 2)
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-111-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+### Plotting dates on the x-axis
+
+.small[
+When you have a `Date` column, R's `plot()` will automatically plot the dates properly on the x-axis. If you want to change the x-axis at all (labels, tick marks, other aesthetics), your best bet is to use the special `axis.Date()` function
+
+
+
+```r
+# Axis ticks at each month Jan - Dec
+axis.Date(
+  # x-axis
+  side = 1,
+  
+  # Date object to create axis
+  x = counts$Date,
+  
+  # Ticks from Jan to Dec each year in the data
+  at = seq.Date(min(counts$Date),
+                max(counts$Date),
+                by = "month"),
+  
+  # Labels from Jan to Dec each year in the data
+  # formatted to Year and abbreviated month name
+  # (e.g., 2021 Aug)
+  labels = format(seq.Date(min(counts$Date),
+                           max(counts$Date),
+                           by = "month"), "%b %Y"),
+  
+  # Rotate text -90 degrees
+  las = 2
+)
+```
+]
+
+---
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-114-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+# Histogram
+.small[
+
+```r
+hist(x = mtcars$mpg, # data to plot
+     breaks = 15, # change default number of bars
+     xlim = c(10, 35), # change size of x-axis
+     main = "", # no main title
+     xlab = "Mile Per Gallon (MPG)", # x-axis title
+     las = 1, # y-axis ticks horizontal
+     border = "darkblue", # bar border color
+     col = "lightblue") # bar fill color
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-116-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# Frequency Polygon
+.small[
+
+```r
+# Get histogram parameters without plotting it
+p &lt;- hist(x = mtcars$mpg, breaks = 15, plot = F)
+str(p)
+```
+
+```
+## List of 6
+##  $ breaks  : int [1:13] 10 12 14 16 18 20 22 24 26 28 ...
+##  $ counts  : int [1:12] 2 1 7 3 5 5 2 2 1 0 ...
+##  $ density : num [1:12] 0.0312 0.0156 0.1094 0.0469 0.0781 ...
+##  $ mids    : num [1:12] 11 13 15 17 19 21 23 25 27 29 ...
+##  $ xname   : chr "mtcars$mpg"
+##  $ equidist: logi TRUE
+##  - attr(*, "class")= chr "histogram"
+```
+
+
+```r
+# Plot the midpoints and associated frequencies
+plot(x = c(min(p$mids)-2, p$mids, max(p$mids)+2),
+     y = c(0, p$counts, 0),
+     type = "l",
+     xlab = "Miles Per Gallon (MPG)",
+     ylab = "Frequency",
+     axes = F)
+
+... # axes, box
+
+# Create polygon to fill in area below curve
+polygon(x = c(min(p$mids)-2, p$mids, max(p$breaks)+2), # create 0 min and max
+        y = c(0, p$counts, 0),
+        col = "lightblue",
+        border = "darkblue")
+```
+]
+---
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-119-1.svg" style="display: block; margin: auto;" /&gt;
+---
+class: code-overflow
+
+## Density plot
+.small[
+
+
+```r
+# Get density vals
+dens &lt;- density(mtcars$mpg)
+
+# Plot density object (with other plotting args)
+plot(x = dens, ...)
+axis(side = 1, ...) # no side 2
+
+polygon(dens, col = "lightblue", border = "darkblue") 
+```
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-121-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: code-overflow
+
+## The Normal Curve
+
+.small[
+The `polygon()` function can be used to plot any area(s) you want. For example:
+
+
+```r
+par(mar=c(4,0,0,0),
+    family = "Ubuntu")
+
+curve(expr = dnorm(x, mean = 0, sd = 1),
+      xlim = c(-4, 4),
+      xlab = "z-score",
+      ylab = "",
+      lwd = 1.5,
+      axes = FALSE)
+
+axis(side = 1, at = qnorm(c(0.005, 0.025, .50, 0.975, .995)),
+     labels = format(qnorm(c(0.005, 0.025, .50, 0.975, .995)), nsmall = 2, digits = 3),
+     lwd = 0, lwd.ticks = 1)
+
+# Z scores to draw polygon (tails)
+# Left side
+from_neg_z &lt;- -4
+to_neg_z &lt;- qnorm(.025)
+
+#Right side
+from_pos_z &lt;- 4
+to_pos_z &lt;- qnorm(.025, lower.tail = F)
+
+# Polygon coordinates (tails)
+x  &lt;- c(from_neg_z, seq(from_neg_z, to_neg_z, 0.01), to_neg_z,
+        from_pos_z, seq(from_pos_z, to_pos_z, -0.01), to_pos_z)
+
+y  &lt;- c(0, dnorm(seq(from_neg_z, to_neg_z, 0.01)), 0,
+        0, dnorm(seq(from_pos_z, to_pos_z, -0.01)), 0)
+
+# Draw polygons
+polygon(x, y, col = "darkblue", border = "darkblue", lwd = 1.5)
+
+# Z scores to draw polygon (body)
+from_z &lt;- qnorm(.025)
+to_z &lt;- qnorm(.025, lower.tail = F)
+
+x  &lt;- c(from_z, seq(from_z, to_z, 0.01), to_z)
+y  &lt;- c(0, dnorm(seq(from_z, to_z, 0.01)), 0)
+
+polygon(x, y, col = "lightblue", border = "darkblue", lwd = 1.5)
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-122-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# Barplots
+
+.small[
+R's `chickwts` data comes from a between-subjects experiment on the effect of chicken feed implements on chicken growth rate at 6 weeks old:
+
+
+```
+## 'data.frame':	71 obs. of  2 variables:
+##  $ weight: num  179 160 136 227 217 168 108 124 143 140 ...
+##  $ feed  : Factor w/ 6 levels "casein","horsebean",..: 2 2 2 2 2 2 2 2 2 2 ...
+```
+
+
+```r
+# Calculate means and info for CI error bars (n, SD)
+chickwts_desc &lt;- chickwts %&gt;%
+  group_by(feed) %&gt;%
+  summarize(n = n(),
+            mean_weight = mean(weight, na.rm = T),
+            sd_weight = sd(weight, na.rm = T))
+```
+
+
+|feed      |  n| mean_weight| sd_weight|
+|:---------|--:|-----------:|---------:|
+|casein    | 12|    323.5833|  64.43384|
+|horsebean | 10|    160.2000|  38.62584|
+|linseed   | 12|    218.7500|  52.23570|
+|meatmeal  | 11|    276.9091|  64.90062|
+|soybean   | 14|    246.4286|  54.12907|
+|sunflower | 12|    328.9167|  48.83638|
+
+]
+---
+.small[
+
+```r
+barplot(chickwts_desc$mean_weight,
+        names.arg = stringr::str_to_title(chickwts_desc$feed),
+        ylim = c(0, 350),
+        las = 1,
+        ylab = "Mean Weight (g)",
+        border = "darkblue",
+        col = "lightblue")
+```
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-127-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+### Error Bars
+.small[
+
+```r
+# Save barplot x values
+bp &lt;- barplot(...)
+
+# with() lets you reference columns without subsetting each time
+with(chickwts_desc,
+     # draw arrows with flat lines on each head
+     arrows(x0 = bp,
+            x1 = bp,
+            y0 = mean_weight - qnorm(.025, lower.tail = F) * (sd_weight / sqrt(n)),
+            y1 = mean_weight + qnorm(.025, lower.tail = F) * (sd_weight / sqrt(n)),
+            lwd = 1.5, angle = 90, code = 3, length = 0.05, col = "darkblue")
+)
+```
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-129-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# Pie Chart
+.small[
+
+.pull-left[
+The `pie()` functions uses a table of counts (i.e. relative proportions) to build the initial pie chart
+
+The `table()` and `tapply()` functions from base R are both very helpful for this
+
+`group_by()` and `summarize(n = n())` from `dplyr` are also very helpful
+
+From the King County 2016 elections data:
+
+
+```r
+counts &lt;- d %&gt;%
+  group_by(Party_Simplified) %&gt;%
+  summarize(n = n())
+```
+
+
+
+```
+## # A tibble: 4 × 2
+##   Party_Simplified      n
+##   &lt;chr&gt;             &lt;int&gt;
+## 1 Democrat          31931
+## 2 Non-partisan     182983
+## 3 Republican         2683
+## 4 Third Party       43518
+```
+
+]
+
+.pull-right[
+
+```r
+pie(x = counts$n,
+    labels = counts$Party_Simplified,
+    col = rainbow(4))
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-133-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+.smallish[
+Use the `init.angle` argument to control the initial rotation of the pie chart
+
+See `help("pie")` for more pie chart plotting options
+]
+
+.small[
+
+.pull-left[
+
+```r
+pie(x = counts$n,
+    labels = counts$Party_Simplified,
+    col = rainbow(4))
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-135-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+pie(x = counts$n,
+    labels = counts$Party_Simplified,
+    col = rainbow(4),
+    init.angle = 90)
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-137-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+]
+
+
+---
+# Boxplot
+
+.small[
+
+.pull-left[
+
+
+```r
+# See `help("bxp")` for boxplot options
+boxplot(mpg ~ cyl, data = mtcars,
+        xlab="Number of Cylinders",
+        ylab="Miles Per Gallon",
+        pch = 20,
+        col = rainbow(3, .5),
+        boxwex = 0.5)
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-139-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+boxplot(mpg ~ cyl, data = mtcars,
+        ylab="Number of Cylinders",
+        xlab="Miles Per Gallon",
+        pch = 20,
+        col = rainbow(3, .5),
+        boxwex = 0.5,
+        horizontal = TRUE)
+```
+
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-141-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+## Violin Plot
+
+.small[
+You *can* make violin plots in base R, but it would require a lot of work and there's [a package](https://cran.r-project.org/web/packages/vioplot/vioplot.pdf) to make your life easier (while still using base R graphics) works just like the code for boxplot
+
+.pull-left[
+
+```r
+vioplot(mpg ~ cyl, data = mtcars,
+        xlab="Number of Cylinders",
+        ylab="Miles Per Gallon (MPG)",
+        pch = 20,
+        ylim = c(8, 35),
+        col = rainbow(3, .5),
+        las = 1)
+```
+
+
+```
+## Loading required package: sm
+```
+
+```
+## Package 'sm', version 2.2-5.6: type help(sm) for summary information
+```
+
+```
+## Loading required package: zoo
+```
+
+```
+## 
+## Attaching package: 'zoo'
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     as.Date, as.Date.numeric
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-143-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+vioplot(mpg ~ cyl, data = mtcars,
+        xlab="Number of Cylinders",
+        ylab="Miles Per Gallon (MPG)",
+        pch = 20, las = 1,
+        ylim = c(8, 35),
+        col = rainbow(3, .5),
+        horizontal = TRUE)
+```
+
+&lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-145-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+]
+
+
+
+&lt;!-- --- --&gt;
+&lt;!-- # Violin Plot --&gt;
+&lt;!-- ```{r} --&gt;
+&lt;!-- library(vioplot) --&gt;
+&lt;!-- ``` --&gt;
+
+
+
+&lt;!-- --- --&gt;
+&lt;!-- ## Time Series Plots --&gt;
+
+&lt;!-- Including plotting dates --&gt;
+
+
+
+
+
+&lt;!-- # `box()` --&gt;
+
+&lt;!-- Types of boxes --&gt;
+
+
+&lt;!-- # `plot()` --&gt;
+
+&lt;!-- # Creating scatterplots --&gt;
+
+&lt;!-- # Density --&gt;
+
+&lt;!-- Creating a normal curve: --&gt;
+
+
+
+
+&lt;!-- Desntiy plots of your own data --&gt;
+&lt;!-- ```{r} --&gt;
+&lt;!-- set.seed(3) --&gt;
+&lt;!-- x &lt;- rnorm(200) --&gt;
+&lt;!-- y &lt;- rnorm(150, mean = 1) --&gt;
+
+&lt;!-- # Density estimations --&gt;
+&lt;!-- denx &lt;- density(x) --&gt;
+&lt;!-- deny &lt;- density(y) --&gt;
+
+&lt;!-- # Plot --&gt;
+&lt;!-- plot(denx, --&gt;
+&lt;!--      ylim = c(0, max(c(denx$y, deny$y))), --&gt;
+&lt;!--      xlim = c(min(c(denx$x, deny$x)), --&gt;
+&lt;!--               max(c(denx$x, deny$x)))) --&gt;
+&lt;!-- lines(deny) --&gt;
+
+&lt;!-- # Fill the areas --&gt;
+&lt;!-- polygon(denx, col = rgb(0.78, 0.89, 1, alpha = 0.6)) --&gt;
+&lt;!-- polygon(deny, col = rgb(0.51, 0.44, 1, alpha = 0.6)) --&gt;
+&lt;!-- ``` --&gt;
+
+
+
+&lt;!-- # `barchart()` --&gt;
+&lt;!-- including stacked barchart --&gt;
+
+&lt;!-- # `pie()` --&gt;
+
+&lt;!-- # `boxplot()` --&gt;
+
+
+
+&lt;!-- ```{r, eval=F} --&gt;
+&lt;!-- https://www.r-graph-gallery.com/base-R.html --&gt;
+
+&lt;!-- Shape parameters --&gt;
+&lt;!-- - lwd --&gt;
+&lt;!-- - type --&gt;
+&lt;!-- - lty --&gt;
+&lt;!-- - cex --&gt;
+&lt;!-- - col --&gt;
+&lt;!-- - pch --&gt;
+
+&lt;!-- Margins --&gt;
+&lt;!-- - par --&gt;
+&lt;!-- - oma --&gt;
+
+&lt;!-- Exporting --&gt;
+&lt;!-- ``` --&gt;
+
+
+
+
+&lt;!-- RESOURCES --&gt;
+&lt;!-- Named colors in base R: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf --&gt;
+&lt;!-- https://rich-iannone.github.io/DiagrammeR/ --&gt;
+&lt;!-- FONTS: https://www.statmethods.net/advgraphs/parameters.html --&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "tomorrow-night-bright",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
