@@ -1060,7 +1060,7 @@ plot(x = mtcars[order(mtcars$cyl), c("wt", "mpg")], # order rows by cyl
      col = rep(hcl.colors(3, alpha = .6), times = table(mtcars$cyl)), # color by cyl
      ...) # color by cyl
 
-legend(x = "topleft", # takes keywords OR x, y coordinates
+legend(x = "topright", # takes keywords OR x, y coordinates
        title = "Cylinders", # legend title
        legend = seq(4, 8, 2), # values inside legend
        col = hcl.colors(3, alpha = .75), # colors corresponding with values
