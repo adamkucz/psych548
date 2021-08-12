@@ -55,8 +55,8 @@ class: center, top, title-slide
 ]
 .pull-right[
 🧠 Psychology's new home
-<div id="htmlwidget-de7827c9a9a3407dc678" style="width:360px;height:288px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-de7827c9a9a3407dc678">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[47.6526131,-122.3107631,null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},"Psychology's New Home",null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[47.6526131,47.6526131],"lng":[-122.3107631,-122.3107631]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-eb807f85dc8b0fef80ce" style="width:360px;height:288px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-eb807f85dc8b0fef80ce">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[47.6526131,-122.3107631,null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},"Psychology's New Home",null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[47.6526131,47.6526131],"lng":[-122.3107631,-122.3107631]}},"evals":[],"jsHooks":[]}</script>
 ]
 ]
 
@@ -870,17 +870,13 @@ for(i in 1:4){
 .smallish[
 Changing font size and style is easy, but changing font family is a bit trickier because it depends on the fonts you have installed on your operating system
 
-The `extrafont` package extends the fonts available for plotting in R:
-1. Install the package `install.packages("extrafont")`
-2. Import the fonts: `extrafont::font_import()`
+The `extrafont` package extends the fonts available for plotting in R. First, install the package with `install.packages("extrafont")` then import the fonts with `extrafont::font_import()`
 
 
 ******
-
 Font `par` arguments:
 
 - `font`: Integer which specifies which font style to use for text
-
   - 1 = plain
   - 2 = **bold**
   - 3 = *italic*
@@ -1534,7 +1530,9 @@ pie(x = counts$n,
 
 &lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-137-1.svg" style="display: block; margin: auto;" /&gt;
 ]
+
 ]
+
 
 ---
 # Boxplot
@@ -1591,6 +1589,30 @@ vioplot(mpg ~ cyl, data = mtcars,
         las = 1)
 ```
 
+
+```
+## Loading required package: sm
+```
+
+```
+## Package 'sm', version 2.2-5.6: type help(sm) for summary information
+```
+
+```
+## Loading required package: zoo
+```
+
+```
+## 
+## Attaching package: 'zoo'
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     as.Date, as.Date.numeric
+```
+
 &lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-143-1.svg" style="display: block; margin: auto;" /&gt;
 ]
 
@@ -1608,7 +1630,102 @@ vioplot(mpg ~ cyl, data = mtcars,
 
 &lt;img src="PSYCH548_Week8_DataVisBaseR_files/figure-html/unnamed-chunk-145-1.svg" style="display: block; margin: auto;" /&gt;
 ]
+
 ]
+
+
+
+&lt;!-- --- --&gt;
+&lt;!-- # Violin Plot --&gt;
+&lt;!-- ```{r} --&gt;
+&lt;!-- library(vioplot) --&gt;
+&lt;!-- ``` --&gt;
+
+
+
+&lt;!-- --- --&gt;
+&lt;!-- ## Time Series Plots --&gt;
+
+&lt;!-- Including plotting dates --&gt;
+
+
+
+
+
+&lt;!-- # `box()` --&gt;
+
+&lt;!-- Types of boxes --&gt;
+
+
+&lt;!-- # `plot()` --&gt;
+
+&lt;!-- # Creating scatterplots --&gt;
+
+&lt;!-- # Density --&gt;
+
+&lt;!-- Creating a normal curve: --&gt;
+
+
+
+
+&lt;!-- Desntiy plots of your own data --&gt;
+&lt;!-- ```{r} --&gt;
+&lt;!-- set.seed(3) --&gt;
+&lt;!-- x &lt;- rnorm(200) --&gt;
+&lt;!-- y &lt;- rnorm(150, mean = 1) --&gt;
+
+&lt;!-- # Density estimations --&gt;
+&lt;!-- denx &lt;- density(x) --&gt;
+&lt;!-- deny &lt;- density(y) --&gt;
+
+&lt;!-- # Plot --&gt;
+&lt;!-- plot(denx, --&gt;
+&lt;!--      ylim = c(0, max(c(denx$y, deny$y))), --&gt;
+&lt;!--      xlim = c(min(c(denx$x, deny$x)), --&gt;
+&lt;!--               max(c(denx$x, deny$x)))) --&gt;
+&lt;!-- lines(deny) --&gt;
+
+&lt;!-- # Fill the areas --&gt;
+&lt;!-- polygon(denx, col = rgb(0.78, 0.89, 1, alpha = 0.6)) --&gt;
+&lt;!-- polygon(deny, col = rgb(0.51, 0.44, 1, alpha = 0.6)) --&gt;
+&lt;!-- ``` --&gt;
+
+
+
+&lt;!-- # `barchart()` --&gt;
+&lt;!-- including stacked barchart --&gt;
+
+&lt;!-- # `pie()` --&gt;
+
+&lt;!-- # `boxplot()` --&gt;
+
+
+
+&lt;!-- ```{r, eval=F} --&gt;
+&lt;!-- https://www.r-graph-gallery.com/base-R.html --&gt;
+
+&lt;!-- Shape parameters --&gt;
+&lt;!-- - lwd --&gt;
+&lt;!-- - type --&gt;
+&lt;!-- - lty --&gt;
+&lt;!-- - cex --&gt;
+&lt;!-- - col --&gt;
+&lt;!-- - pch --&gt;
+
+&lt;!-- Margins --&gt;
+&lt;!-- - par --&gt;
+&lt;!-- - oma --&gt;
+
+&lt;!-- Exporting --&gt;
+&lt;!-- ``` --&gt;
+
+
+
+
+&lt;!-- RESOURCES --&gt;
+&lt;!-- Named colors in base R: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf --&gt;
+&lt;!-- https://rich-iannone.github.io/DiagrammeR/ --&gt;
+&lt;!-- FONTS: https://www.statmethods.net/advgraphs/parameters.html --&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
