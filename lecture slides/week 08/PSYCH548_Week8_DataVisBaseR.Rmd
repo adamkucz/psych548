@@ -17,6 +17,7 @@ library(leaflet)
 library(dplyr)
 library(tidyr)
 library(lubridate)
+library(vioplot)
 
 options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(comment = "##",
@@ -1419,7 +1420,7 @@ layout_mat <- matrix(c(1, 1,
                      nrow = 3,
                      byrow = T)
 
-layout(layout_mat, c(1, 1), c(1, 1))
+layout(layout_mat, c(1, 1), c(1, 1, 1))
 ```
 
 
@@ -1433,7 +1434,7 @@ layout_mat <- matrix(c(1, 1,
                      nrow = 3,
                      byrow = T)
 
-layout(layout_mat, c(1, 1), c(1, 1))
+layout(layout_mat, c(1, 1), c(1, 1, 1))
 
 par(mar = c(0, 0, 0, 0) + 0.2)
 for(i in 1:5){
@@ -2081,7 +2082,7 @@ polygon(x, y, col = "lightblue", border = "darkblue", lwd = 1.5)
 # Barplots
 
 .small[
-R's `chickwts` data comes from a between-subjects experiment on the effect of chicken feed implements on chicken growth rate at 6 weeks old:
+R's `chickwts` data comes from a between-subjects experiment on the effect of chicken feed supplements on chicken growth rate at 6 weeks old:
 
 ```{r, echo=F}
 str(chickwts)
@@ -2367,8 +2368,6 @@ vioplot(mpg ~ cyl, data = mtcars,
 ```
 
 ```{r, echo=F, fig.width = 4, fig.height = 3.5, fig.align='center'}
-library(vioplot)
-
 par(family = "Ubuntu",
     mar = c(4, 4, 0, 0),
     font.lab = 4)
@@ -2395,8 +2394,6 @@ vioplot(mpg ~ cyl, data = mtcars,
 ```
 
 ```{r, echo=F, fig.width = 4, fig.height = 3.5, fig.align='center'}
-library(vioplot)
-
 par(family = "Ubuntu",
     mar = c(4, 4, 0, 0),
     font.lab = 4)
@@ -2411,113 +2408,4 @@ vioplot(mpg ~ cyl, data = mtcars,
         horizontal = TRUE)
 ```
 ]
-
 ]
-
-
-
-<!-- --- -->
-<!-- # Violin Plot -->
-<!-- ```{r} -->
-<!-- library(vioplot) -->
-<!-- ``` -->
-
-
-
-<!-- --- -->
-<!-- ## Time Series Plots -->
-
-<!-- Including plotting dates -->
-
-
-
-
-
-<!-- # `box()` -->
-
-<!-- Types of boxes -->
-
-
-<!-- # `plot()` -->
-
-<!-- # Creating scatterplots -->
-
-<!-- # Density -->
-
-<!-- Creating a normal curve: -->
-```{r, eval=F, echo=F}
-# https://statisticsglobe.com/r-polygon-function-plot/
-
-x <- seq(-3, 3, length=200)
-y <- dnorm(x, mean=0, sd=1)
-plot(x, y, type="l", lwd=2)
-polygon(x, y, col="red", border="blue")
-
-x <- seq(-3, 3, length=200)
-y <- dnorm(x, mean=0, sd=1)
-plot(x, y, type="l", lwd=1)
-val <- 1.96
-polygon(c(x[x <= -val], -val), c(y[x <= -val], min(y[x <= -val])), col=rgb(0.51, 0.44, 1, alpha = 0.6))
-polygon(c(x[x >= val], val), c(y[x >= val], min(y[x >= val])), col=rgb(0.51, 0.44, 1, alpha = 0.6))
-```
-
-
-
-<!-- Desntiy plots of your own data -->
-<!-- ```{r} -->
-<!-- set.seed(3) -->
-<!-- x <- rnorm(200) -->
-<!-- y <- rnorm(150, mean = 1) -->
-
-<!-- # Density estimations -->
-<!-- denx <- density(x) -->
-<!-- deny <- density(y) -->
-
-<!-- # Plot -->
-<!-- plot(denx, -->
-<!--      ylim = c(0, max(c(denx$y, deny$y))), -->
-<!--      xlim = c(min(c(denx$x, deny$x)), -->
-<!--               max(c(denx$x, deny$x)))) -->
-<!-- lines(deny) -->
-
-<!-- # Fill the areas -->
-<!-- polygon(denx, col = rgb(0.78, 0.89, 1, alpha = 0.6)) -->
-<!-- polygon(deny, col = rgb(0.51, 0.44, 1, alpha = 0.6)) -->
-<!-- ``` -->
-
-
-
-<!-- # `barchart()` -->
-<!-- including stacked barchart -->
-
-<!-- # `pie()` -->
-
-<!-- # `boxplot()` -->
-
-
-
-<!-- ```{r, eval=F} -->
-<!-- https://www.r-graph-gallery.com/base-R.html -->
-
-<!-- Shape parameters -->
-<!-- - lwd -->
-<!-- - type -->
-<!-- - lty -->
-<!-- - cex -->
-<!-- - col -->
-<!-- - pch -->
-
-<!-- Margins -->
-<!-- - par -->
-<!-- - oma -->
-
-<!-- Exporting -->
-<!-- ``` -->
-
-
-
-
-<!-- RESOURCES -->
-<!-- Named colors in base R: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf -->
-<!-- https://rich-iannone.github.io/DiagrammeR/ -->
-<!-- FONTS: https://www.statmethods.net/advgraphs/parameters.html -->
