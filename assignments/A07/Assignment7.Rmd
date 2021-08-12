@@ -1,0 +1,42 @@
+---
+title: "Assignment 7"
+subtitle: "Data Visualization in Base R"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,
+                      cache = T)
+```
+
+
+<div style="border: 2px solid rgb(255, 140, 0); text-align: center; background-color: rgb(255, 140, 0, .75); font-weight: bold; color:white; padding: 0 25% 0 25%; margin-bottom: 10px;">
+<span>Please submit both the .Rmd and a .html file on Canvas.</span>
+</div>
+
+<div style="border: 2px solid rgb(21, 158, 3); text-align: center; background-color: rgb(21, 158, 3, .75); font-weight: bold; color:white; padding: 0 30% 0 30%; margin-bottom: 25px;">
+<span>Do not use any packages to do the actual plotting on this assignment (it is okay to use packages as needed for data cleaning and manipulation)<span>
+</div>
+
+Your assignment this week is to create data visualizations of your own data using base R plotting functions.
+
+1. First, help me understand these data. In a few sentences, describe the research design, structure of the data, and any quirks you think would be helpful for me to know about.
+
+
+
+
+2. Then, create at least 4 figures that help you understand and visualize your data. Bonus if these figures complement each other to tell a story of your data, but this is not a requirement. You should include code to do the following at least once across your 4+ figures: 
+
+    - At least two of your figures should be a different type (e.g., do not plot 4 scatterplots)
+    - Change the default point shape, line type, and/or line width
+    - Change the default point, line, bar, etc. color
+    - Depict different groups in your data using shape, color, and/or size
+    - Include a legend when plotting multiple groups in your data
+    - Change the default axes to get them closer to publication quality
+    - Create multiple figures in the same window using `par(mfrow = ...)` or `layout()`
+    - Add lines to your data using `abline()`, `lines()`, or `matlines()`
+    - Change the default plot title and axis titles
+
+
+
+
