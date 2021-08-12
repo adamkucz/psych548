@@ -17,6 +17,7 @@ library(leaflet)
 library(dplyr)
 library(tidyr)
 library(lubridate)
+library(vioplot)
 
 options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(comment = "##",
@@ -1192,9 +1193,11 @@ The `extrafont` package extends the fonts available for plotting in R:
 
 
 ******
+
 Font `par` arguments:
 
 - `font`: Integer which specifies which font style to use for text
+
   - 1 = plain
   - 2 = **bold**
   - 3 = *italic*
@@ -2271,9 +2274,7 @@ pie(x = counts$n,
     init.angle = 90)
 ```
 ]
-
 ]
-
 
 ---
 # Boxplot
@@ -2369,8 +2370,6 @@ vioplot(mpg ~ cyl, data = mtcars,
 ```
 
 ```{r, echo=F, fig.width = 4, fig.height = 3.5, fig.align='center'}
-library(vioplot)
-
 par(family = "Ubuntu",
     mar = c(4, 4, 0, 0),
     font.lab = 4)
@@ -2397,8 +2396,6 @@ vioplot(mpg ~ cyl, data = mtcars,
 ```
 
 ```{r, echo=F, fig.width = 4, fig.height = 3.5, fig.align='center'}
-library(vioplot)
-
 par(family = "Ubuntu",
     mar = c(4, 4, 0, 0),
     font.lab = 4)
@@ -2413,113 +2410,4 @@ vioplot(mpg ~ cyl, data = mtcars,
         horizontal = TRUE)
 ```
 ]
-
 ]
-
-
-
-<!-- --- -->
-<!-- # Violin Plot -->
-<!-- ```{r} -->
-<!-- library(vioplot) -->
-<!-- ``` -->
-
-
-
-<!-- --- -->
-<!-- ## Time Series Plots -->
-
-<!-- Including plotting dates -->
-
-
-
-
-
-<!-- # `box()` -->
-
-<!-- Types of boxes -->
-
-
-<!-- # `plot()` -->
-
-<!-- # Creating scatterplots -->
-
-<!-- # Density -->
-
-<!-- Creating a normal curve: -->
-```{r, eval=F, echo=F}
-# https://statisticsglobe.com/r-polygon-function-plot/
-
-x <- seq(-3, 3, length=200)
-y <- dnorm(x, mean=0, sd=1)
-plot(x, y, type="l", lwd=2)
-polygon(x, y, col="red", border="blue")
-
-x <- seq(-3, 3, length=200)
-y <- dnorm(x, mean=0, sd=1)
-plot(x, y, type="l", lwd=1)
-val <- 1.96
-polygon(c(x[x <= -val], -val), c(y[x <= -val], min(y[x <= -val])), col=rgb(0.51, 0.44, 1, alpha = 0.6))
-polygon(c(x[x >= val], val), c(y[x >= val], min(y[x >= val])), col=rgb(0.51, 0.44, 1, alpha = 0.6))
-```
-
-
-
-<!-- Desntiy plots of your own data -->
-<!-- ```{r} -->
-<!-- set.seed(3) -->
-<!-- x <- rnorm(200) -->
-<!-- y <- rnorm(150, mean = 1) -->
-
-<!-- # Density estimations -->
-<!-- denx <- density(x) -->
-<!-- deny <- density(y) -->
-
-<!-- # Plot -->
-<!-- plot(denx, -->
-<!--      ylim = c(0, max(c(denx$y, deny$y))), -->
-<!--      xlim = c(min(c(denx$x, deny$x)), -->
-<!--               max(c(denx$x, deny$x)))) -->
-<!-- lines(deny) -->
-
-<!-- # Fill the areas -->
-<!-- polygon(denx, col = rgb(0.78, 0.89, 1, alpha = 0.6)) -->
-<!-- polygon(deny, col = rgb(0.51, 0.44, 1, alpha = 0.6)) -->
-<!-- ``` -->
-
-
-
-<!-- # `barchart()` -->
-<!-- including stacked barchart -->
-
-<!-- # `pie()` -->
-
-<!-- # `boxplot()` -->
-
-
-
-<!-- ```{r, eval=F} -->
-<!-- https://www.r-graph-gallery.com/base-R.html -->
-
-<!-- Shape parameters -->
-<!-- - lwd -->
-<!-- - type -->
-<!-- - lty -->
-<!-- - cex -->
-<!-- - col -->
-<!-- - pch -->
-
-<!-- Margins -->
-<!-- - par -->
-<!-- - oma -->
-
-<!-- Exporting -->
-<!-- ``` -->
-
-
-
-
-<!-- RESOURCES -->
-<!-- Named colors in base R: http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf -->
-<!-- https://rich-iannone.github.io/DiagrammeR/ -->
-<!-- FONTS: https://www.statmethods.net/advgraphs/parameters.html -->

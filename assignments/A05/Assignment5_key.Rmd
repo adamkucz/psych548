@@ -1,9 +1,3 @@
----
-title: "Assignment 5"
-subtitle: "Data Cleaning"
-output: html_document
----
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F)
 ```
