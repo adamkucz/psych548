@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Data Visualization with ggplot2</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Adam Kuczynski" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="../../css/slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, top, title-slide
+
+# Data Visualization with <span style="font-family=&#39;monospace&#39;">ggplot2</span>
+### Adam Kuczynski
+
+---
+
+
+
+
+&lt;style type="text/css"&gt;
+#data-visualization-with-span-style-font-family-monospace-ggplot2-span- {
+  font-size: 45px;
+}
+
+.layer {
+  min-width: 90%;
+  min-height: 32px;
+  line-height: 32px;
+  margin: 10px auto;
+  text-align: center;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.badge {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  margin: 30px 80px 0 auto;
+  position: fixed;
+  top:0;
+  right:0; 
+}
+
+.badge2 {
+  margin-right: 120px;
+  opacity: .5;
+}
+
+
+.code-overflow .remark-code,
+.code-overflow .r,
+.code-overflow .hljs {
+  max-height: 250px;
+  overflow: auto;
+}
+&lt;/style&gt;
+
+.pull-left[
+# `ggplot2()`
+The `ggplot2` package is based on a philosophy outlined in [*The Grammar of Graphics*](https://www.springer.com/gp/book/9780387245447)
+
+Understanding the philosophy is 90% of understanding how to create figures with `ggplot2`
+
+The remaining 10% is learning the various functions that correspond with each part of the philosophy
+
+This lecture is focused on understanding that philosophy, but we will also play around with some example code
+]
+
+.pull-right[
+&lt;div style="text-align:right"&gt;
+  &lt;img src="images/ggplot2.svg" style="max-width:50%; margin-bottom: 50px;"&gt;
+  &lt;img src="images/grammarofgraphics.jpg" style="max-width: 55%;"&gt;
+&lt;/div&gt;
+]
+
+
+---
+# The Grammar of Graphics
+
+**Central Idea**: Instead of creating a function for every single type of plot,&lt;sup&gt;1&lt;/sup&gt; decompose graphics its its separate components/layers that can be used flexibly to create (almost) any type of plot you want
+
+&lt;div class="layer" style="background-color:#388d9b;"&gt;Data&lt;/div&gt;
+&lt;div class="layer" style="background-color:#d13460;"&gt;Mapping&lt;/div&gt;
+&lt;div class="layer" style="background-color:#ff9f37;"&gt;Geometries&lt;/div&gt;
+&lt;div class="layer" style="background-color:#ffe789;"&gt;Statistics&lt;/div&gt;
+&lt;div class="layer" style="background-color:#86b35d;"&gt;Scale&lt;/div&gt;
+&lt;div class="layer" style="background-color:#299cd8;"&gt;Facets&lt;/div&gt;
+&lt;div class="layer" style="background-color:#e65540;"&gt;Coordinates&lt;/div&gt;
+&lt;div class="layer" style="background-color:#858988;"&gt;Theme&lt;/div&gt;
+
+
+.footnote[[1] New types of plots are being created nearly every day, so this would be impossible to accomplish]
+
+---
+# Example Data: `gapminder`
+
+
+.smallish[
+We will be using the `gapminder` data from the `gapminder` package for this lecture
+
+
+```r
+str(gapminder)
+```
+
+```
+## tibble [1,704 × 6] (S3: tbl_df/tbl/data.frame)
+##  $ country  : Factor w/ 142 levels "Afghanistan",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ continent: Factor w/ 5 levels "Africa","Americas",..: 3 3 3 3 3 3 3 3 3 3 ...
+##  $ year     : int [1:1704] 1952 1957 1962 1967 1972 1977 1982 1987 1992 1997 ...
+##  $ lifeExp  : num [1:1704] 28.8 30.3 32 34 36.1 ...
+##  $ pop      : int [1:1704] 8425333 9240934 10267083 11537966 13079460 14880372 12881816 13867957 16317921 22227415 ...
+##  $ gdpPercap: num [1:1704] 779 821 853 836 740 ...
+```
+
+- 142 countries (`country`)
+- 5 continents (`continent`)
+- 12 discrete years from 1952 to 2007 (`year`)
+- life expectancy (`lifeExp`)
+- population estimate (`pop`)
+- GDP per capita (`gpsPercap`)
+
+]
+---
+## Constructing a `ggplot`
+
+.small[
+
+`ggplot` figures are created started with the `ggplot()` function
+
+
+```r
+ggplot(data = NULL, mapping = aes(), ..., environment = parent.frame())
+```
+
+- `data` defined within a call to `ggplot()` are defined globally, which means each layer will used these data for plotting by default
+- `mapping` defined within a call to `ggplot()` are also defined globally for each layer to use by default
+
+.pull-left[
+
+```r
+# A blank ggplot template
+ggplot()
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-4-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+The `+` sign is used to add layers
+
+```r
+ggplot() +
+  geom_layer() + 
+  another_geom_layer() + 
+  facet_layer() +
+  theme_layer()
+```
+
+Layers are added on top of each other, so the order matters
+
+Unlike base R plots, `ggplots` can be saved as objects
+
+```r
+p &lt;- ggplot() + ...
+```
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Data&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#388d9b;"&gt;&lt;/div&gt;
+&lt;div&gt;
+
+.smallish[
+.pull-left[
+- This layer refers to the data that go into your figure
+
+- Can be one dataframe (defined globally) or many dataframes (defined at each layer)
+
+- Creating graphics is mostly about getting your data cleaned and in the format you need
+
+  - Most of the time your data will need to be in long (aka "tidy") format
+
+  - Sometimes you will need to supply data of summary statistics (e.g., for `geom_errorbar()`), but most of the time you will control the summary statistics within the `statistics` layer
+]
+
+.pull-right[
+
+```r
+# Set global data as flights
+# (from nycflights13 package)
+ggplot(data = gapminder)
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-7-1.svg" style="display: block; margin: auto;" /&gt;
+
+☝️ Because we do not have any geometry, the plot is still blank
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Mapping&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#d13460;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+.pull-left[
+Once you have your data, you need to inform the graphics function how those data fit into the plot you want to create
+
+In other words, you need to tell the graphics which variable represents `x`, `y`, etc.
+
+There are *tons* of different aesthetic specifications, which can be found in [this documentation](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html). Some of the most common are:
+
+- `x`, `y` (x and y axis)
+- `color`, `fill`
+- `shape`
+- `linetype`
+
+Mapping occurs inside a function called `aes()`, which stands for for **aes**thetics
+
+
+```r
+aes(x = my_x_var, y = my_y_var)
+```
+
+```
+## Aesthetic mapping: 
+## * `x` -&gt; `my_x_var`
+## * `y` -&gt; `my_y_var`
+```
+]
+
+.pull-right[
+
+```r
+# Map the x-axis to `year`
+# color to `continent`
+ggplot(data = gapminder,
+       mapping = aes(x = year, color = continent))
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-9-1.svg" style="display: block; margin: auto;" /&gt;
+
+☝️ The plot is getting some shape, but still no data are plotted because we have not added a geometry layer
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Mapping&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#d13460;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.smallish[
+
+Calls to `aes()` are *always* made within other `ggplot2` functions (i.e., they are attributes of a layer, not their own layer)
+
+Most of the time mapping will take column names for your data that you want to map on to each aesthetic of a plot
+
+However, `aes()` can also take expressions (i.e., R code) that determine the axes, color groups, etc.
+
+For example:
+
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = gdpPercap * pop,
+                     color = continent == "Asia"))
+```
+
+☝ From the `gapminder` data:
+
+- map `year` onto the x-axis
+- total GDP (`gdpPercap * pop`) on the y-axis
+- different colors where `contintent` `==` and `!=` "Asia"
+
+]
+
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Mapping vs. Setting&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#d13460;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+Arguments inside `aes()` (color, size, shape, etc.) **map** aesthetics to the data such that the colors, sizes, shapes, etc. *depend* on the data
+
+- Used to plot different colors, shapes, sizes, etc. based on groups/condition in your data
+
+These same arguments placed outside `aes()` (e.g., within `geom_*()`) **set** aesthetics to the layer such that the colors *do not depend* on the data
+
+- Used to change the colors, shapes, sizes, etc. of the entire plot/layer
+
+.pull-left[
+
+
+```r
+# Mapping (wrong)
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp,
+*                    color = "red")) +
+  ...
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-12-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+# Setting (right)
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+*                    y = lifeExp)) +
+  ...(color = "red")
+#
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-14-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+]
+
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Geometries&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ff9f37;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.smallish[
+- Mostly what you think about in `ggplot2`
+- Take all the **scale** values from come from mapping and may have been transformed by **statistics** and interprets/plots them in some way
+  - e.g., a line geometry (`geom_line()`) interprets data on way and creates lines on your figure while a boxplot geometry (`geom_boxplot()`) interprets the data another way 
+  
+.pull-left[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+* geom_line(stat = "summary")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-15-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year)) +
+  # No `y` mapping needed for boxplot
+* geom_boxplot()
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-16-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Geometries&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ff9f37;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+- Geometries are intimately intertwined with **statistics**, and each `geom_*()` has a default statistic (`stat`) assigned
+- The default statistic for `geom_line()` is [identity](https://ggplot2.tidyverse.org/reference/stat_identity.html), which means ("leave the data as is"). 
+
+.pull-left[
+If we create a line geometry with the data "as is" we get the following plot:
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  geom_line() # stat = "identity"
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-17-1.svg" style="display: block; margin: auto;" /&gt;
+☝ Plots every single point across every single year
+]
+
+
+.pull-right[
+When we change the default to [summary](https://ggplot2.tidyverse.org/reference/stat_summary.html), we get a plots of mean values (changed with `fun`)
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  geom_line(stat = "summary")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-18-1.svg" style="display: block; margin: auto;" /&gt;
+☝ Plots mean values for all observations within each year
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Geometries&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ff9f37;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+--
+
+
+- Different geometries do not necessary share the same mapping. For example, `geom_point()` needs (at minimum) an `x` and `y` mapping, but `geom_histogram()` only needs an `x` mapping (the statistic determines the y-axis)
+--
+
+
+- There is an "Aesthetics" section in the help page for each `geom` that describes the required and optional mapping parameters
+
+  - For example, `goem_linerange()` needs `x` *or* `y`, `ymin` *or* `xmin`, and `ymax` *or* `xmax` while `geom_histogram()` needs only `x` or `y`
+
+******
+--
+
+
+## Multiple Geometries
+--
+
+
+- You can (and often will) have multiple layers of geometries in the same figure
+--
+
+
+- The order or your geometries matter, because each later is plotted on top of the previous layers
+
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Geometries&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ff9f37;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+## Add bar geometry
+
+.smallish[
+
+.pull-left[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+* geom_bar(stat = "summary",
+*          width = 3,
+*          fill = "red")
+```
+]
+
+.pull-right[
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-20-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Geometries&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ff9f37;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+## Add line geometry
+
+.smallish[
+
+.pull-left[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  geom_bar(stat = "summary",
+           width = 3,
+           fill = "red") +
+* geom_line(stat = "summary",
+*           color = "blue")
+```
+]
+
+.pull-right[
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-22-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Geometries&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ff9f37;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+## Add point geometry
+
+.smallish[
+
+.pull-left[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  geom_bar(stat = "summary",
+           width = 3,
+           fill = "red") +
+  geom_line(stat = "summary",
+            color = "blue") +
+* geom_point(stat = "summary",
+*            color = "orange")
+```
+]
+
+.pull-right[
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-24-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Geometries&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ff9f37;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+## Add area geometry
+
+.smallish[
+.pull-left[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  geom_bar(stat = "summary",
+           width = 3,
+           fill = "red") +
+  geom_line(stat = "summary",
+            color = "blue") +
+  geom_point(stat = "summary",
+             color = "orange") +
+* geom_area(stat = "summary",
+*           alpha = .5,
+*           fill = "blue")
+```
+]
+
+.pull-right[
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-26-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Statistics&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ffe789;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.smallish[
+- Your data do not always have the required statistics for each type of figure
+  - For example, plotting a boxplot requires calculating the 25th, 50th, and 75th percentiles of your data and the interquartile range 
+  - Sometimes your data are exactly what is needed (e.g., creating a scatterplot), in which case you set your statistic to **identity** which just passes your data on to that layer
+
+- Provides convenience and flexibility because you do not need to know how your data need to be manipulated for each type of figure
+
+- However, sometimes you do need to manipulate your data to get the correct aesthetic mapping for a geom (e.g., creating errobars)
+
+.pull-left[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  geom_bar(stat = "summary") + 
+* geom_errorbar()
+```
+]
+
+.pull-right[
+&lt;pre style="background-color: rgb(193, 52, 52, .5); border: 2px solid rgb(193, 52, 52); padding-left: 10px; padding-top: 5px;"&gt;
+Error: geom_errorbar
+requires the following
+missing aesthetics: ymin
+and ymax or xmin and xmax
+&lt;pre&gt;
+]
+
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Statistics: Errorbars&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ffe789;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+.small[
+**Step 1**: create summary statistics from our data (mean and standard error) :
+
+
+```r
+gp_summary &lt;- gapminder %&gt;%
+  group_by(year) %&gt;%
+  summarize(mean_lifeExp = mean(lifeExp, na.rm = T),
+            se_lifeExp = sd(lifeExp, na.rm = T) / sqrt(n()))
+```
+
+**Step 2**: Supply these data to the `geom_errorbar()` layer to control the height of the errorbars
+
+
+```r
+ggplot(data = gapminder, mapping = aes(x = year, y = lifeExp)) +
+  geom_point(stat = "summary") +
+* geom_errorbar(data = gp_summary,
+*               mapping = aes(x = year, y = mean_lifeExp,
+*                             ymin = mean_lifeExp - se_lifeExp,
+*                             ymax = mean_lifeExp + se_lifeExp))
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-29-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Statistics&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ffe789;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+## Errorbar Types
+
+.pull-left[
+`geom_linerange()`
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-30-1.svg" style="display: block; margin: auto;" /&gt;
+
+`geom_pointrange()`
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-31-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+`geom_crossbar()`
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-32-1.svg" style="display: block; margin: auto;" /&gt;
+
+`geom_errorbar()`
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-33-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Statistics&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ffe789;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+Statistics are linked to geometries such that each geometry requires a statistic (and vice versa: each statistic requires a geometry)
+
+Thus, geometries have default statistics that try to guess what you want to plot but that can also be changed
+
+Defaults for common geometries:
+
+.smallish[
+.pull-left[
+- `geom_point(stat = "identity"`
+
+- `geom_count(stat = "sum")`
+
+- `geom_jitter(stat = "identity")`
+
+- `geom_bar(stat = "count")`
+
+- `geom_density(stat = "density")`
+
+- `geom_histrogram(stat = "bin")`
+]
+
+.pull-right[
+- `geom_boxplot(stat = "boxplot")`
+
+- `geom_violin(stat = "ydensity")`
+
+- `geom_rug(stat = "identity")`
+
+- `geom_freqpoly(stat = "bin")`
+
+- `geom_quantile(stat = "quantile")`
+
+- `geom_smooth(stat = "smooth")`
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Statistics&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#ffe789;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.smallish[
+
+Geometries can be created using `geom_*()` and passing in the statistic as an argument (as we have seen) *or* using `stat_*()` and passing the geometry in as an argument
+
+There's no one right way to do this, although it is most common to create the geometry with `geom_*()` rather than `stat_*()`
+
+
+.pull-left[
+**`geom_*()`**
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  geom_bar(stat = "summary") 
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-34-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+**`stat_*()`**
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  stat_summary(geom = "bar")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-35-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Mapping&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#d13460;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.smallish[
+Now that we know how to create geometry and statistics layers we can understand aesthetic mapping more completely
+]
+
+.small[
+.pull-left[
+**No color mapping**
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) + 
+  # No color mapping
+  geom_line(stat = "summary")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-36-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+**Color mapped to continent**
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp,
+*                    color = continent)) +
+  geom_line(stat = "summary")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-37-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Mapping&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#d13460;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+You can map the same (or different) columns to multiple aesthetics within one call to `aes()`
+
+.pull-left[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp,
+                     color = continent,
+                     linetype = continent)) +
+  # Size equal among groups
+  geom_line(stat = "summary")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-38-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp,
+                     color = continent, 
+                     linetype = continent,
+                     size = ave(pop, continent))) +
+  geom_line(stat = "summary")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-39-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Mapping: Layer-level &lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#d13460;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+**Line geometry for each country, color by continent**
+
+.smallish[
+
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year, y = lifeExp, color = continent)) +
+  geom_line(mapping = aes(group = country),
+            stat = "summary",
+            alpha = .5)
+# 
+# 
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-41-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Mapping: Layer-level &lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#d13460;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+**Line geometry for each continent, color by continent**
+
+.smallish[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year, y = lifeExp, color = continent)) +
+  geom_line(mapping = aes(group = country),
+            stat = "summary",
+            alpha = .5) +
+  geom_line(stat = "summary",
+            size = 3)
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-42-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Scales&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+**How are properties of the axes, colors, and other aethetics determined? Scales!**
+
+**Scales** control the details of how data values are translated to visual properties (e.g., 
+plot Africa with #F8766D, Americas with #B79F00, etc.)
+
+All geometries are given default scales which you can override with the `scale_*()` function
+
+To get the scales for each layer of your ggplot figure, use `build_ggplot()`
+
+
+```r
+p &lt;- ggplot(data = gapminder,
+       mapping = aes(x = year, y = lifeExp, color = continent)) + 
+  geom_line(stat = "summary")
+
+*ggplot_build(p)$data[[1]] %&gt;%
+  str()
+```
+
+```
+## 'data.frame':	60 obs. of  11 variables:
+##  $ colour     : chr  "#F8766D" "#F8766D" "#F8766D" "#F8766D" ...
+##  $ x          : num  1952 1957 1962 1967 1972 ...
+##  $ group      : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ y          : num  39.1 41.3 43.3 45.3 47.5 ...
+##  $ ymin       : num  38.4 40.5 42.5 44.5 46.6 ...
+##  $ ymax       : num  39.8 42 44.1 46.2 48.3 ...
+##  $ PANEL      : Factor w/ 1 level "1": 1 1 1 1 1 1 1 1 1 1 ...
+##  $ flipped_aes: logi  FALSE FALSE FALSE FALSE FALSE FALSE ...
+##  $ size       : num  0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 ...
+##  $ linetype   : num  1 1 1 1 1 1 1 1 1 1 ...
+##  $ alpha      : logi  NA NA NA NA NA NA ...
+```
+]
+
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Scales&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+Scale functions have the syntax: `scale_&lt;aesthetic&gt;_&lt;type&gt;` where `&lt;aesthetic&gt;` refers to each aesthetic mapping (`x`, `y`, `color`, etc.) and `&lt;type&gt;` refers to the type of scale (continuous, discrete, log10, etc.)
+
+**Axes scales**
+
+- `scale_x_continous()`, `scale_y_continuous()` (transform with `trans` argument)
+- `scale_x_log10()`, `scale_y_log10()`
+- `scale_x_sqrt()`, `scale_y_sqrt()`
+- `scale_x_reverse()`, `scale_y_reverse()`
+- `scale_x_discrete()`, `scale_y_discrete()`
+- `scale_x_binned()`, `scale_y_binned()`
+
+**Color, shape, size scales**
+- `scale_color_continuous()`, `scale_shape_continuous()`, `scale_size_continuous()`
+- `scale_color_discrete()`, `scale_shape_discrete()`, `scale_size_discrete()`
+- `scale_color_binned()`, `scale_shape_binned()`, `scale_size_binned()`
+- `scale_color_brewer()`, `scale_shape_brewer()`, `scale_size_brewer()`
+
+&lt;div style="height:20px;"&gt;&lt;/div&gt;
+
+There are dozens of different types of scales in `ggplot2`, all of which can be found in [this documentation](https://ggplot2.tidyverse.org/reference/#section-scales).
+
+Also check out the [scales](https://cran.r-project.org/web/packages/scales/scales.pdf) package
+
+]
+
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Scales: Example&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+
+
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = gdpPercap * pop,
+                     color = continent)) + 
+  geom_line(stat = "summary", size = 1.5) +
+  geom_point(stat = "summary", shape = 21, fill = "white", size = 2)
+  # 
+  # 
+  # 
+  # 
+  # 
+```
+
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-46-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Scales: Example&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = gdpPercap * pop,
+                     color = continent)) + 
+  geom_line(stat = "summary", size = 1.5) +
+  geom_point(stat = "summary", shape = 21, fill = "white", size = 2) +
+  scale_x_continuous(name = "Year",
+                     breaks = unique(gapminder$year))
+  # 
+  # 
+  # 
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-48-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Scales: Example&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = gdpPercap * pop,
+                     color = continent)) + 
+  geom_line(stat = "summary", size = 1.5) +
+  geom_point(stat = "summary", shape = 21, fill = "white", size = 2) +
+  scale_x_continuous(name = "Year",
+                     breaks = unique(gapminder$year)) +
+  scale_y_continuous(name = "Gross Domestic Product (USD)")
+  # 
+  # 
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-50-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Scales: Example&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = gdpPercap * pop,
+                     color = continent)) + 
+  geom_line(stat = "summary", size = 1.5) +
+  geom_point(stat = "summary", shape = 21, fill = "white", size = 2) +
+  scale_x_continuous(name = "Year",
+                     breaks = unique(gapminder$year)) +
+  scale_y_continuous(name = "Gross Domestic Product (USD)") + 
+  scale_color_brewer(palette = "Set1")
+  # 
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-52-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Scales: Example&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = gdpPercap * pop,
+                     color = continent)) + 
+  geom_line(stat = "summary", size = 1.5) +
+  geom_point(stat = "summary", shape = 21, fill = "white", size = 2) +
+  scale_x_continuous(name = "Year",
+                     breaks = unique(gapminder$year)) +
+  scale_y_continuous(name = "Gross Domestic Product (USD)") + 
+  scale_color_brewer(palette = "Set1") + 
+  ggtitle("Life Expectancy Over Time by Continent")
+```
+
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-54-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Scales: Continuous Color&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp,
+                     group = continent,
+                     size = ave(pop, continent),
+                     color = ave(gdpPercap, continent))) +
+  geom_point(stat = "summary") +
+  scale_color_continuous(name = "GDP Per Capita") +
+  scale_size_continuous(name = "Avg. Population")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-55-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Facets&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#299cd8;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.smallish[
+
+.pull-left[
+- Often we are focused on creating one figure per plotting area, but we are not constrained to this and may want to create multiple subplots when looking at our data
+
+- [**Facets**](https://ggplot2-book.org/facet.html) are multiple panels of plots, with the same plotting logic, on different groups of your data
+
+- Facets are most helpful when you are investigating your data, but they may help you create figures for publication as in [Kleiman et al. (2017)](https://doi.org/10.1037/abn0000273)
+
+- Use facets to prevent overplotting (plotting too much data in one figure)
+]
+
+.pull-right[
+![Faceted ggplot from Kleiman et al. (2017)](images/kleiman.png)
+]
+
+- Two different kinds of facets: `facet_wrap()` and `facet_grid()`
+
+- Because facets are extendable, there are packages (e.g., [ggh4x](https://teunbrand.github.io/ggh4x/articles/Facets.html)) with additional types of facets
+
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Facets:&lt;code class="remark-inline-code"&gt;facet_wrap()&lt;/code&gt;&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#299cd8;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.smallish[
+`facet_wrap()` takes a column from your data with a grouping structure and creates several subplots for each group (`facet_wrap(~ groupvar)`)
+
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  geom_line(mapping = aes(group = country), stat = "summary", size = .25) +
+  geom_line(stat = "summary", size = 2, alpha = .5, color = "blue") +
+* facet_wrap(~ continent)
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-56-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Facets:&lt;code class="remark-inline-code"&gt;facet_grid()&lt;/code&gt;&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#299cd8;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.smallish[
+
+`facet_grid()` takes two grouping variables and creates plots that show the intersection between them (`facet_grid(group1 ~ group2)`)
+
+
+
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  geom_line(mapping = aes(group = country), stat = "summary", size = .25) +
+  geom_line(stat = "summary", size = 2, alpha = .5, color = "blue") +
+* facet_grid(continent ~ gdprelative) # GDP larger/smaller to continent mean
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-58-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Facets:&lt;code class="remark-inline-code"&gt;facet_grid()&lt;/code&gt;&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#299cd8;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.smallish[
+
+`facet_grid()` can also be arranged with *n&lt;sub&gt;groups&lt;/sub&gt;* panels with `~ group1 + group2`
+
+
+
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = lifeExp)) +
+  geom_line(mapping = aes(group = country), stat = "summary", size = .25) +
+  geom_line(stat = "summary", size = 2, alpha = .5, color = "blue") +
+* facet_grid(~ continent + gdprelative)
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-60-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Facets + Scales&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#299cd8;"&gt;&lt;/div&gt;
+  &lt;div class="badge badge2" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.smallish[
+- By default, facets fix the `x` and `y` scales across all plots
+- Often this makes sense, because you want to compare the same data across different groups, but sometimes you may want to free either/both of the axis scales. You can do this with the `scales` argument (`"free"`, `"free_x"`, `"free_y"`)
+
+
+```r
+ggplot(...) +
+  facet_grid(continent ~ gdprelative,
+             scales = "free") 
+```
+
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-62-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Coordinates&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#e65540;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+The **coordinate** system represents a physical mapping of the plot's aesthetics onto the screen
+
+Many types of coordinate systems, but we are most used to the Cartesian system (`x`, `y` value pairs)
+
+Types of coordinate systems in ggplot2:
+--
+
+
+- `coord_cartesian()`: Cartesian coordinates
+--
+
+
+- `coord_trans()`: Transformed Cartesian coordinate system
+--
+
+
+- `coord_fixed()`: Cartesian coordinates with a fixed aspect ratio
+--
+
+
+- `coord_flip()`: Cartesian coordinates with `x` and `y` flipped
+--
+
+
+- `coord_polar()` polar coordinates
+--
+
+
+- `coord_map()`, `coord_quickmap()`: map projections (latitude, longitude)
+---
+&lt;div&gt;
+  &lt;h2 style="inline"&gt;Coordinates:&lt;code class="remark-inline-code"&gt;coord_flip()&lt;/code&gt;&lt;/h2&gt;
+  &lt;div class="badge" style="background-color:#e65540;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+.pull-left[
+
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = continent,
+                     y = gdpPercap)) +
+  geom_bar(stat = "summary")
+  # 
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-64-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+.pull-right[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = continent,
+                     y = gdpPercap)) +
+  geom_bar(stat = "summary") +
+  coord_flip()
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-65-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h2 style="inline"&gt;Coordinates:&lt;code class="remark-inline-code"&gt;coord_polar()&lt;/code&gt;&lt;/h2&gt;
+  &lt;div class="badge" style="background-color:#e65540;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+`coord_polar()` interprets `x` and `y` as the radius and angle, respecitvely
+
+.pull-left[
+**Bar Chart**
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = gdpPercap,
+                     fill = continent)) +
+  geom_bar(stat = "summary", color = "black")
+  # 
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-67-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+**Coxcomb Plot**
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = year,
+                     y = gdpPercap,
+                     fill = continent)) +
+  geom_bar(stat = "summary", width = 5, color = "black") +
+* coord_polar()
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-68-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h2 style="inline"&gt;Coordinates:&lt;code class="remark-inline-code"&gt;coord_polar()&lt;/code&gt;&lt;/h2&gt;
+  &lt;div class="badge" style="background-color:#e65540;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+## Pie Chart
+
+.small[
+
+.pull-left[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = "", y = pop, fill = continent)) +
+  geom_bar(stat = "summary") +
+  # 
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-70-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+```r
+ggplot(data = gapminder,
+       mapping = aes(x = "", y = pop, fill = continent)) +
+  geom_bar(stat = "summary") + 
+  coord_polar(theta = "y") # map angle to y
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-71-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h2 style="inline"&gt;Coordinates:&lt;code class="remark-inline-code"&gt;coord_map()&lt;/code&gt;&lt;/h2&gt;
+  &lt;div class="badge" style="background-color:#e65540;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+.pull-left[
+**Cartesian System**
+
+```r
+ggplot(data = map_data("world"),
+       mapping = aes(x = long,
+                     y = lat,
+                     group = group)) +
+  geom_path() +
+  scale_y_continuous(breaks = (-2:2) * 30) +
+  scale_x_continuous(breaks = (-4:4) * 45)
+  # 
+  # 
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-73-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+
+**Azimuthal (orthographic) Projection**
+
+```r
+ggplot(data = map_data("world"),
+       mapping = aes(x = long,
+                     y = lat, 
+                     group = group)) +
+  geom_path() +
+  scale_y_continuous(breaks = (-2:2) * 30) +
+  scale_x_continuous(breaks = (-4:4) * 45) +
+  coord_map(projection = "ortho",
+            orientation = c(30, -94, 0))
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-74-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Scales vs. Coordinates&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#e65540;"&gt;&lt;/div&gt;
+  &lt;div class="badge badge2" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+
+
+.smallish[
+
+.pull-left[
+**Scales**
+
+1. Transform data
+2. Estimate statistic
+
+
+```r
+# log10(GDP) %&gt;% mean()
+ggplot(...) +
+  scale_y_log10(name = "GDP")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-77-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+**Coordinates**
+
+1. Estimate statistic
+2. Transform data
+
+
+```r
+# mean(GDP) %&gt;% log10
+ggplot(...) +
+  coord_trans(y = "log10")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-79-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+]
+---
+&lt;div&gt;
+  &lt;h1 style="inline"&gt;Scales vs. Coordinates&lt;/h1&gt;
+  &lt;div class="badge" style="background-color:#e65540;"&gt;&lt;/div&gt;
+  &lt;div class="badge badge2" style="background-color:#86b35d;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+You can use both **scales** and **coordinates** together to estimate your model on the transformed data and transform is back for interpretation
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-80-1.svg" style="display: block; margin: auto;" /&gt;
+
+.footnote[**(A)** Linear model on original data - does not fit well; **(B)** linear model on log10 transformed GDP - fits well; **(C)** Linear model on original data, then log10 transform y-axis (not in original scale); **(D)** log10 transform GDP, estimate model, backtransform axes to get original scale]
+]
+---
+&lt;div&gt;
+  &lt;h2 style="inline"&gt;Theme&lt;/h2&gt;
+  &lt;div class="badge" style="background-color:#858988;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+The **theme** encompasses every part of the graphic that is not part of the data (i.e., has no mapping to the data)
+
+There are several [pre-made themes](https://ggplot2.tidyverse.org/reference/ggtheme.html) that come with ggplot2:
+
+.pull-left[
+- `theme_grey()` 👈 default
+
+- `theme_bw()`
+
+- `theme_linedraw()`
+
+- `theme_light()`
+
+- `theme_dark()`
+]
+
+.pull-right[
+- `theme_minimal()`
+
+- `theme_classic()`
+
+- `theme_void()`
+
+- `theme_test()`
+]
+
+---
+
+&lt;div&gt;
+  &lt;h2 style="inline"&gt;Theme&lt;/h2&gt;
+  &lt;div class="badge" style="background-color:#858988;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+To tweak other aspects of your plots them you can use the `theme()` function, which has 94 arguments to give you complete control over all elements of your plot
+
+To demonstrate, we'll use the following base plot from Slide 32:
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-81-1.svg" style="display: block; margin: auto;" /&gt;
+
+---
+
+&lt;div&gt;
+  &lt;h2 style="inline"&gt;Theme: &lt;code class="remark-inline-code"&gt;panel&lt;/code&gt;&lt;/h2&gt;
+  &lt;div class="badge" style="background-color:#858988;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+
+```r
+p +
+  theme(panel.grid.major = element_line(color = "black", linetype = 2, size = 0.25),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "white"),
+        panel.border = element_rect(color = "black", fill = NA, size = 1))
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-82-1.svg" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+&lt;div&gt;
+  &lt;h2 style="inline"&gt;Theme: &lt;code class="remark-inline-code"&gt;axes&lt;/code&gt;&lt;/h2&gt;
+  &lt;div class="badge" style="background-color:#858988;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+```r
+p +
+  theme(title = element_text(family = "Ubuntu Mono", face = "bold"),
+        axis.title.y = element_text(family = "Ubuntu Mono"),
+        axis.title.x = element_blank(),
+        axis.text = element_text(family = "Ubuntu Mono", color = "black", size = 11),
+        axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-84-1.svg" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+
+&lt;div&gt;
+  &lt;h2 style="inline"&gt;Theme: &lt;code class="remark-inline-code"&gt;legend&lt;/code&gt;&lt;/h2&gt;
+  &lt;div class="badge" style="background-color:#858988;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+
+
+```r
+p +
+  theme(legend.key = element_blank(),
+        legend.text = element_text(family = "Ubuntu Mono")) + 
+  guides(color = guide_legend(title = "Continent"))
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-86-1.svg" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+&lt;div&gt;
+  &lt;h2 style="inline"&gt;Theme&lt;/h2&gt;
+  &lt;div class="badge" style="background-color:#858988;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+.small[
+Just like `ggplot2` comes with pre-made themes, you can create your own themes to use repeatedly throughout your data visualizations
+
+
+
+.pull-left[
+
+```r
+theme_monotype &lt;- theme(
+  # Grid theme
+  panel.grid.major = element_line(color = "grey", linetype = 2, size = 0.5),
+  panel.grid.minor = element_blank(),
+  panel.background = element_rect(fill = "white"),
+  panel.border = element_rect(color = "black", fill = NA, size = 1),
+
+  # Axis theme
+  title = element_text(family = "Ubuntu Mono", face = "bold"),
+  axis.title.y = element_text(family = "Ubuntu Mono"),
+  axis.title.x = element_blank(),       
+  axis.text = element_text(family = "Ubuntu Mono", color = "black", size = 11),
+  axis.text.x = element_text(angle = 45, hjust = 1),
+  
+  # Legend theme
+  legend.key = element_blank(),
+  legend.title = element_text(family = "Ubuntu Mono"),
+  legend.text = element_text(family = "Ubuntu Mono")
+)
+```
+]
+
+.pull-right[
+
+```r
+p +
+  theme_monotype
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-90-1.svg" style="display: block; margin: auto;" /&gt;
+]
+]
+
+---
+class: inverse
+# patchwork
+
+&lt;div style="text-align:center; margin-top: 125px;"&gt;
+  &lt;img src="images/patchwork.png" alt="patchwork logo"&gt;
+&lt;/div&gt;
+
+---
+# What is patchwork?
+
+.small[
+Patchwork is a package created by [Thomas Lin Pedersen](https://twitter.com/thomasp85) (also the maintainer of `ggplot2`) to help you easily and flexibly combine several ggplots into the same graphic
+
+Consider the following four plots (`p1`, `p2`, `p3`, `p4`):
+
+
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-92-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# Patchwork arithmetic
+
+.small[
+Patchwork uses arithmetic (`+`, `-`, `*`, `/`) and logical (`|`, `&amp;`) operators to control the layout of your figure
+
+
+```r
+(p1)
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-94-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+
+# Patchwork arithmetic
+
+.small[
+
+**Add `p2`**
+
+
+```r
+(p1 + p2)
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-96-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# Patchwork arithmetic
+
+.small[
+
+**Add `p3`**
+
+
+```r
+(p1 + p2 + p3)
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-98-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+# Patchwork arithmetic
+
+.small[
+
+**Add `p4`**
+
+
+```r
+(p1 + p2 + p3) / p4
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-100-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# `plot_layout()`
+
+.small[
+
+You can also use `plot_layout()` to control the layout of your plots
+
+The `-` sign ensures that all the patchwork on the LHS (`p1 + p2 + p3`) and on the RHS (`p4`) are grouped (i.e., nested) together
+
+
+```r
+p1 + p2 + p3 - p4 + plot_layout(nrow = 2)
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-102-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+# `plot_layout()`
+
+.small[
+
+Use `plot_layout()` to control the heights and widths of your patchwork elements
+
+
+```r
+(p1 + p2 + p3) / p4 + plot_layout(heights = c(1, 2))
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-104-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+## Combine multiple patchworks
+
+.small[
+
+To keep your code organized in a complex patchwork, you can save individual patchworks and combine them at the end
+
+
+```r
+patchwork1 &lt;- (p1 + p3 + coord_polar() + p2) + plot_layout(widths = c(1, 1, 4))
+patchwork2 &lt;- (p3 + p4) + plot_layout(widths = c(3, 1))
+
+patchwork1 / patchwork2 + plot_layout(height = c(1, 4))
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-106-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# Add layers to all ggplots 
+
+.small[
+
+With `patchwork`, you can control the layers (e.g., geoms, theme) of your ggplots all at once using the `&amp;` operator. This is useful, for example, when you have several plots with the same theme or want to add a layer to every plot without adding this code to each and every plot
+
+
+```r
+(p1 + p2 + p3) / p4 &amp;
+  scale_y_continuous(trans = "log10") &amp;
+  theme(plot.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank(),
+        panel.background = element_rect(color = "darkblue",
+                                        fill = "lightblue"))
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-107-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# Add layers to some ggplots 
+
+.small[
+
+While the `&amp;` operator adds layers to all ggplots in a patchwork, the `*` operator adds layers only to the current nesting level
+
+
+```r
+(p1 + p2 + p3) *
+  scale_y_continuous(trans = "log10") *
+  theme(plot.title = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank(),
+        panel.background = element_rect(color = "darkblue",
+                                        fill = "lightblue")) / p4
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-108-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# Controlling Legends
+
+.small[
+
+Imagine you have the following three plots configured using patchwork (`(p1 + p2) / p3`). The legends are identical and it is only necessary to have one of them for the entire figure.
+
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-109-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+---
+# Controlling Legends
+
+.small[
+
+Combine identical legends with `guides = "collect"`
+
+
+```r
+(p1 + p2) / p3 +
+  plot_layout(guides = "collect")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-110-1.svg" style="display: block; margin: auto;" /&gt;
+]
+---
+# Titles &amp; Tags
+
+.small[
+When you have a multi-plot figure such as that in the previous slide, it is common to label each plot to refer to in your manuscript. To apply titles and tags to the entire plotting window, you can use `plot_annotation()`
+
+
+```r
+(p1 + p2) / p3 +
+  plot_layout(guides = "collect") +
+  plot_annotation(title = "Gapminder Line Graphs",
+                  subtitle = "Kuczynski et al. (2021)",
+                  tag_levels = "A", tag_prefix = "(", tag_suffix = ")")
+```
+
+&lt;img src="PSYCH548_Week9_DataVisGGplot_files/figure-html/unnamed-chunk-111-1.svg" style="display: block; margin: auto;" /&gt;
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "tomorrow-night-bright",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
