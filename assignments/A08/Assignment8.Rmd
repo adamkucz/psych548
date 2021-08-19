@@ -1,0 +1,39 @@
+---
+title: "Assignment 8"
+subtitle: "Data Visualization Using ggplot2"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+```
+
+
+<div style="border: 2px solid rgb(255, 140, 0); text-align: center; background-color: rgb(255, 140, 0, .75); font-weight: bold; color:white; padding: 0 25% 0 25%; margin-bottom: 10px;">
+<span>Please submit both the .Rmd and a .html file on Canvas.</span>
+</div>
+
+Your assignment this week is to create data visualizations of your own data using ggplot2. It is okay to use additonal packages that extend ggplot2 functions, but please don't use a package that makes the entire ggplot call for you. In other words, packages that give you more geoms are okay, but packages that create a ggplot for you without you having to add these geoms yourself are not okay.
+
+1. First, help me understand these data. In a few sentences, describe the research design, structure of the data, and any quirks you think would be helpful for me to know about. If you are using the same data as last week, you can copy & paste your description.
+
+
+2. Then, create at least 4 figures that help you understand and visualize your data. It's okay to make the same figures as you did last week (but in ggplot2, as long as they meet the criteria below), but I encourage you do add some layers that would otherwise be more challenging in base R. You should include code to do the following at least once across your 4+ figures:
+
+- Map aesthetics in addition to `x` and `y`
+- Set aesthetics to certain feature(s) of your ggplots
+- Create a plot with more than one geometry layer
+- Modify the default scales
+- Modify the default coordinate system
+- Use `theme()` to modify features of your ggplot
+- 
+```{r}
+
+```
+
+
+3. At the end, use the `patchwork` package to combine your plots into whatever arrangement you would like
+
+```{r}
+
+```
