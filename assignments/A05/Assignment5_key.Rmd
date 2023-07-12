@@ -228,7 +228,7 @@ d$weekend <- ifelse(test = wday(as.Date(d$date, "%m/%d/%y")) %in% 6:7,
 
 ## Problem 4
 
-Suppose you are a newly minted clinician in independent practice with a caseload of 10 patients. You realize you need to keep track of your patients' diagnoses for billing purposes, so you ask your clinic manager to a you patients' diagnoses into one file for you. You get the following data:
+Suppose you are a newly minted clinician in independent practice with a caseload of 10 patients. You realize you need to keep track of your patients' diagnoses for billing purposes, so you ask your clinic manager to collect your patients' diagnoses into one file for you. You get the following data:
 ```{r}
 diagnoses <- read.csv("https://adamkucz.github.io/psych548/data/diagnoses.csv")
 knitr::kable(diagnoses)
